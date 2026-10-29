@@ -83,6 +83,18 @@ w["nodes"].append(save_job)
 rename("Create file from text", "Make Job File")
 w["connections"]["Make Job File"] = {"main": [[{"node": "Save Job", "type": "main", "index": 0}]]}
 
+# 4) programmatic start: lets `n8n execute --id=...` run it (CLI needs this trigger)
+sched = by_name["Every Hour"]
+w["nodes"].append({
+    "parameters": {"inputSource": "passthrough"},
+    "type": "n8n-nodes-base.executeWorkflowTrigger",
+    "typeVersion": 1.1,
+    "position": [sched["position"][0], sched["position"][1] + 200],
+    "id": str(uuid.uuid4()),
+    "name": "Run Now (CLI)",
+})
+w["connections"]["Run Now (CLI)"] = {"main": [[{"node": "RSS A", "type": "main", "index": 0}]]}
+
 assert not any(n["type"].endswith("googleDrive") for n in w["nodes"]), "Drive node left"
 w["name"] = "Crypto Video Pipeline"
 json.dump(w, open(DST, "w"), indent=2)

@@ -568,8 +568,21 @@
         1804,
         288
       ],
-      "id": "dbda954d-fbe0-410b-85e9-9426c49a93ea",
+      "id": "7606c15a-e3b4-4c6f-81a5-a42d77080b17",
       "name": "Save Job"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        424
+      ],
+      "id": "b794c436-fb2e-439e-9b13-60d38f94a74b",
+      "name": "Run Now (CLI)"
     }
   ],
   "connections": {
@@ -850,6 +863,17 @@
         [
           {
             "node": "Save Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Now (CLI)": {
+      "main": [
+        [
+          {
+            "node": "RSS A",
             "type": "main",
             "index": 0
           }
