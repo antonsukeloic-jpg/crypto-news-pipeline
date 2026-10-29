@@ -1,0 +1,30 @@
+name: vps
+# Runs a command on the VPS over SSH. The deploy key in .github/deploy_key.enc is
+# AES-encrypted; the passphrase is given at dispatch time and masked in the log.
+on:
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: Command to run on the VPS (bash -lc)
+        required: true
+      pass:
+        description: Passphrase for .github/deploy_key.enc
+        required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: ssh
+        env:
+          PASS: ${{ inputs.pass }}
+          CMD: ${{ inputs.cmd }}
+        run: |
+          echo "::add-mask::$PASS"
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in .github/deploy_key.enc -out ~/.ssh/k -pass env:PASS
+          chmod 600 ~/.ssh/k
+          B64=$(printf '%s' "$CMD" | base64 -w0)
+          ssh -i ~/.ssh/k -o StrictHostKeyChecking=no -o ConnectTimeout=20 root@76.13.251.134 "echo $B64 | base64 -d | bash" 2>&1 | sed -E 's/[0-9]{6,}:[A-Za-z0-9_-]{30,}/[TOKEN]/g'
+          rm -f ~/.ssh/k
