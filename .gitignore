@@ -1,0 +1,9 @@
+node_modules/
+remotion/public/
+outputs/
+jobs/
+*.log
+*.bak
+*.bak2
+*.bak3
+.DS_Store
