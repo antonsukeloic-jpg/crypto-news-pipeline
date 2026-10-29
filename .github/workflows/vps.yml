@@ -10,6 +10,8 @@ on:
       pass:
         description: Passphrase for .github/deploy_key.enc
         required: true
+permissions:
+  contents: write
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -26,5 +28,16 @@ jobs:
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in .github/deploy_key.enc -out ~/.ssh/k -pass env:PASS
           chmod 600 ~/.ssh/k
           B64=$(printf '%s' "$CMD" | base64 -w0)
-          ssh -i ~/.ssh/k -o StrictHostKeyChecking=no -o ConnectTimeout=20 root@76.13.251.134 "echo $B64 | base64 -d | bash" 2>&1 | sed -E 's/[0-9]{6,}:[A-Za-z0-9_-]{30,}/[TOKEN]/g'
+          ssh -i ~/.ssh/k -o StrictHostKeyChecking=no -o ConnectTimeout=20 root@76.13.251.134 "echo $B64 | base64 -d | bash" 2>&1 | sed -E 's/[0-9]{6,}:[A-Za-z0-9_-]{30,}/[TOKEN]/g' | tail -c 60000 | tee /tmp/out.txt
           rm -f ~/.ssh/k
+      # the sandbox cannot download Actions logs, so the output is also pushed to the vps-log branch
+      - name: publish output
+        if: always()
+        env:
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          git config user.name vps-bot && git config user.email vps-bot@users.noreply.github.com
+          git fetch origin vps-log && git checkout vps-log || git checkout --orphan vps-log
+          git rm -rfq --cached . 2>/dev/null || true
+          mkdir -p runs && cp /tmp/out.txt runs/$RUN_ID.txt 2>/dev/null || echo "(no output)" > runs/$RUN_ID.txt
+          git add runs/$RUN_ID.txt && git commit -qm "run $RUN_ID" && git push -q origin vps-log
