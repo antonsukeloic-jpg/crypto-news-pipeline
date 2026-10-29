@@ -1,0 +1,20 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+--- status:
+"status": "success"
+"lastNodeExecuted": "Save Job"
+--- files:
+lt_img_1793317502928_1.png
+lt_img_1793317502928_3.png
+lt_img_1793317502928_2.png
+lt_voice_1793317502928.mp3
+lt_voice_fonttest.mp3
+lt_img_fonttest_3.png
+--- watcher:
+Oct 29 23:46:06 srv2107298 bash[60891]: [23:46:06] waiting for assets (1 missing)
+Oct 29 23:46:09 srv2107298 bash[60891]: [23:46:09] waiting for assets (1 missing)
+Oct 29 23:46:12 srv2107298 bash[60891]: [23:46:12] waiting for assets (1 missing)
+Oct 29 23:46:15 srv2107298 bash[60891]: [23:46:15] rendering...
+Oct 29 23:46:15 srv2107298 bash[63455]: props ok channel=lt scenes=3 btc=None change=None
+Oct 29 23:46:44 srv2107298 bash[60891]: [23:46:44] OK lt_video_1793317502928.mp4
+Oct 29 23:46:46 srv2107298 bash[60891]: [23:46:46] sent to Telegram
+Oct 29 23:46:51 srv2107298 bash[60891]: [23:46:51] lt_video_1793317502928.mp4 already done, dropping duplicate
