@@ -1,0 +1,895 @@
+{
+  "name": "Crypto Video Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "articleText",
+              "cssSelector": "body"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6255e899-20e9-4ca8-bdd6-7ec3c97751af",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a short-form scriptwriter for an English-language crypto news channel. Turn ONE news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON.\n\nRULES\n- voiceover: punchy spoken-word, ~40 words max (~15s total). Strong hook in sentence 1. Plain language, active voice. This is news, NOT financial advice. TONE: sound like a fast-paced crypto news anchor - confident, energetic, urgent but factual; lead with the number or the stakes.\n- ACCURACY: use ONLY facts in the article. Never invent numbers, prices, dates, names or quotes. If a figure isn't in the article, don't state it.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + a duration.\n- duration_sec: integer seconds the scene shows. Scene durations MUST sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~6 words.\n- visual.query: a vivid 1-2 sentence description of an image that clearly SHOWS the key subject of THIS sentence, so the visual matches the words (follow VISUAL RULES).\n- center: per scene, pick what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"635\",\"prefix\":\"-$\",\"suffix\":\"M\",\"color\":\"red\",\"label\":\"max 6 words\"} for a scene built on ONE striking number (at most 1-2 scenes, most impactful figures only; value = digits only with optional decimal; suffix is a SHORT unit ONLY (M, B, K, %, x, or empty) - NEVER words like \"users\" or \"wallets\" (put those in the label); color \"red\" for a loss/down, \"green\" for a gain/up, otherwise omit color). {\"type\":\"coin\",\"coingecko_id\":\"bitcoin\",\"name\":\"Bitcoin\"} when a single named cryptocurrency is the clear focus of that scene (coingecko_id = the coin\\u2019s lowercase CoinGecko API id, e.g. bitcoin, ethereum, solana, ripple, cardano, binancecoin, tether, dogecoin, chainlink, avalanche-2, polkadot, tron - we fetch the coin\\u2019s official logo and show it with the name). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Full Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a specific well-known PUBLIC figure is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Short Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a specific company, organization or other coin is the subject - we fetch its photo/logo from Wikipedia and show it with the name; give the EXACT English Wikipedia page title (e.g. \"Coinbase\", \"Changpeng Zhao\", \"Ethereum\"), and if unsure use \"none\"; only well-known public figures or organizations, never a private individual. {\"type\":\"none\"} otherwise (general beats - the image carries it). Whenever a scene is centered on a named coin, exchange, company, protocol, project, foundation, regulator or a named public person, you MUST set \"coin\" or \"entity\" (not \"none\") - these almost always have a Wikipedia page, so use the common name as the Wikipedia title (examples: \"CoinDCX\", \"Binance\", \"Vitalik Buterin\", \"Ethereum\"). Use \"none\" only when the scene is truly about no specific named entity. Keep the middle engaged across the WHOLE video, not just the first scene. WORKED EXAMPLE: for \"HSBC just launched RedCoin, its first stablecoin\" the center is {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"HSBC\",\"wiki\":\"HSBC\"} (HSBC is a major named company). For \"ZachXBT disputes the timeline\" use a person entity only if the person has a Wikipedia page, else \"none\". NEVER invent a number: only use \"stat\" for figures actually stated in the article.\n- hook: most scroll-stopping line, max 8 words.\n- hashtags: 4-6, no spaces.\n- ticker: main cryptocurrency symbol the article is about, lowercase, one of: btc, sol, eth, xrp, ada, bnb, usdt, doge. Use empty string if none applies.\n\nVISUAL RULES (for every visual.query)\n- FIRST pick the KEY SUBJECT or ACTION of this scene's vo_segment - the one thing the viewer should literally SEE while they hear that line. Then describe an image that clearly SHOWS that exact thing, so the picture matches the spoken words and the viewer instantly connects them.\n- Be SPECIFIC and literal to the sentence, not abstract or moody filler. Examples: \"money leaving an exchange\" -> gold coins pouring out of an open metal vault; \"a hack\" -> a hooded figure breaching a glowing server rack; \"a court ruling\" -> a judge signing a document at the bench; \"approval / launch\" -> a rocket lifting off a pad. If a viewer paused on the frame, they should guess the sentence.\n- Each scene visualizes ITS OWN sentence - a clearly DIFFERENT subject and setting every time. Never reuse the same location or motif across scenes.\n- NO readable text, numbers, words, logos, tickers, signage or watermarks in the image (we add those). Do NOT depict real people's faces or real company branding/logos.\n- Do NOT draw coins, tokens, coin symbols, a glowing orb/circle standing in for a coin, holograms, or any phone/computer/payment screen showing UI, charts or symbols - the AI renders these as fake gibberish. Show the real-world scene or ACTION instead (the real coin or company logo is added separately as an overlay). Also do NOT depict a specific company building, headquarters, branded branch or storefront signage - these render as fake gibberish; show a neutral real-world scene or the action.\n- Match the real sentiment of the article - do not show panic or disaster unless the news is genuinely negative.\n- Vertical 9:16, main subject in the lower-middle, clean darker empty space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"ticker\":\"btc\",\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ $json.articleText }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "c9c9efb1-7504-4a59-bc4d-168e06f6846c",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "3pYNdkLM3jdNYjyM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst data = JSON.parse(raw.slice(s0, e0 + 1));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"crypto news\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"crypto news\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.voiceFile = \"voice_\"+ts+\".mp3\";\ndata.outputFile = \"video_\"+ts+\".mp4\";\ndata.jobFile = \"job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\ntry { const _p = await this.helpers.httpRequest({ url: 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true', json: true }); if (_p && _p.bitcoin) { btc_price = Math.round(_p.bitcoin.usd); btc_change_24h = Math.round(_p.bitcoin.usd_24h_change * 10) / 10; } } catch (e) {}\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = (data.ticker || \"\").toLowerCase();\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title) => {\n  if (!title) return null;\n  try {\n    const u = 'https://en.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title) => {\n  if (!title) return null;\n  try {\n    const u1 = 'https://en.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  if (!img) img = await cgEntity(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS));\nconst looksPerson = (n) => /^[A-Z][a-z]+ [A-Z][a-z]+$/.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /\\b([A-Za-z]*[A-Z][A-Za-z]*[A-Z][A-Za-z0-9]*)\\b/g; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /\\b([A-Z][a-z]+(?:\\s+[A-Z][a-z]+)+)\\b/g; while ((m = reMulti.exec(vo))) add(m[1]);\n  const reSingle = /\\b([A-Z][a-z]{2,})\\b/g; while ((m = reSingle.exec(vo))) add(m[1]);\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    let img = isPerson ? (await wikiImage(title) || (c.name && c.name !== title ? await wikiImage(c.name) : null)) : await resolveNonPerson(title);\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, btc_price: btc_price, btc_change_24h: btc_change_24h, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "9955a417-8ab4-443d-ae29-4cc001eed6ce",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "mode": "id",
+          "value": "qFjcP4hHD9WIdODvuJOJ"
+        },
+        "text": "={{ $('Code in JavaScript').item.json.voiceover }}",
+        "additionalOptions": {
+          "model": {
+            "__rl": true,
+            "value": "eleven_v3",
+            "mode": "list",
+            "cachedResultName": "Eleven v3"
+          },
+          "voiceSettings": "{\n  \"stability\": 1,\n  \"similarity_boost\": 1,\n  \"style\": 0,\n  \"use_speaker_boost\": true,\n  \"speed\": 1\n}"
+        },
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -128
+      ],
+      "id": "18d1f6f3-c016-48df-9f69-cbb7e67b490e",
+      "name": "Convert text to speech",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "lZ8pCRfAtMEwJkMM",
+          "name": "ElevenLabs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "694708370",
+        "message": "={{ $('Code in JavaScript').item.json.script_text }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        16
+      ],
+      "id": "3d1f70da-256b-40aa-9345-3a9f3a73d7a2",
+      "name": "Send message and wait for response",
+      "webhookId": "6451384a-0de6-4fc3-a797-b5b219b682e5",
+      "credentials": {
+        "telegramApi": {
+          "id": "MsHdBVyurDnoXcyo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Split Scenes').item.json.imageFile }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ZEsP5yuzhfeCcs8RLg5lehirNCPv4fLR",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1232,
+        288
+      ],
+      "id": "8b371853-5532-4521-97a8-bb75d1b8502a",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vYoGWYA5fFdAwp6s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://platform.higgsfield.ai/higgsfield-ai/soul/standard",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 72afeec8-299d-45ff-87c5-2ffc4e2c1621:4b7d57d958299b7818787cfc6cbf2c846c27706447beb66b53e7a4f166381a01"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.image_prompt }}"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "9:16"
+            },
+            {
+              "name": "resolution",
+              "value": "720p"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        272
+      ],
+      "id": "d37c9d89-42c5-4041-94a1-9002eed2274c",
+      "name": "Image - Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.status_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 72afeec8-299d-45ff-87c5-2ffc4e2c1621:4b7d57d958299b7818787cfc6cbf2c846c27706447beb66b53e7a4f166381a01"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        608,
+        288
+      ],
+      "id": "98a66bda-14f8-419d-8737-72b5aa682e94",
+      "name": "Image - Get"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Image - Get').item.json.images[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1072,
+        288
+      ],
+      "id": "c91de3e0-ae83-4a8e-bf4e-f711683eb94f",
+      "name": "Image - Download"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "87f28eef-00dc-4c86-b70a-aa5a9aac914c",
+      "name": "Article - Fetch"
+    },
+    {
+      "parameters": {
+        "name": "={{ $('Code in JavaScript').item.json.voiceFile }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ZEsP5yuzhfeCcs8RLg5lehirNCPv4fLR",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1648,
+        -128
+      ],
+      "id": "fe1b6868-bcda-49b0-9be3-e638c305c245",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vYoGWYA5fFdAwp6s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "createFromText",
+        "content": "={{ $('Add Captions').first().json.job_json }}",
+        "name": "={{ $('Code in JavaScript').item.json.jobFile }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1lWrXr6sL22NI5l5GAuEK7XVVGfam3t1L",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1584,
+        288
+      ],
+      "id": "9cdc2086-3a33-4179-b185-68e9d80b5e32",
+      "name": "Create file from text",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "vYoGWYA5fFdAwp6s",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c6b32b51-e5c9-488c-9843-5c420e0820db",
+              "leftValue": "={{  $json.status  }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        304
+      ],
+      "id": "51b655b7-20fb-427b-9a6a-1e5c4320d13d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        432
+      ],
+      "id": "c3a33b34-9382-44da-aa17-17434bf5c797",
+      "name": "Wait",
+      "webhookId": "7b76ba5c-4037-4025-9c02-0acd2bb33ca0"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd3e9a8e-b8a4-469d-8cbf-e03c85ba7575",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        32
+      ],
+      "id": "4d6236c5-1ed5-4dcc-b23c-bbef89092e4e",
+      "name": "Approved?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const STYLE=\" Style: cyberpunk neon lighting, vivid magenta and cyan glow, rain-soaked reflections, high contrast, futuristic, volumetric light, cinematic, photorealistic. Vertical 9:16. No text, no numbers, no logos, no watermark.\";\nreturn $('Code in JavaScript').first().json.scenes.map(function(s){ s.image_prompt=(s.image_prompt||'')+STYLE; return { json: s }; });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        288
+      ],
+      "id": "275ba5ed-1e45-45a3-a19e-7e93aa582728",
+      "name": "Split Scenes"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/forced-alignment",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Code in JavaScript').item.json.voiceover }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "align-f7543972",
+      "name": "Align",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1696,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Ail8NJx7E0A34ghp",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nif (job && captions.length) { job.captions = captions; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
+      },
+      "id": "addcap-cz6v327e",
+      "name": "Add Captions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "sched-4mdt7a53",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -816,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const srcs=[['CoinDesk','RSS CoinDesk'],['Cointelegraph','RSS Cointelegraph'],['Decrypt','RSS Decrypt']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
+      },
+      "id": "comb-0ngle9oz",
+      "name": "Combine Feeds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        208
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the editor of a viral crypto-news video channel. Choose the SINGLE best story from the candidates for a 15-second vertical video.\n\nHARD RULES\n- NEVER choose a story primarily about Coinbase.\n- Prefer concrete, surprising, number-driven breaking news (hacks, rulings, big moves, launches, records).\n- Avoid pure opinion, price-prediction fluff, sponsored or thin posts.\n\nOutput ONLY valid JSON, no markdown, no code fences:\n{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\nCANDIDATES\n{{ $json.candidatesText }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {}
+      },
+      "id": "sel-1a2cme4v",
+      "name": "Select Story",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        208
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "3pYNdkLM3jdNYjyM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw=$input.first().json.content[0].text;\nconst s=raw.indexOf('{'); const e=raw.lastIndexOf('}');\nconst sel=JSON.parse(raw.slice(s,e+1));\nreturn [{ json: { link: sel.link, title: sel.title||'', source_url: sel.link, reason: sel.reason||'' } }];"
+      },
+      "id": "parse-k9f0enbl",
+      "name": "Parse Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "options": {}
+      },
+      "id": "rss-vzxocwku",
+      "name": "RSS A",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        0
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://cointelegraph.com/rss",
+        "options": {}
+      },
+      "id": "rss-sm7pescn",
+      "name": "RSS B",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        208
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "https://decrypt.co/feed",
+        "options": {}
+      },
+      "id": "rss-qiob4jfj",
+      "name": "RSS C",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        400
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech": {
+      "main": [
+        [
+          {
+            "node": "Align",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Request": {
+      "main": [
+        [
+          {
+            "node": "Image - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Get": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Download": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article - Fetch": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Create file from text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Image - Download",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Image - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Upload file1": {
+      "main": [
+        [
+          {
+            "node": "Split Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Scenes": {
+      "main": [
+        [
+          {
+            "node": "Image - Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Align": {
+      "main": [
+        [
+          {
+            "node": "Add Captions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Captions": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "RSS A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Feeds": {
+      "main": [
+        [
+          {
+            "node": "Select Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Story": {
+      "main": [
+        [
+          {
+            "node": "Parse Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Selection": {
+      "main": [
+        [
+          {
+            "node": "Article - Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS A": {
+      "main": [
+        [
+          {
+            "node": "RSS B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS B": {
+      "main": [
+        [
+          {
+            "node": "RSS C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS C": {
+      "main": [
+        [
+          {
+            "node": "Combine Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "pinData": {},
+  "active": false,
+  "versionId": "6d53c113-219c-4600-9a74-735b27f13100",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
