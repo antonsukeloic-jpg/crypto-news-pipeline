@@ -1,0 +1,3 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+LT_UPDATED LtNewsPipeLine01
+LT pipeline started (log: /root/exec_lt.log)
