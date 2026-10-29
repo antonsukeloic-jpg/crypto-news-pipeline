@@ -20,7 +20,7 @@
         416,
         0
       ],
-      "id": "ceb68d7c-c371-4c79-b329-2fba48103d1d",
+      "id": "4c807dce-a520-455c-a469-46259fec0941",
       "name": "HTML",
       "onError": "continueRegularOutput"
     },
@@ -48,7 +48,7 @@
         592,
         0
       ],
-      "id": "d86acf53-9cde-4094-a33b-59320c8a5352",
+      "id": "24d6e451-292d-46d4-858a-1da5545d6a50",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -67,7 +67,7 @@
         896,
         -16
       ],
-      "id": "9f26763f-c24a-46b5-a665-78f204c46ad4",
+      "id": "720a5aa8-610b-4c27-ae2e-4a91b1a7dc52",
       "name": "Code in JavaScript"
     },
     {
@@ -96,7 +96,7 @@
         1488,
         -128
       ],
-      "id": "3caa8980-37d9-4f6c-8dd7-673563a30b53",
+      "id": "b42b8fdd-1d77-41b2-9b2e-547946c44f1d",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -123,9 +123,9 @@
         1088,
         16
       ],
-      "id": "46b10629-7bb4-4b32-84ce-a2a625fb9b9b",
+      "id": "93d73780-ebc7-46af-a56e-9ed28b9f7e6b",
       "name": "Send message and wait for response",
-      "webhookId": "d4da0720-bf04-4bd1-afaa-ba4f7adde112",
+      "webhookId": "634b578d-303f-4cc6-a3e1-1b208fe17f61",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -146,7 +146,7 @@
         1232,
         288
       ],
-      "id": "fc863c87-5de5-4ed7-b078-63025c8bb5a3",
+      "id": "31bbfbd6-89e2-42bc-ab1f-343ae3fe1cf6",
       "name": "Save Image"
     },
     {
@@ -191,7 +191,7 @@
         400,
         272
       ],
-      "id": "baf2e861-304b-4ee4-801a-c40c796de427",
+      "id": "071bc8e0-dbe3-4a27-a96d-e68325595667",
       "name": "Image - Request"
     },
     {
@@ -215,7 +215,7 @@
         608,
         288
       ],
-      "id": "eee5aa17-f3be-42c0-82ff-7a5c26251535",
+      "id": "1d864052-a105-4d29-8147-3cee1e04985f",
       "name": "Image - Get"
     },
     {
@@ -235,7 +235,7 @@
         1072,
         288
       ],
-      "id": "2f5454f4-6d7b-4116-b362-9b0a1fde345d",
+      "id": "1460a29b-b674-491f-a7c4-ddb48a0441ab",
       "name": "Image - Download"
     },
     {
@@ -266,7 +266,7 @@
         208,
         0
       ],
-      "id": "0eb3c8f7-efe9-4b64-a3aa-653b93d28f19",
+      "id": "ed77eae4-dac4-4757-a184-84e68f1ecb56",
       "name": "Article - Fetch",
       "retryOnFail": true,
       "maxTries": 3,
@@ -286,7 +286,7 @@
         1648,
         -128
       ],
-      "id": "2ca1a4f6-a950-4e5c-be21-f3cef9ae5db1",
+      "id": "16f80028-79de-4389-90da-72d7820a00a9",
       "name": "Save Voice"
     },
     {
@@ -299,7 +299,7 @@
         1584,
         288
       ],
-      "id": "d4f03489-3eae-42ac-880f-d6f532384f45",
+      "id": "efe68dda-93c9-44c7-97d2-fbf253cbfa0b",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -334,7 +334,7 @@
         800,
         304
       ],
-      "id": "0ba7b4e6-5848-43fb-bbfa-5ececba55c83",
+      "id": "92319e61-91dd-45f0-a3c0-dcb27e4ee89e",
       "name": "If"
     },
     {
@@ -347,9 +347,9 @@
         976,
         432
       ],
-      "id": "ea6aec4d-465d-4d8c-8cc9-ddf4673f54a3",
+      "id": "3fe8c520-72cd-4f15-8125-aebaaa611355",
       "name": "Wait",
-      "webhookId": "f6b0fa85-3563-433d-9319-2617c8c2acaf"
+      "webhookId": "2d7ecf2a-a44f-468a-8846-812e43459681"
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
         1264,
         32
       ],
-      "id": "d73f10f4-98be-4348-b794-8b58c94ea7e6",
+      "id": "887c6171-77bb-4d61-9f5f-c86d3fdd60af",
       "name": "Approved?"
     },
     {
@@ -395,7 +395,7 @@
         1360,
         288
       ],
-      "id": "1156e40d-d2d4-4f9b-a421-1758a87a0ccc",
+      "id": "81f52252-6f9d-49af-b46b-fff8a0891e6e",
       "name": "Split Scenes"
     },
     {
@@ -421,7 +421,7 @@
         },
         "options": {}
       },
-      "id": "54e06a88-7eb1-48a5-ac2f-7372f3231799",
+      "id": "f3419bd2-b2bb-4a0e-a336-94cf9055d659",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -441,7 +441,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "a0ab1e0d-3212-4369-88f1-09ca27dcab92",
+      "id": "46bc3c36-aaf0-43fd-b137-d2aa64d02811",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +460,7 @@
           ]
         }
       },
-      "id": "0366b5cf-a46b-483e-933c-776730b46a4f",
+      "id": "c92be264-2308-4362-b1bb-71d280bc2df4",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -474,7 +474,7 @@
       "parameters": {
         "jsCode": "const srcs=[['Delfi','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json).filter(j=>j&&!j.error);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nif(!all.length) throw new Error('Combine Feeds: no RSS stories collected');\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
       },
-      "id": "4481b452-5fd0-402c-a120-95b55f4a53e0",
+      "id": "e9ec6b46-f0a3-4ce4-a4f1-a8e9ab4ffc93",
       "name": "Combine Feeds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -502,7 +502,7 @@
         "simplify": false,
         "options": {}
       },
-      "id": "7c70adff-5e41-4a9c-bc0d-5c4ccff4b186",
+      "id": "83f91780-fb6f-4a7e-80aa-1592e1067045",
       "name": "Select Story",
       "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
@@ -521,7 +521,7 @@
       "parameters": {
         "jsCode": "const raw=$input.first().json.content[0].text;\nconst s=raw.indexOf('{'); const e=raw.lastIndexOf('}');\nconst sel=JSON.parse(raw.slice(s,e+1));\nreturn [{ json: { link: sel.link, title: sel.title||'', source_url: sel.link, reason: sel.reason||'' } }];"
       },
-      "id": "a199b62d-787a-4e9d-93f5-25f1c54b184e",
+      "id": "0ae605b2-c253-48ba-acaf-c6ea0218e9c4",
       "name": "Parse Selection",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -532,10 +532,10 @@
     },
     {
       "parameters": {
-        "url": "https://www.delfi.lt/rss/feeds/daily.xml",
+        "url": "https://feed.delfi.lt/v2/articles/6?format=rss",
         "options": {}
       },
-      "id": "fbc2f176-20c6-49eb-845a-4bf02eed4cd1",
+      "id": "99383715-20ae-4e13-82db-98479916ecc1",
       "name": "RSS A",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -554,7 +554,7 @@
         "url": "https://www.15min.lt/rss",
         "options": {}
       },
-      "id": "a0e1a52f-42ef-462a-bb96-656192d5a076",
+      "id": "7a354d3f-8049-4a8e-adde-3c60587059ec",
       "name": "RSS B",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -573,7 +573,7 @@
         "url": "https://www.lrytas.lt/rss",
         "options": {}
       },
-      "id": "a67baf20-3195-432c-86fd-f57f00563ce7",
+      "id": "53d15712-892c-4aea-ab17-8941dac8301c",
       "name": "RSS C",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -600,7 +600,7 @@
         1804,
         288
       ],
-      "id": "5185012f-d8fc-41bc-b8b6-b39563e38f73",
+      "id": "303861ba-961c-4fb8-a287-1b06ba301ee8",
       "name": "Save Job"
     },
     {
@@ -613,7 +613,7 @@
         -816,
         424
       ],
-      "id": "1fa18719-6c0b-4505-8758-d0b2a5f1d82a",
+      "id": "ec1bc0c9-d3a4-4907-b188-245cb35d4b50",
       "name": "Run Now (CLI)"
     }
   ],

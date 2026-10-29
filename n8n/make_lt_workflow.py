@@ -23,7 +23,8 @@ LT_VOICE_ID = "8crourjnsg8XHpBXQXHa"         # "Audrius" - cloned native Lithuan
 LT_MODEL = "eleven_v3"                       # Eleven v3 officially supports Lithuanian
 
 FEEDS = [
-    ("Delfi", "https://www.delfi.lt/rss/feeds/daily.xml"),
+    # delfi.lt/rss/feeds/daily.xml is now just an index of feeds; this is its "Dienos naujienos" feed
+    ("Delfi", "https://feed.delfi.lt/v2/articles/6?format=rss"),
     ("15min", "https://www.15min.lt/rss"),
     ("Lrytas", "https://www.lrytas.lt/rss"),
 ]
