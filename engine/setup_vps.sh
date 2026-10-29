@@ -34,6 +34,7 @@ print('WF_IDS', ids)
 EOF
 chown 1000:1000 $S/wf.json
 $NX import:workflow --input=/data/shared/wf.json && say "WORKFLOW=imported $(python3 -c "import json;print(json.load(open('$S/wf.json')).get('id'))")" || say "WORKFLOW=IMPORT_FAILED"
+python3 -c "import json;print(json.load(open('$S/wf.json')).get('id') or '')" > $ST/wf_id
 rm -f $S/wf.json $S/all_wf.json
 
 # 4) Telegram bot token from the migrated n8n credential (never printed)
