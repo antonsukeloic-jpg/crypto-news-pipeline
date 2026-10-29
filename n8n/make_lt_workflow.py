@@ -86,12 +86,15 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\n"
     "CANDIDATES\n{{ $json.candidatesText }}")
 
+FIX = 'const fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII ". Keep a " only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = \'\', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === \'\\\\\' && inStr) { out += ch + (t[i + 1] || \'\'); i++; continue; }\n    if (ch !== \'"\') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || \'\';\n    let structural = (nx === \':\' || nx === \'}\' || nx === \']\' || nx === \'\');\n    if (nx === \',\') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /["{\\[\\d\\-tfn]/.test(t[k] || \'\'); }\n    if (structural) { inStr = false; out += ch; } else out += \'\\u201c\';\n  }\n  return out;\n};\n'
+
 # ---- 4b) Parse Selection: Lithuanian titles contain „ ... " quotes that break naive JSON;
 #          recover the link with a regex and take the title from the candidates list.
 by_name["Parse Selection"]["parameters"]["jsCode"] = (
     "const raw = $input.first().json.content[0].text;\n"
+    + FIX +
     "let sel = null;\n"
-    "try { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(raw.slice(s, e + 1)); } catch (err) { sel = null; }\n"
+    "try { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(fixJson(raw.slice(s, e + 1))); } catch (err) { sel = null; }\n"
     "const cands = ($('Combine Feeds').first().json.candidates) || [];\n"
     "if (!sel || !sel.link) {\n"
     "  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n"
@@ -176,6 +179,7 @@ def rep(old, new, count=1):
     code = code.replace(old, new)
 
 
+rep('const data = JSON.parse(raw.slice(s0, e0 + 1));', FIX + 'const data = JSON.parse(fixJson(raw.slice(s0, e0 + 1)));')
 rep('"crypto news"', '"Lietuvos naujienos"', 2)
 rep('s.imageFile = "img_"+ts', 's.imageFile = "lt_img_"+ts')
 rep('data.voiceFile = "voice_"+ts', 'data.voiceFile = "lt_voice_"+ts')
