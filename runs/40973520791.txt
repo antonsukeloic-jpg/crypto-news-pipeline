@@ -1,0 +1,74 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+LT pipeline started (log: /root/exec_lt.log)
+--- exec log:
+                },
+                    "diagnostics": null
+                  },
+                  "pairedItem": {
+                    "item": 0
+                  }
+                }
+              ]
+            ]
+          },
+          "source": {
+            "main": [
+              {
+                "previousNode": "Select Story",
+                "previousNodeOutput": 0,
+                "previousNodeRun": 0
+              }
+            ]
+          }
+        }
+      ],
+      "metadata": {},
+      "waitingExecution": {},
+      "waitingExecutionSource": {},
+      "runtimeData": {
+        "version": 1,
+        "establishedAt": 1793316602342,
+        "source": "cli",
+        "triggerNode": {
+          "name": "Run Now (CLI)",
+          "type": "n8n-nodes-base.executeWorkflowTrigger"
+        }
+      }
+    },
+    "resumeToken": "c5a8f5ee5a0468ba1a1257e39dc0ca2f6e17ea75a9e678f4dbfc3aa3d161dfbc"
+  },
+  "mode": "cli",
+  "startedAt": "2026-10-29T23:30:02.334Z",
+  "stoppedAt": "2026-10-29T23:30:07.108Z",
+  "storedAt": "db",
+  "status": "error"
+}
+Error executing workflow. See log messages for details.
+
+Execution error:
+====================================
+Expected ',' or '}' after property value in JSON at position 149 (line 1 column 150) [line 3]
+WrappedExecutionError: Expected ',' or '}' after property value in JSON at position 149 (line 1 column 150) [line 3]
+    at throwExecutionError (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file++++home+runner+_work+n8n+n8n+packages+nodes-base/node_modules/n8n-nodes-base/nodes/Code/throw-execution-error.ts:11:9)
+    at JsTaskRunnerSandbox.runCodeAllItems (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file++++home+runner+_work+n8n+n8n+packages+nodes-base/node_modules/n8n-nodes-base/nodes/Code/JsTaskRunnerSandbox.ts:46:23)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at ExecuteContext.execute (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-nodes-base@file++++home+runner+_work+n8n+n8n+packages+nodes-base/node_modules/n8n-nodes-base/nodes/Code/Code.node.ts:219:8)
+    at WorkflowExecute.executeNode (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file++++home+runner+_work+n8n+n8n+packages+core/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1154:8)
+    at WorkflowExecute.runNode (/usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file++++home+runner+_work+n8n+n8n+packages+core/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:1456:11)
+    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file++++home+runner+_work+n8n+n8n+packages+core/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2389:27
+    at /usr/local/lib/node_modules/n8n/node_modules/.pnpm/n8n-core@file++++home+runner+_work+n8n+n8n+packages+core/node_modules/n8n-core/src/execution-engine/workflow-execute.ts:2870:11
+Expected ',' or '}' after property value in JSON at position 149 (line 1 column 150) [line 3]
+--- jobs/assets:
+/root/shared/jobs:
+
+/root/shared/processing:
+lt_voice_fonttest.mp3
+lt_img_fonttest_3.png
+lt_img_fonttest_2.png
+lt_img_fonttest_1.png
+img_1793313572763_1.png
+img_1793313572763_3.png
+img_1793313572763_2.png
+voice_1793313572763.mp3
+--- watcher:
+-- No entries --
