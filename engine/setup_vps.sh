@@ -20,7 +20,7 @@ NX="docker compose exec -T n8n n8n"
 
 # 2b) community node used by the workflow (ElevenLabs), then restart n8n to load it
 if ! docker compose exec -T n8n test -d /home/node/.n8n/nodes/node_modules/@elevenlabs/n8n-nodes-elevenlabs; then
-  docker compose exec -T n8n sh -c 'mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes && npm install --no-audit --no-fund @elevenlabs/n8n-nodes-elevenlabs'
+  docker compose exec -T n8n sh -c 'mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes && rm -rf node_modules package-lock.json && npm install --no-audit --no-fund --omit=dev --omit=peer --legacy-peer-deps --ignore-scripts @elevenlabs/n8n-nodes-elevenlabs'
   docker compose restart n8n
   for i in $(seq 1 30); do docker compose exec -T n8n n8n --version >/dev/null 2>&1 && break; sleep 2; done
 fi
