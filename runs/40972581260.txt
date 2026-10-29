@@ -1,0 +1,35 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+== https://www.delfi.lt/rss/feeds/daily.xml
+200 text/xml; charset=UTF-8 5817
+items: 31
+<title>Dienos naujienos
+<title>Lietuvoje
+== https://www.delfi.lt/rss/
+200 text/xml; charset=UTF-8 10795
+items: 47
+<title>Global latest articles
+<title>Global LT latest articles
+== https://www.delfi.lt/rss/feeds/lithuania.xml
+200 text/xml; charset=UTF-8 53319
+items: 50
+<title>
+<title>
+<pubDate>Wed, 12 Aug 2026 12:40:17 +0300
+== https://www.15min.lt/rss
+200 application/xml 32267
+items: 20
+<title>
+<title>
+<pubDate>Fri, 30 Oct 2026 01:19:11 +0200
+== https://www.lrytas.lt/rss
+200 application/rss+xml; charset=utf-8 95095
+items: 50
+<title>Lrytas.lt
+<title>Palmiros horoskopas penktadieniui, spalio 30 d.
+<pubDate>Thu, 29 Oct 2026 22:01:00 GMT
+== https://www.lrt.lt/?rss
+200 application/rss+xml; charset=utf-8 101768
+items: 100
+<title>
+<title>
+<pubDate>Thu, 29 Oct 2026 23:59:00 +0200
