@@ -18,6 +18,14 @@ for i in $(seq 1 30); do docker compose exec -T n8n n8n --version >/dev/null 2>&
 say "N8N_FILE_ENV=$(grep -c N8N_RESTRICT_FILE_ACCESS_TO $ST/docker-compose.yml) n8n=$(docker compose exec -T n8n n8n --version 2>/dev/null | tail -1)"
 NX="docker compose exec -T n8n n8n"
 
+# 2b) community node used by the workflow (ElevenLabs), then restart n8n to load it
+if ! docker compose exec -T n8n test -d /home/node/.n8n/nodes/node_modules/@elevenlabs/n8n-nodes-elevenlabs; then
+  docker compose exec -T n8n sh -c 'mkdir -p ~/.n8n/nodes && cd ~/.n8n/nodes && npm install --no-audit --no-fund @elevenlabs/n8n-nodes-elevenlabs'
+  docker compose restart n8n
+  for i in $(seq 1 30); do docker compose exec -T n8n n8n --version >/dev/null 2>&1 && break; sleep 2; done
+fi
+say "ELEVENLABS_NODE=$(docker compose exec -T n8n test -d /home/node/.n8n/nodes/node_modules/@elevenlabs/n8n-nodes-elevenlabs && echo ok || echo missing)"
+
 # 3) build the local-disk workflow and overwrite the existing one (same id)
 python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf.json
 $NX export:workflow --all --output=/data/shared/all_wf.json
