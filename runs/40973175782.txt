@@ -1,0 +1,20 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+N8N_FILE_ENV=1 n8n=2.45.5
+ELEVENLABS_NODE=ok
+LT_WORKFLOW=imported LtNewsPipeLine01
+WORKFLOW=imported tOGl1tIRFxUJZJKA
+PUBLISHED=yes
+TG_WEBHOOK=https://n8n.visualforma.cloud/webhook/2a 
+TELEGRAM=ok
+REMOTION=ok
+WATCHER=active
+SETUP_DONE
+---
+Successfully imported 1 workflow.
+LT_WORKFLOW=imported LtNewsPipeLine01
+WF_IDS ['tOGl1tIRFxUJZJKA'] LT_IDS ['LtNewsPipeLine01']
+Successfully imported 1 workflow.
+WORKFLOW=imported tOGl1tIRFxUJZJKA
+---
+LtNewsPipeLine01
+tOGl1tIRFxUJZJKA

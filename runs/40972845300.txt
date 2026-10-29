@@ -1,3 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-71599db LT: use Delfi's live article feed (daily.xml became a feed index)
-started
