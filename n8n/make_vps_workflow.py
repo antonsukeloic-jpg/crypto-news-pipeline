@@ -155,11 +155,30 @@ w["nodes"] += [
     },
 ]
 w["connections"]["Telegram Command"] = {"main": [[{"node": "Is /run from me?", "type": "main", "index": 0}]]}
-w["connections"]["Is /run from me?"] = {"main": [
-    [{"node": "Reply: starting", "type": "main", "index": 0},
-     {"node": "RSS A", "type": "main", "index": 0}],
-    [],
+# reply FIRST, then start the pipeline (a failed reply never blocks the run)
+w["connections"]["Is /run from me?"] = {"main": [[{"node": "Reply: starting", "type": "main", "index": 0}], []]}
+w["connections"]["Reply: starting"] = {"main": [[{"node": "RSS A", "type": "main", "index": 0}]]}
+next(n for n in w["nodes"] if n["name"] == "Reply: starting")["onError"] = "continueRegularOutput"
+
+# 6) Article fetch: browser-like request, retries, and never crash the run.
+#    If the site still refuses, the script is written from the RSS headline + summary.
+art = by_name["Article - Fetch"]
+art["parameters"]["sendHeaders"] = True
+art["parameters"]["headerParameters"] = {"parameters": [
+    {"name": "User-Agent", "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"},
+    {"name": "Accept", "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"},
+    {"name": "Accept-Language", "value": "en-US,en;q=0.9"},
 ]}
+art.update({"retryOnFail": True, "maxTries": 3, "waitBetweenTries": 5000,
+            "onError": "continueRegularOutput"})
+by_name["HTML"]["onError"] = "continueRegularOutput"
+msg = by_name["Message a model"]["parameters"]["messages"]["values"][0]
+FALLBACK = ("{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : "
+            "('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + "
+            "(($('Combine Feeds').first().json.candidates || []).find(c => c.link === "
+            "$('Parse Selection').first().json.link) || {}).snippet) }}")
+assert msg["content"].count("{{ $json.articleText }}") == 1
+msg["content"] = msg["content"].replace("{{ $json.articleText }}", FALLBACK)
 
 assert not any(n["type"].endswith("googleDrive") for n in w["nodes"]), "Drive node left"
 w["name"] = "Crypto Video Pipeline"

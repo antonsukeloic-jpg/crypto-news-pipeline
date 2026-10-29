@@ -21,7 +21,8 @@
         0
       ],
       "id": "6255e899-20e9-4ca8-bdd6-7ec3c97751af",
-      "name": "HTML"
+      "name": "HTML",
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -34,7 +35,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are a short-form scriptwriter for an English-language crypto news channel. Turn ONE news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON.\n\nRULES\n- voiceover: punchy spoken-word, ~40 words max (~15s total). Strong hook in sentence 1. Plain language, active voice. This is news, NOT financial advice. TONE: sound like a fast-paced crypto news anchor - confident, energetic, urgent but factual; lead with the number or the stakes.\n- ACCURACY: use ONLY facts in the article. Never invent numbers, prices, dates, names or quotes. If a figure isn't in the article, don't state it.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + a duration.\n- duration_sec: integer seconds the scene shows. Scene durations MUST sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~6 words.\n- visual.query: a vivid 1-2 sentence description of an image that clearly SHOWS the key subject of THIS sentence, so the visual matches the words (follow VISUAL RULES).\n- center: per scene, pick what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"635\",\"prefix\":\"-$\",\"suffix\":\"M\",\"color\":\"red\",\"label\":\"max 6 words\"} for a scene built on ONE striking number (at most 1-2 scenes, most impactful figures only; value = digits only with optional decimal; suffix is a SHORT unit ONLY (M, B, K, %, x, or empty) - NEVER words like \"users\" or \"wallets\" (put those in the label); color \"red\" for a loss/down, \"green\" for a gain/up, otherwise omit color). {\"type\":\"coin\",\"coingecko_id\":\"bitcoin\",\"name\":\"Bitcoin\"} when a single named cryptocurrency is the clear focus of that scene (coingecko_id = the coin\\u2019s lowercase CoinGecko API id, e.g. bitcoin, ethereum, solana, ripple, cardano, binancecoin, tether, dogecoin, chainlink, avalanche-2, polkadot, tron - we fetch the coin\\u2019s official logo and show it with the name). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Full Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a specific well-known PUBLIC figure is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Short Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a specific company, organization or other coin is the subject - we fetch its photo/logo from Wikipedia and show it with the name; give the EXACT English Wikipedia page title (e.g. \"Coinbase\", \"Changpeng Zhao\", \"Ethereum\"), and if unsure use \"none\"; only well-known public figures or organizations, never a private individual. {\"type\":\"none\"} otherwise (general beats - the image carries it). Whenever a scene is centered on a named coin, exchange, company, protocol, project, foundation, regulator or a named public person, you MUST set \"coin\" or \"entity\" (not \"none\") - these almost always have a Wikipedia page, so use the common name as the Wikipedia title (examples: \"CoinDCX\", \"Binance\", \"Vitalik Buterin\", \"Ethereum\"). Use \"none\" only when the scene is truly about no specific named entity. Keep the middle engaged across the WHOLE video, not just the first scene. WORKED EXAMPLE: for \"HSBC just launched RedCoin, its first stablecoin\" the center is {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"HSBC\",\"wiki\":\"HSBC\"} (HSBC is a major named company). For \"ZachXBT disputes the timeline\" use a person entity only if the person has a Wikipedia page, else \"none\". NEVER invent a number: only use \"stat\" for figures actually stated in the article.\n- hook: most scroll-stopping line, max 8 words.\n- hashtags: 4-6, no spaces.\n- ticker: main cryptocurrency symbol the article is about, lowercase, one of: btc, sol, eth, xrp, ada, bnb, usdt, doge. Use empty string if none applies.\n\nVISUAL RULES (for every visual.query)\n- FIRST pick the KEY SUBJECT or ACTION of this scene's vo_segment - the one thing the viewer should literally SEE while they hear that line. Then describe an image that clearly SHOWS that exact thing, so the picture matches the spoken words and the viewer instantly connects them.\n- Be SPECIFIC and literal to the sentence, not abstract or moody filler. Examples: \"money leaving an exchange\" -> gold coins pouring out of an open metal vault; \"a hack\" -> a hooded figure breaching a glowing server rack; \"a court ruling\" -> a judge signing a document at the bench; \"approval / launch\" -> a rocket lifting off a pad. If a viewer paused on the frame, they should guess the sentence.\n- Each scene visualizes ITS OWN sentence - a clearly DIFFERENT subject and setting every time. Never reuse the same location or motif across scenes.\n- NO readable text, numbers, words, logos, tickers, signage or watermarks in the image (we add those). Do NOT depict real people's faces or real company branding/logos.\n- Do NOT draw coins, tokens, coin symbols, a glowing orb/circle standing in for a coin, holograms, or any phone/computer/payment screen showing UI, charts or symbols - the AI renders these as fake gibberish. Show the real-world scene or ACTION instead (the real coin or company logo is added separately as an overlay). Also do NOT depict a specific company building, headquarters, branded branch or storefront signage - these render as fake gibberish; show a neutral real-world scene or the action.\n- Match the real sentiment of the article - do not show panic or disaster unless the news is genuinely negative.\n- Vertical 9:16, main subject in the lower-middle, clean darker empty space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"ticker\":\"btc\",\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ $json.articleText }}"
+              "content": "=You are a short-form scriptwriter for an English-language crypto news channel. Turn ONE news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON.\n\nRULES\n- voiceover: punchy spoken-word, ~40 words max (~15s total). Strong hook in sentence 1. Plain language, active voice. This is news, NOT financial advice. TONE: sound like a fast-paced crypto news anchor - confident, energetic, urgent but factual; lead with the number or the stakes.\n- ACCURACY: use ONLY facts in the article. Never invent numbers, prices, dates, names or quotes. If a figure isn't in the article, don't state it.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + a duration.\n- duration_sec: integer seconds the scene shows. Scene durations MUST sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~6 words.\n- visual.query: a vivid 1-2 sentence description of an image that clearly SHOWS the key subject of THIS sentence, so the visual matches the words (follow VISUAL RULES).\n- center: per scene, pick what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"635\",\"prefix\":\"-$\",\"suffix\":\"M\",\"color\":\"red\",\"label\":\"max 6 words\"} for a scene built on ONE striking number (at most 1-2 scenes, most impactful figures only; value = digits only with optional decimal; suffix is a SHORT unit ONLY (M, B, K, %, x, or empty) - NEVER words like \"users\" or \"wallets\" (put those in the label); color \"red\" for a loss/down, \"green\" for a gain/up, otherwise omit color). {\"type\":\"coin\",\"coingecko_id\":\"bitcoin\",\"name\":\"Bitcoin\"} when a single named cryptocurrency is the clear focus of that scene (coingecko_id = the coin\\u2019s lowercase CoinGecko API id, e.g. bitcoin, ethereum, solana, ripple, cardano, binancecoin, tether, dogecoin, chainlink, avalanche-2, polkadot, tron - we fetch the coin\\u2019s official logo and show it with the name). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Full Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a specific well-known PUBLIC figure is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Short Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a specific company, organization or other coin is the subject - we fetch its photo/logo from Wikipedia and show it with the name; give the EXACT English Wikipedia page title (e.g. \"Coinbase\", \"Changpeng Zhao\", \"Ethereum\"), and if unsure use \"none\"; only well-known public figures or organizations, never a private individual. {\"type\":\"none\"} otherwise (general beats - the image carries it). Whenever a scene is centered on a named coin, exchange, company, protocol, project, foundation, regulator or a named public person, you MUST set \"coin\" or \"entity\" (not \"none\") - these almost always have a Wikipedia page, so use the common name as the Wikipedia title (examples: \"CoinDCX\", \"Binance\", \"Vitalik Buterin\", \"Ethereum\"). Use \"none\" only when the scene is truly about no specific named entity. Keep the middle engaged across the WHOLE video, not just the first scene. WORKED EXAMPLE: for \"HSBC just launched RedCoin, its first stablecoin\" the center is {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"HSBC\",\"wiki\":\"HSBC\"} (HSBC is a major named company). For \"ZachXBT disputes the timeline\" use a person entity only if the person has a Wikipedia page, else \"none\". NEVER invent a number: only use \"stat\" for figures actually stated in the article.\n- hook: most scroll-stopping line, max 8 words.\n- hashtags: 4-6, no spaces.\n- ticker: main cryptocurrency symbol the article is about, lowercase, one of: btc, sol, eth, xrp, ada, bnb, usdt, doge. Use empty string if none applies.\n\nVISUAL RULES (for every visual.query)\n- FIRST pick the KEY SUBJECT or ACTION of this scene's vo_segment - the one thing the viewer should literally SEE while they hear that line. Then describe an image that clearly SHOWS that exact thing, so the picture matches the spoken words and the viewer instantly connects them.\n- Be SPECIFIC and literal to the sentence, not abstract or moody filler. Examples: \"money leaving an exchange\" -> gold coins pouring out of an open metal vault; \"a hack\" -> a hooded figure breaching a glowing server rack; \"a court ruling\" -> a judge signing a document at the bench; \"approval / launch\" -> a rocket lifting off a pad. If a viewer paused on the frame, they should guess the sentence.\n- Each scene visualizes ITS OWN sentence - a clearly DIFFERENT subject and setting every time. Never reuse the same location or motif across scenes.\n- NO readable text, numbers, words, logos, tickers, signage or watermarks in the image (we add those). Do NOT depict real people's faces or real company branding/logos.\n- Do NOT draw coins, tokens, coin symbols, a glowing orb/circle standing in for a coin, holograms, or any phone/computer/payment screen showing UI, charts or symbols - the AI renders these as fake gibberish. Show the real-world scene or ACTION instead (the real coin or company logo is added separately as an overlay). Also do NOT depict a specific company building, headquarters, branded branch or storefront signage - these render as fake gibberish; show a neutral real-world scene or the action.\n- Match the real sentiment of the article - do not show panic or disaster unless the news is genuinely negative.\n- Vertical 9:16, main subject in the lower-middle, clean darker empty space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"ticker\":\"btc\",\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
             }
           ]
         },
@@ -240,7 +241,24 @@
     {
       "parameters": {
         "url": "={{ $json.link }}",
-        "options": {}
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            }
+          ]
+        }
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -249,7 +267,11 @@
         0
       ],
       "id": "87f28eef-00dc-4c86-b70a-aa5a9aac914c",
-      "name": "Article - Fetch"
+      "name": "Article - Fetch",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {
@@ -569,7 +591,7 @@
         1804,
         288
       ],
-      "id": "052ad73b-5b1b-402d-81b8-4d9558f68616",
+      "id": "fbcbf810-f924-466a-9f88-e7ae97638b39",
       "name": "Save Job"
     },
     {
@@ -582,7 +604,7 @@
         -816,
         424
       ],
-      "id": "a2cf4ad5-9eb5-4204-b6db-4abc5b5a2b9a",
+      "id": "4241edf2-8d73-4dbf-8895-7c99eff6ee79",
       "name": "Run Now (CLI)"
     },
     {
@@ -598,9 +620,9 @@
         -1256,
         644
       ],
-      "id": "aac177b5-7e22-4cfb-9017-6bf29822e894",
+      "id": "73ea6d6f-a1dd-4c62-8790-ec786f2ed9b2",
       "name": "Telegram Command",
-      "webhookId": "3b9b86ed-0eed-4429-b42c-22c31e0d9a6f",
+      "webhookId": "772d926a-1251-4b6f-94a0-12885b747562",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -619,7 +641,7 @@
           },
           "conditions": [
             {
-              "id": "12d9b3dc-d952-4c32-8065-0cc2cf978f7a",
+              "id": "cc2eba21-0038-4796-ba3b-16c878889cae",
               "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
               "rightValue": "694708370",
               "operator": {
@@ -628,7 +650,7 @@
               }
             },
             {
-              "id": "0ef50b21-def4-4146-a1d4-8f255dccbc18",
+              "id": "0134e61c-fede-4fe4-894c-69636272ad1a",
               "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
               "rightValue": "/run",
               "operator": {
@@ -647,7 +669,7 @@
         -1036,
         644
       ],
-      "id": "cce735a7-8135-4672-972d-113def97a355",
+      "id": "9b697040-cee6-40c5-a809-75fa251a1239",
       "name": "Is /run from me?"
     },
     {
@@ -664,14 +686,15 @@
         -816,
         744
       ],
-      "id": "9881db7d-8495-4b69-9e21-635d634a01cc",
+      "id": "75cc6675-6179-452f-84c3-11ef4c7e7671",
       "name": "Reply: starting",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
           "name": "Telegram account"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -987,14 +1010,20 @@
             "node": "Reply: starting",
             "type": "main",
             "index": 0
-          },
+          }
+        ],
+        []
+      ]
+    },
+    "Reply: starting": {
+      "main": [
+        [
           {
             "node": "RSS A",
             "type": "main",
             "index": 0
           }
-        ],
-        []
+        ]
       ]
     }
   },
