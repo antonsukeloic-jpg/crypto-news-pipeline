@@ -1,5 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-4466:                          "text": "{\"link\":\"https://www.lrytas.lt/zmones/uzsienio-zvaigzdes/2026/10/29/news/mire-iksmenu-zvaigzde-patrickas-stewartas-44700865\",\"title\":\"Mirė „Iksmenų\" žvaigždė Patrickas Stewartas\",\"reason\":\"Garsus aktorius mirė – žinia sukrečia milijonus gerbėjų visame pasaulyje\"}"
-4558:                        "text": "{\"link\":\"https://www.lrytas.lt/zmones/uzsienio-zvaigzdes/2026/10/29/news/mire-iksmenu-zvaigzde-patrickas-stewartas-44700865\",\"title\":\"Mirė „Iksmenų\" žvaigždė Patrickas Stewartas\",\"reason\":\"Garsus aktorius mirė – žinia sukrečia milijonus gerbėjų visame pasaulyje\"}"
-"text": "{
-"text": "{

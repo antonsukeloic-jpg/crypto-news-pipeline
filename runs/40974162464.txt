@@ -1,0 +1,6 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+Importing 1 workflows...
+Successfully imported 1 workflow.
+LT_UPDATED LtNewsPipeLine01
+LT pipeline started (log: /root/exec_lt.log)
+client_loop: send disconnect: Broken pipe
