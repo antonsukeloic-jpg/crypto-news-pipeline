@@ -449,7 +449,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const srcs=[['CoinDesk','RSS CoinDesk'],['Cointelegraph','RSS Cointelegraph'],['Decrypt','RSS Decrypt']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
+        "jsCode": "const srcs=[['CoinDesk','RSS A'],['Cointelegraph','RSS B'],['Decrypt','RSS C']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nif(!all.length) throw new Error('Combine Feeds: no RSS stories collected');\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
       },
       "id": "comb-0ngle9oz",
       "name": "Combine Feeds",
@@ -568,7 +568,7 @@
         1804,
         288
       ],
-      "id": "7606c15a-e3b4-4c6f-81a5-a42d77080b17",
+      "id": "5b394231-13a4-4961-8ab5-e0ebab6fcc9b",
       "name": "Save Job"
     },
     {
@@ -581,7 +581,7 @@
         -816,
         424
       ],
-      "id": "b794c436-fb2e-439e-9b13-60d38f94a74b",
+      "id": "a1cf219d-0761-497b-857f-ddbccd1ef142",
       "name": "Run Now (CLI)"
     }
   ],

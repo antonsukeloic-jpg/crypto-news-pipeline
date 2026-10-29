@@ -83,6 +83,18 @@ w["nodes"].append(save_job)
 rename("Create file from text", "Make Job File")
 w["connections"]["Make Job File"] = {"main": [[{"node": "Save Job", "type": "main", "index": 0}]]}
 
+# 3b) Combine Feeds looked up feed nodes by old names; point it at RSS A/B/C,
+#     and fail loudly if no stories were collected (instead of an empty prompt)
+cf = by_name["Combine Feeds"]["parameters"]
+cf["jsCode"] = (cf["jsCode"]
+    .replace("'RSS CoinDesk'", "'RSS A'")
+    .replace("'RSS Cointelegraph'", "'RSS B'")
+    .replace("'RSS Decrypt'", "'RSS C'")
+    .replace("all=all.filter(x=>x.title&&x.link);",
+             "all=all.filter(x=>x.title&&x.link);\n"
+             "if(!all.length) throw new Error('Combine Feeds: no RSS stories collected');"))
+assert "'RSS A'" in cf["jsCode"] and "no RSS stories" in cf["jsCode"]
+
 # 4) programmatic start: lets `n8n execute --id=...` run it (CLI needs this trigger)
 sched = by_name["Every Hour"]
 w["nodes"].append({
