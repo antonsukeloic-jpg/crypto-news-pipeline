@@ -20,7 +20,7 @@
         416,
         0
       ],
-      "id": "887d0888-9f76-4dab-afa9-d74920b50ca0",
+      "id": "e23e1a1f-a8f0-4e45-9113-ee41b8b0f3c1",
       "name": "HTML",
       "onError": "continueRegularOutput"
     },
@@ -48,7 +48,7 @@
         592,
         0
       ],
-      "id": "28b0b266-a9dc-4262-a01c-ecd872a364bf",
+      "id": "6e0dcf4e-f27b-482a-8f8e-c877994ae063",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -59,7 +59,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nconst data = JSON.parse(fixJson(raw.slice(s0, e0 + 1)));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"Lietuvos naujienos\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"Lietuvos naujienos\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"lt_img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.voiceFile = \"lt_voice_\"+ts+\".mp3\";\ndata.outputFile = \"lt_video_\"+ts+\".mp4\";\ndata.jobFile = \"lt_job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = \"\";\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en')); }\n  try {\n    const u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en')); }\n  try {\n    const u1 = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS).concat([\"Sausio\", \"Sausis\", \"Vasario\", \"Vasaris\", \"Kovo\", \"Kovas\", \"Balandžio\", \"Balandis\", \"Gegužės\", \"Gegužė\", \"Birželio\", \"Birželis\", \"Liepos\", \"Liepa\", \"Rugpjūčio\", \"Rugpjūtis\", \"Rugsėjo\", \"Rugsėjis\", \"Spalio\", \"Spalis\", \"Lapkričio\", \"Lapkritis\", \"Gruodžio\", \"Gruodis\", \"Pirmadienį\", \"Pirmadienis\", \"Antradienį\", \"Antradienis\", \"Trečiadienį\", \"Trečiadienis\", \"Ketvirtadienį\", \"Ketvirtadienis\", \"Penktadienį\", \"Penktadienis\", \"Šeštadienį\", \"Šeštadienis\", \"Sekmadienį\", \"Sekmadienis\", \"Lietuva\", \"Lietuvos\", \"Lietuvoje\", \"Lietuvai\", \"Lietuvą\", \"Lietuviai\", \"Lietuvių\", \"Lietuviams\", \"Lietuvis\", \"Lietuvė\", \"Vilnius\", \"Vilniuje\", \"Vilniaus\", \"Vilnių\", \"Kaunas\", \"Kaune\", \"Kauno\", \"Kauną\", \"Klaipėda\", \"Klaipėdoje\", \"Klaipėdos\", \"Šiauliai\", \"Šiauliuose\", \"Panevėžys\", \"Panevėžyje\", \"Europa\", \"Europos\", \"Europoje\", \"Europą\", \"Rusija\", \"Rusijos\", \"Rusijoje\", \"Baltarusija\", \"Baltarusijos\", \"Latvija\", \"Latvijos\", \"Lenkija\", \"Lenkijos\", \"Ukraina\", \"Ukrainos\", \"Ukrainoje\", \"JAV\", \"ES\", \"NATO\", \"Vyriausybė\", \"Vyriausybės\", \"Seimas\", \"Seimo\", \"Seime\", \"Prezidentas\", \"Prezidento\", \"Ministras\", \"Ministrė\", \"Ministerija\", \"Policija\", \"Policijos\", \"Teismas\", \"Teismo\", \"Savivaldybė\", \"Savivaldybės\", \"Euras\", \"Eurų\", \"Eurai\", \"Eurais\", \"Šiandien\", \"Vakar\", \"Rytoj\", \"Šiąnakt\", \"Šįryt\", \"Tačiau\", \"Todėl\", \"Taip\", \"Dabar\", \"Jau\", \"Dar\", \"Bet\", \"Ir\", \"Kai\", \"Nes\", \"Kad\", \"Jis\", \"Ji\", \"Jie\", \"Jos\", \"Mes\", \"Jūs\", \"Tai\", \"Tas\", \"Ta\", \"Tie\", \"Tos\", \"Čia\", \"Ten\", \"Tik\", \"Net\", \"Pagal\", \"Anot\", \"Po\", \"Per\", \"Nuo\", \"Iki\", \"Prie\", \"Apie\", \"Dėl\", \"Su\", \"Be\", \"Už\", \"Ant\", \"Iš\", \"Į\", \"O\", \"Kaip\", \"Kodėl\", \"Kiek\", \"Kur\", \"Kas\", \"Jei\", \"Jeigu\", \"Nors\", \"Milijonas\", \"Milijonai\", \"Milijonų\", \"Milijardas\", \"Milijardų\", \"Tūkstančiai\", \"Tūkstančių\", \"Procentai\", \"Procentų\", \"Naujienos\", \"Delfi\", \"Lrytas\", \"BNS\", \"ELTA\", \"LRT\", \"Pranešama\", \"Pranešė\", \"Teigiama\", \"Sako\", \"Teigia\", \"Skelbia\"]));\nconst looksPerson = (n) => /^\\p{Lu}\\p{Ll}+ \\p{Lu}\\p{Ll}+$/u.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu; while ((m = reSingle.exec(vo))) add(m[1]);\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    const enT = (c.wiki_en && c.wiki_en !== 'none') ? c.wiki_en : '';\n    let img = isPerson ? (await wikiImage(title) || (enT ? await wikiImage(enT, 'en') : null) || (c.name && c.name !== title ? await wikiImage(c.name) : null))\n                       : (await resolveNonPerson(title) || (enT ? (await companyLogo(enT, 'en') || await wikiImage(enT, 'en')) : null));\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", channel:\"lt\", voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nreturn [{ json: data }];"
+        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nconst data = JSON.parse(fixJson(raw.slice(s0, e0 + 1)));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"Lietuvos naujienos\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"Lietuvos naujienos\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"lt_img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.voiceFile = \"lt_voice_\"+ts+\".mp3\";\ndata.outputFile = \"lt_video_\"+ts+\".mp4\";\ndata.jobFile = \"lt_job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = \"\";\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en')); }\n  try {\n    const u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en')); }\n  try {\n    const u1 = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS).concat([\"Sausio\", \"Sausis\", \"Vasario\", \"Vasaris\", \"Kovo\", \"Kovas\", \"Balandžio\", \"Balandis\", \"Gegužės\", \"Gegužė\", \"Birželio\", \"Birželis\", \"Liepos\", \"Liepa\", \"Rugpjūčio\", \"Rugpjūtis\", \"Rugsėjo\", \"Rugsėjis\", \"Spalio\", \"Spalis\", \"Lapkričio\", \"Lapkritis\", \"Gruodžio\", \"Gruodis\", \"Pirmadienį\", \"Pirmadienis\", \"Antradienį\", \"Antradienis\", \"Trečiadienį\", \"Trečiadienis\", \"Ketvirtadienį\", \"Ketvirtadienis\", \"Penktadienį\", \"Penktadienis\", \"Šeštadienį\", \"Šeštadienis\", \"Sekmadienį\", \"Sekmadienis\", \"Lietuva\", \"Lietuvos\", \"Lietuvoje\", \"Lietuvai\", \"Lietuvą\", \"Lietuviai\", \"Lietuvių\", \"Lietuviams\", \"Lietuvis\", \"Lietuvė\", \"Vilnius\", \"Vilniuje\", \"Vilniaus\", \"Vilnių\", \"Kaunas\", \"Kaune\", \"Kauno\", \"Kauną\", \"Klaipėda\", \"Klaipėdoje\", \"Klaipėdos\", \"Šiauliai\", \"Šiauliuose\", \"Panevėžys\", \"Panevėžyje\", \"Europa\", \"Europos\", \"Europoje\", \"Europą\", \"Rusija\", \"Rusijos\", \"Rusijoje\", \"Baltarusija\", \"Baltarusijos\", \"Latvija\", \"Latvijos\", \"Lenkija\", \"Lenkijos\", \"Ukraina\", \"Ukrainos\", \"Ukrainoje\", \"JAV\", \"ES\", \"NATO\", \"Vyriausybė\", \"Vyriausybės\", \"Seimas\", \"Seimo\", \"Seime\", \"Prezidentas\", \"Prezidento\", \"Ministras\", \"Ministrė\", \"Ministerija\", \"Policija\", \"Policijos\", \"Teismas\", \"Teismo\", \"Savivaldybė\", \"Savivaldybės\", \"Euras\", \"Eurų\", \"Eurai\", \"Eurais\", \"Šiandien\", \"Vakar\", \"Rytoj\", \"Šiąnakt\", \"Šįryt\", \"Tačiau\", \"Todėl\", \"Taip\", \"Dabar\", \"Jau\", \"Dar\", \"Bet\", \"Ir\", \"Kai\", \"Nes\", \"Kad\", \"Jis\", \"Ji\", \"Jie\", \"Jos\", \"Mes\", \"Jūs\", \"Tai\", \"Tas\", \"Ta\", \"Tie\", \"Tos\", \"Čia\", \"Ten\", \"Tik\", \"Net\", \"Pagal\", \"Anot\", \"Po\", \"Per\", \"Nuo\", \"Iki\", \"Prie\", \"Apie\", \"Dėl\", \"Su\", \"Be\", \"Už\", \"Ant\", \"Iš\", \"Į\", \"O\", \"Kaip\", \"Kodėl\", \"Kiek\", \"Kur\", \"Kas\", \"Jei\", \"Jeigu\", \"Nors\", \"Milijonas\", \"Milijonai\", \"Milijonų\", \"Milijardas\", \"Milijardų\", \"Tūkstančiai\", \"Tūkstančių\", \"Procentai\", \"Procentų\", \"Naujienos\", \"Delfi\", \"Lrytas\", \"BNS\", \"ELTA\", \"LRT\", \"Pranešama\", \"Pranešė\", \"Teigiama\", \"Sako\", \"Teigia\", \"Skelbia\"]));\nconst looksPerson = (n) => /^\\p{Lu}\\p{Ll}+ \\p{Lu}\\p{Ll}+$/u.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((m = reSingle.exec(vo))) { const before = vo.slice(0, m.index).replace(/[\\s„“\"'(]+$/, ''); if (before === '' || /[.!?:;–-]$/.test(before)) continue; add(m[1]); }\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    const enT = (c.wiki_en && c.wiki_en !== 'none') ? c.wiki_en : '';\n    let img = isPerson ? (await wikiImage(title) || (enT ? await wikiImage(enT, 'en') : null) || (c.name && c.name !== title ? await wikiImage(c.name) : null))\n                       : (await resolveNonPerson(title) || (enT ? (await companyLogo(enT, 'en') || await wikiImage(enT, 'en')) : null));\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", channel:\"lt\", voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nreturn [{ json: data }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,7 +67,7 @@
         896,
         -16
       ],
-      "id": "13904e79-8c66-4b6a-a6ae-cb5c62f7c07d",
+      "id": "ca04a152-e228-40cd-a69b-79a8479d041b",
       "name": "Code in JavaScript"
     },
     {
@@ -96,7 +96,7 @@
         1488,
         -128
       ],
-      "id": "18b66c99-6d7a-4920-bc99-939191d4a23c",
+      "id": "e6274dec-2dbf-4ccf-950b-cafeb8955a04",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -123,9 +123,9 @@
         1088,
         16
       ],
-      "id": "2dd8c217-1be9-4593-ab75-7175f065cd9f",
+      "id": "451b56f5-babb-4f9c-a1b4-cf7349786eb7",
       "name": "Send message and wait for response",
-      "webhookId": "d050066d-9a5e-4738-90e8-80fb886744f7",
+      "webhookId": "799bc62e-0d21-4dc4-99ec-2e9aa73d8ded",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -146,7 +146,7 @@
         1232,
         288
       ],
-      "id": "7a6cd281-9564-4652-9687-783bf5608d9a",
+      "id": "68711272-235e-45ec-b9b3-fc23dcfe23dc",
       "name": "Save Image"
     },
     {
@@ -191,7 +191,7 @@
         400,
         272
       ],
-      "id": "ebb8b959-6fd9-4ac5-84ee-fb9340aa4cb6",
+      "id": "d23615bd-972c-4a35-b745-11e9dcb96439",
       "name": "Image - Request"
     },
     {
@@ -215,7 +215,7 @@
         608,
         288
       ],
-      "id": "6f3fddc6-ce09-46b5-a6c3-6c8392343616",
+      "id": "07ebe8e4-8e1e-431e-b08b-840b7a5afdd3",
       "name": "Image - Get"
     },
     {
@@ -235,7 +235,7 @@
         1072,
         288
       ],
-      "id": "cd2a80f0-4492-4821-b460-774a98dbe39e",
+      "id": "1edd49dd-1d68-4555-866d-9cb86b1926da",
       "name": "Image - Download"
     },
     {
@@ -266,7 +266,7 @@
         208,
         0
       ],
-      "id": "4e65f78e-8677-4df2-a0ae-974f25466798",
+      "id": "2688428c-d4c3-431a-b648-d48a25b2d9d8",
       "name": "Article - Fetch",
       "retryOnFail": true,
       "maxTries": 3,
@@ -286,7 +286,7 @@
         1648,
         -128
       ],
-      "id": "495edd28-901d-4fb6-8554-fd033ce7e3f5",
+      "id": "87d29f70-451a-4b08-aeb6-aa2e8ee3c936",
       "name": "Save Voice"
     },
     {
@@ -299,7 +299,7 @@
         1584,
         288
       ],
-      "id": "bc5844d1-868f-4ff1-a06b-47bf7faa72e4",
+      "id": "7ef4e277-b753-4b8e-af6e-a5bf8c65bafe",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -334,7 +334,7 @@
         800,
         304
       ],
-      "id": "3f602e74-3d2c-43f9-95e0-2fbece9ebf7c",
+      "id": "24517224-a9a7-4394-99b8-24df47565d49",
       "name": "If"
     },
     {
@@ -347,9 +347,9 @@
         976,
         432
       ],
-      "id": "82818d08-6c3a-4689-ad42-71e783ee161b",
+      "id": "e5a2d990-1b61-403e-8aad-1804a9626dcc",
       "name": "Wait",
-      "webhookId": "6a30e692-48c6-48fd-9f67-af2f81edc10a"
+      "webhookId": "aa16ca22-6a5c-45b5-ad44-25ad20fb531c"
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
         1264,
         32
       ],
-      "id": "eac24663-e0d9-433c-92b3-7a62fca0e3ba",
+      "id": "9df6879a-3115-46ea-825c-5dce1283f181",
       "name": "Approved?"
     },
     {
@@ -395,7 +395,7 @@
         1360,
         288
       ],
-      "id": "9a4daa6e-59ca-48fa-bdb7-ee47747edf8a",
+      "id": "920269ee-a460-4c5c-80ce-5272e5785b19",
       "name": "Split Scenes"
     },
     {
@@ -421,7 +421,7 @@
         },
         "options": {}
       },
-      "id": "6b574afe-abf0-4f7d-8e4c-287a0aeea2cc",
+      "id": "1ecad987-a10b-4f38-af0b-071baa04c46b",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -441,7 +441,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "21bf56f0-203b-43fd-ba8b-8e9f026c54c8",
+      "id": "0a435b11-f0cd-43c2-991d-e30b1cd4adab",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +460,7 @@
           ]
         }
       },
-      "id": "f1cf2201-9658-4f87-8fa0-0b356dd0ed4d",
+      "id": "8b8215b9-f5f5-4716-ab4d-9dd300c36744",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -474,7 +474,7 @@
       "parameters": {
         "jsCode": "const srcs=[['Delfi','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json).filter(j=>j&&!j.error);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nif(!all.length) throw new Error('Combine Feeds: no RSS stories collected');\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
       },
-      "id": "b876a734-e843-4180-b12e-8fa4a1b7dda1",
+      "id": "650ea000-88ba-4f6c-a5ca-8e34d6455d2d",
       "name": "Combine Feeds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -502,7 +502,7 @@
         "simplify": false,
         "options": {}
       },
-      "id": "07c45e1f-e046-475f-b6ae-81b9745da557",
+      "id": "1ccee9b9-0691-4a57-8098-d5a2e66edd7b",
       "name": "Select Story",
       "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
@@ -521,7 +521,7 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json.content[0].text;\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nlet sel = null;\ntry { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(fixJson(raw.slice(s, e + 1))); } catch (err) { sel = null; }\nconst cands = ($('Combine Feeds').first().json.candidates) || [];\nif (!sel || !sel.link) {\n  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n  const link = m[1] || m[0];\n  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n  sel = { link, title: '', reason: rm ? rm[1] : '' };\n}\nconst hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\nif (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\nreturn [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];"
       },
-      "id": "9c7b5a45-434f-45f3-8ebf-35c1c867b75a",
+      "id": "c1ae0c1b-234e-4978-b3ed-d62391b4732d",
       "name": "Parse Selection",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -535,7 +535,7 @@
         "url": "https://feed.delfi.lt/v2/articles/6?format=rss",
         "options": {}
       },
-      "id": "64ed297b-244b-4e80-b560-7ed8780b610f",
+      "id": "2035e461-8e7c-4227-9043-37d8346db469",
       "name": "RSS A",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -554,7 +554,7 @@
         "url": "https://www.15min.lt/rss",
         "options": {}
       },
-      "id": "b357bf09-a4ad-4d74-8efa-9426e723716f",
+      "id": "8cc5105c-d9f9-4db8-9c20-aff5e90a5d65",
       "name": "RSS B",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -573,7 +573,7 @@
         "url": "https://www.lrytas.lt/rss",
         "options": {}
       },
-      "id": "033f570f-e330-44e0-a3d5-8be6e6b57ac1",
+      "id": "3c3af32e-b59c-4721-b2f4-cfb740795d80",
       "name": "RSS C",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -600,7 +600,7 @@
         1804,
         288
       ],
-      "id": "56e5e35b-a746-4e30-ba2b-ab4fbb2be237",
+      "id": "979cfbd2-897d-44b6-974d-47e4659abab6",
       "name": "Save Job"
     },
     {
@@ -613,7 +613,7 @@
         -816,
         424
       ],
-      "id": "120e192a-dc0e-4b33-a337-adec351b0c7e",
+      "id": "4b09af34-8c56-455a-aaca-7a4fe6da5150",
       "name": "Run Now (CLI)"
     }
   ],

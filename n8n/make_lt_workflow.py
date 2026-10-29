@@ -210,7 +210,8 @@ rep("let m; const reBrand = /\\b([A-Za-z]*[A-Z][A-Za-z]*[A-Z][A-Za-z0-9]*)\\b/g;
     "let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n"
     "  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n"
     "  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n"
-    "  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu; while ((m = reSingle.exec(vo))) add(m[1]);")
+    "  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n"
+    "  while ((m = reSingle.exec(vo))) { const before = vo.slice(0, m.index).replace(/[\\s„“\"'(]+$/, ''); if (before === '' || /[.!?:;–-]$/.test(before)) continue; add(m[1]); }")  # skip sentence-initial words: in Lithuanian they are usually not names
 LT_STOP = [
     # months (all cases), weekdays, generic words that start sentences or are capitalised in Lithuanian news
     'Sausio','Sausis','Vasario','Vasaris','Kovo','Kovas','Balandžio','Balandis','Gegužės','Gegužė','Birželio','Birželis',
