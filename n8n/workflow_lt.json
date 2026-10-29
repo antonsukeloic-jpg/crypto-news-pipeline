@@ -20,7 +20,7 @@
         416,
         0
       ],
-      "id": "4c807dce-a520-455c-a469-46259fec0941",
+      "id": "b0e9a571-beb8-4af9-99f1-3f6c59262c23",
       "name": "HTML",
       "onError": "continueRegularOutput"
     },
@@ -35,7 +35,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are a short-form scriptwriter for a Lithuanian-language general news channel (TikTok/Reels). Turn ONE news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON.\n\nLANGUAGE\n- voiceover, every vo_segment, on_screen_text, hook, meta.title, center.label and hashtags are in NATURAL SPOKEN LITHUANIAN: the way a young Lithuanian news presenter actually talks. Correct grammar, correct cases and endings, correct diacritics (ą č ę ė į š ų ū ž). Short sentences. No anglicisms, no bureaucratic phrasing, no literal translations from English.\n- Write numbers so they are read correctly aloud in Lithuanian: prefer words for small numbers and keep units spoken (e.g. \"penkiais procentais\", \"du milijonai eurų\", \"trisdešimt metų\"). Use digits only where natural (years, big figures).\n- Names of people and places stay in their Lithuanian form with correct declension.\n- visual.query stays in ENGLISH (the image model works better in English).\n\nRULES\n- voiceover: punchy spoken-word, ~35 words max (~15s total). Strong hook in sentence 1. Plain language, active voice. TONE: a fast, confident, energetic news presenter - urgent but factual; lead with the number or the stakes. No clickbait lies.\n- ACCURACY: use ONLY facts in the article. Never invent numbers, prices, dates, names or quotes. If a figure isn't in the article, don't state it.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + a duration.\n- duration_sec: integer seconds the scene shows. Scene durations MUST sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~5 words, Lithuanian.\n- visual.query: a vivid 1-2 sentence ENGLISH description of an image that clearly SHOWS the key subject of THIS sentence (follow VISUAL RULES).\n- center: per scene, pick what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"635\",\"prefix\":\"\",\"suffix\":\"%\",\"color\":\"red\",\"label\":\"max 5 Lithuanian words\"} for a scene built on ONE striking number (at most 1-2 scenes, most impactful figures only; value = digits only with optional decimal; prefix/suffix are SHORT symbols or units ONLY (€, %, mln., mlrd., tūkst., km, °C, or empty) - NEVER whole words like \"žmonių\" (put those in the label); color \"red\" for a loss/fall/bad, \"green\" for a gain/rise/good, otherwise omit color). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Vardas Pavardė\",\"wiki\":\"Exact lt.wikipedia page title\",\"wiki_en\":\"Exact en.wikipedia page title or none\"} when a specific well-known PUBLIC figure is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Short Name\",\"wiki\":\"Exact lt.wikipedia page title\",\"wiki_en\":\"Exact en.wikipedia page title or none\"} when a specific company, institution, party, club, city or organization is the subject - we fetch its photo/logo from Wikipedia and show it with the name. Give the EXACT Lithuanian Wikipedia page title in the NOMINATIVE case (e.g. \"Gitanas Nausėda\", \"Vilnius\", \"Lietuvos bankas\", \"Maxima\", \"Žalgiris\") and the English one if it exists (e.g. \"Gitanas Nausėda\", \"Bank of Lithuania\"); use \"none\" if unsure. Only well-known public figures or organizations, never a private individual or a victim. {\"type\":\"none\"} otherwise (general beats - the image carries it). Whenever a scene is centered on a named company, institution, party, club, city or a named public person you MUST set \"entity\" (not \"none\"). Keep the middle engaged across the WHOLE video, not just the first scene. NEVER invent a number: only use \"stat\" for figures actually stated in the article.\n- hook: most scroll-stopping line in Lithuanian, max 7 words.\n- hashtags: 4-6 Lithuanian hashtags, no spaces (e.g. #lietuva #naujienos).\n\nVISUAL RULES (for every visual.query, in English)\n- FIRST pick the KEY SUBJECT or ACTION of this scene's vo_segment - the one thing the viewer should literally SEE while they hear that line. Then describe an image that clearly SHOWS that exact thing, so the picture matches the spoken words.\n- Be SPECIFIC and literal to the sentence, not abstract filler. Examples: \"prices rise\" -> a shopper staring at a supermarket shelf price tag; \"a new law\" -> a hand stamping an official document in a parliament hall; \"storm\" -> wind bending trees on a Lithuanian village road; \"a win\" -> basketball players celebrating on the court. If a viewer paused on the frame, they should guess the sentence.\n- Set scenes in Lithuania / Northern Europe when relevant (Baltic architecture, old town streets, pine forests, Baltic sea coast, grey autumn light) - never generic American imagery.\n- Each scene visualizes ITS OWN sentence - a clearly DIFFERENT subject and setting every time. Never reuse the same location or motif across scenes.\n- NO readable text, numbers, words, logos, flags with writing, signage or watermarks in the image (we add those). Do NOT depict real people's faces or real company branding/logos.\n- Do NOT draw phone/computer/TV screens showing UI, charts or symbols - the AI renders these as fake gibberish. Show the real-world scene or ACTION instead. Also do NOT depict a specific real building or branded storefront; show a neutral real-world scene or the action.\n- Match the real sentiment of the article - do not show panic or disaster unless the news is genuinely negative. No gore, no injured people.\n- Vertical 9:16, main subject in the lower-middle, clean darker empty space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
+              "content": "=You are a short-form scriptwriter for a Lithuanian-language general news channel (TikTok/Reels). Turn ONE news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. Inside JSON strings never use the ASCII double quote character: write Lithuanian quotes as „ and “ instead.\n\nLANGUAGE\n- voiceover, every vo_segment, on_screen_text, hook, meta.title, center.label and hashtags are in NATURAL SPOKEN LITHUANIAN: the way a young Lithuanian news presenter actually talks. Correct grammar, correct cases and endings, correct diacritics (ą č ę ė į š ų ū ž). Short sentences. No anglicisms, no bureaucratic phrasing, no literal translations from English.\n- Write numbers so they are read correctly aloud in Lithuanian: prefer words for small numbers and keep units spoken (e.g. \"penkiais procentais\", \"du milijonai eurų\", \"trisdešimt metų\"). Use digits only where natural (years, big figures).\n- Names of people and places stay in their Lithuanian form with correct declension.\n- visual.query stays in ENGLISH (the image model works better in English).\n\nRULES\n- voiceover: punchy spoken-word, ~35 words max (~15s total). Strong hook in sentence 1. Plain language, active voice. TONE: a fast, confident, energetic news presenter - urgent but factual; lead with the number or the stakes. No clickbait lies.\n- ACCURACY: use ONLY facts in the article. Never invent numbers, prices, dates, names or quotes. If a figure isn't in the article, don't state it.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + a duration.\n- duration_sec: integer seconds the scene shows. Scene durations MUST sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~5 words, Lithuanian.\n- visual.query: a vivid 1-2 sentence ENGLISH description of an image that clearly SHOWS the key subject of THIS sentence (follow VISUAL RULES).\n- center: per scene, pick what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"635\",\"prefix\":\"\",\"suffix\":\"%\",\"color\":\"red\",\"label\":\"max 5 Lithuanian words\"} for a scene built on ONE striking number (at most 1-2 scenes, most impactful figures only; value = digits only with optional decimal; prefix/suffix are SHORT symbols or units ONLY (€, %, mln., mlrd., tūkst., km, °C, or empty) - NEVER whole words like \"žmonių\" (put those in the label); color \"red\" for a loss/fall/bad, \"green\" for a gain/rise/good, otherwise omit color). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Vardas Pavardė\",\"wiki\":\"Exact lt.wikipedia page title\",\"wiki_en\":\"Exact en.wikipedia page title or none\"} when a specific well-known PUBLIC figure is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Short Name\",\"wiki\":\"Exact lt.wikipedia page title\",\"wiki_en\":\"Exact en.wikipedia page title or none\"} when a specific company, institution, party, club, city or organization is the subject - we fetch its photo/logo from Wikipedia and show it with the name. Give the EXACT Lithuanian Wikipedia page title in the NOMINATIVE case (e.g. \"Gitanas Nausėda\", \"Vilnius\", \"Lietuvos bankas\", \"Maxima\", \"Žalgiris\") and the English one if it exists (e.g. \"Gitanas Nausėda\", \"Bank of Lithuania\"); use \"none\" if unsure. Only well-known public figures or organizations, never a private individual or a victim. {\"type\":\"none\"} otherwise (general beats - the image carries it). Whenever a scene is centered on a named company, institution, party, club, city or a named public person you MUST set \"entity\" (not \"none\"). Keep the middle engaged across the WHOLE video, not just the first scene. NEVER invent a number: only use \"stat\" for figures actually stated in the article.\n- hook: most scroll-stopping line in Lithuanian, max 7 words.\n- hashtags: 4-6 Lithuanian hashtags, no spaces (e.g. #lietuva #naujienos).\n\nVISUAL RULES (for every visual.query, in English)\n- FIRST pick the KEY SUBJECT or ACTION of this scene's vo_segment - the one thing the viewer should literally SEE while they hear that line. Then describe an image that clearly SHOWS that exact thing, so the picture matches the spoken words.\n- Be SPECIFIC and literal to the sentence, not abstract filler. Examples: \"prices rise\" -> a shopper staring at a supermarket shelf price tag; \"a new law\" -> a hand stamping an official document in a parliament hall; \"storm\" -> wind bending trees on a Lithuanian village road; \"a win\" -> basketball players celebrating on the court. If a viewer paused on the frame, they should guess the sentence.\n- Set scenes in Lithuania / Northern Europe when relevant (Baltic architecture, old town streets, pine forests, Baltic sea coast, grey autumn light) - never generic American imagery.\n- Each scene visualizes ITS OWN sentence - a clearly DIFFERENT subject and setting every time. Never reuse the same location or motif across scenes.\n- NO readable text, numbers, words, logos, flags with writing, signage or watermarks in the image (we add those). Do NOT depict real people's faces or real company branding/logos.\n- Do NOT draw phone/computer/TV screens showing UI, charts or symbols - the AI renders these as fake gibberish. Show the real-world scene or ACTION instead. Also do NOT depict a specific real building or branded storefront; show a neutral real-world scene or the action.\n- Match the real sentiment of the article - do not show panic or disaster unless the news is genuinely negative. No gore, no injured people.\n- Vertical 9:16, main subject in the lower-middle, clean darker empty space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
             }
           ]
         },
@@ -48,7 +48,7 @@
         592,
         0
       ],
-      "id": "24d6e451-292d-46d4-858a-1da5545d6a50",
+      "id": "91c9d587-8454-4ac6-a104-e8c748c4c324",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -67,7 +67,7 @@
         896,
         -16
       ],
-      "id": "720a5aa8-610b-4c27-ae2e-4a91b1a7dc52",
+      "id": "4ed761c4-b315-4504-b68c-feef8fe7a78e",
       "name": "Code in JavaScript"
     },
     {
@@ -96,7 +96,7 @@
         1488,
         -128
       ],
-      "id": "b42b8fdd-1d77-41b2-9b2e-547946c44f1d",
+      "id": "87a7bd6c-48db-4a07-b182-e26e3940931b",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -123,9 +123,9 @@
         1088,
         16
       ],
-      "id": "93d73780-ebc7-46af-a56e-9ed28b9f7e6b",
+      "id": "0fd93785-267d-40ef-9824-6c2b1e14ca3e",
       "name": "Send message and wait for response",
-      "webhookId": "634b578d-303f-4cc6-a3e1-1b208fe17f61",
+      "webhookId": "fcf2138d-4986-4019-8847-92189babbd36",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -146,7 +146,7 @@
         1232,
         288
       ],
-      "id": "31bbfbd6-89e2-42bc-ab1f-343ae3fe1cf6",
+      "id": "52812847-dbab-44e0-a218-6dd21caa7df4",
       "name": "Save Image"
     },
     {
@@ -191,7 +191,7 @@
         400,
         272
       ],
-      "id": "071bc8e0-dbe3-4a27-a96d-e68325595667",
+      "id": "6c9dbf66-142f-4c5b-93f0-de994e703f55",
       "name": "Image - Request"
     },
     {
@@ -215,7 +215,7 @@
         608,
         288
       ],
-      "id": "1d864052-a105-4d29-8147-3cee1e04985f",
+      "id": "dfce7e1b-84f4-4b5b-85dc-498dc0a84e3c",
       "name": "Image - Get"
     },
     {
@@ -235,7 +235,7 @@
         1072,
         288
       ],
-      "id": "1460a29b-b674-491f-a7c4-ddb48a0441ab",
+      "id": "f3aaa9a8-a79c-4ad8-98ce-5cc73636f937",
       "name": "Image - Download"
     },
     {
@@ -266,7 +266,7 @@
         208,
         0
       ],
-      "id": "ed77eae4-dac4-4757-a184-84e68f1ecb56",
+      "id": "1b88e296-2687-4204-87bc-698a29284c90",
       "name": "Article - Fetch",
       "retryOnFail": true,
       "maxTries": 3,
@@ -286,7 +286,7 @@
         1648,
         -128
       ],
-      "id": "16f80028-79de-4389-90da-72d7820a00a9",
+      "id": "41c9483a-aad1-40c0-83c1-84cd92c3d83a",
       "name": "Save Voice"
     },
     {
@@ -299,7 +299,7 @@
         1584,
         288
       ],
-      "id": "efe68dda-93c9-44c7-97d2-fbf253cbfa0b",
+      "id": "af529d4b-4098-40c6-a5b2-026576eef12e",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -334,7 +334,7 @@
         800,
         304
       ],
-      "id": "92319e61-91dd-45f0-a3c0-dcb27e4ee89e",
+      "id": "8f81d5b2-b085-4aca-8556-6dcf6460b54c",
       "name": "If"
     },
     {
@@ -347,9 +347,9 @@
         976,
         432
       ],
-      "id": "3fe8c520-72cd-4f15-8125-aebaaa611355",
+      "id": "54c1cdf0-ac21-4755-96d1-0ee26fb778b6",
       "name": "Wait",
-      "webhookId": "2d7ecf2a-a44f-468a-8846-812e43459681"
+      "webhookId": "4dbb5d63-79df-4676-bb62-892e9c7512fc"
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
         1264,
         32
       ],
-      "id": "887c6171-77bb-4d61-9f5f-c86d3fdd60af",
+      "id": "7bfffd64-91fc-4eb0-a3d6-1d50e3ac6742",
       "name": "Approved?"
     },
     {
@@ -395,7 +395,7 @@
         1360,
         288
       ],
-      "id": "81f52252-6f9d-49af-b46b-fff8a0891e6e",
+      "id": "d836f82c-7f09-47d6-9f10-38a3e67c7438",
       "name": "Split Scenes"
     },
     {
@@ -421,7 +421,7 @@
         },
         "options": {}
       },
-      "id": "f3419bd2-b2bb-4a0e-a336-94cf9055d659",
+      "id": "a3b68f09-7536-44ad-be1e-be6eb74b461f",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -441,7 +441,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "46bc3c36-aaf0-43fd-b137-d2aa64d02811",
+      "id": "4b924127-1eaa-4377-90d6-6e3f3e5d6f3f",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +460,7 @@
           ]
         }
       },
-      "id": "c92be264-2308-4362-b1bb-71d280bc2df4",
+      "id": "c1bec9ab-3395-499a-af0b-75ce96f484c5",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -474,7 +474,7 @@
       "parameters": {
         "jsCode": "const srcs=[['Delfi','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json).filter(j=>j&&!j.error);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nif(!all.length) throw new Error('Combine Feeds: no RSS stories collected');\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
       },
-      "id": "e9ec6b46-f0a3-4ce4-a4f1-a8e9ab4ffc93",
+      "id": "151c2ea7-e57c-46f2-82cf-9b4535e4dd25",
       "name": "Combine Feeds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -495,14 +495,14 @@
         "messages": {
           "values": [
             {
-              "content": "=You are the editor of a Lithuanian general-news TikTok channel. Choose the SINGLE best story from the candidates for a 15-second vertical video for a Lithuanian audience.\n\nHARD RULES\n- Prefer concrete, surprising, number-driven, talked-about news: politics decisions, economy and prices, big events in Lithuania, science/tech, sport results, weather extremes, things people will share.\n- AVOID graphic tragedies, deaths of private persons, crime details, accidents with victims, suicide, violence against children, and anything that cannot be told accurately in 15 seconds.\n- Avoid pure opinion columns, horoscopes, recipes, sponsored or thin posts, live blogs, and paywalled teasers.\n- Prefer stories about Lithuania or directly affecting Lithuanians over distant foreign news.\n\nOutput ONLY valid JSON, no markdown, no code fences:\n{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\nCANDIDATES\n{{ $json.candidatesText }}"
+              "content": "=You are the editor of a Lithuanian general-news TikTok channel. Choose the SINGLE best story from the candidates for a 15-second vertical video for a Lithuanian audience.\n\nHARD RULES\n- Prefer concrete, surprising, number-driven, talked-about news: politics decisions, economy and prices, big events in Lithuania, science/tech, sport results, weather extremes, things people will share.\n- AVOID graphic tragedies, deaths of private persons, crime details, accidents with victims, suicide, violence against children, and anything that cannot be told accurately in 15 seconds.\n- Avoid pure opinion columns, horoscopes, recipes, sponsored or thin posts, live blogs, and paywalled teasers.\n- Prefer stories about Lithuania or directly affecting Lithuanians over distant foreign news.\n\n- Prefer not to pick obituaries or death announcements unless the story is clearly the day's biggest news.\n\nOutput ONLY valid JSON, no markdown, no code fences. Inside JSON strings never use the ASCII double quote character; write Lithuanian quotes as „ and “ instead.\n{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\nCANDIDATES\n{{ $json.candidatesText }}"
             }
           ]
         },
         "simplify": false,
         "options": {}
       },
-      "id": "83f91780-fb6f-4a7e-80aa-1592e1067045",
+      "id": "9556a73a-efd0-4a2a-844a-8e646a1ca9c1",
       "name": "Select Story",
       "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
@@ -519,9 +519,9 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw=$input.first().json.content[0].text;\nconst s=raw.indexOf('{'); const e=raw.lastIndexOf('}');\nconst sel=JSON.parse(raw.slice(s,e+1));\nreturn [{ json: { link: sel.link, title: sel.title||'', source_url: sel.link, reason: sel.reason||'' } }];"
+        "jsCode": "const raw = $input.first().json.content[0].text;\nlet sel = null;\ntry { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(raw.slice(s, e + 1)); } catch (err) { sel = null; }\nconst cands = ($('Combine Feeds').first().json.candidates) || [];\nif (!sel || !sel.link) {\n  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n  const link = m[1] || m[0];\n  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n  sel = { link, title: '', reason: rm ? rm[1] : '' };\n}\nconst hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\nif (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\nreturn [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];"
       },
-      "id": "0ae605b2-c253-48ba-acaf-c6ea0218e9c4",
+      "id": "8912321b-47fc-4dca-b290-541319d5274f",
       "name": "Parse Selection",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -535,7 +535,7 @@
         "url": "https://feed.delfi.lt/v2/articles/6?format=rss",
         "options": {}
       },
-      "id": "99383715-20ae-4e13-82db-98479916ecc1",
+      "id": "2a275e5b-4162-4b1e-b88d-911e5381bc2b",
       "name": "RSS A",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -554,7 +554,7 @@
         "url": "https://www.15min.lt/rss",
         "options": {}
       },
-      "id": "7a354d3f-8049-4a8e-adde-3c60587059ec",
+      "id": "ef28189c-23c0-4460-9053-a76bb91a00b2",
       "name": "RSS B",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -573,7 +573,7 @@
         "url": "https://www.lrytas.lt/rss",
         "options": {}
       },
-      "id": "53d15712-892c-4aea-ab17-8941dac8301c",
+      "id": "895d26b6-c141-42e1-8701-eeaaa186d115",
       "name": "RSS C",
       "type": "n8n-nodes-base.rssFeedRead",
       "typeVersion": 1.1,
@@ -600,7 +600,7 @@
         1804,
         288
       ],
-      "id": "303861ba-961c-4fb8-a287-1b06ba301ee8",
+      "id": "0fd81e3e-a357-4415-8c7d-7a6b1ac5b9c3",
       "name": "Save Job"
     },
     {
@@ -613,7 +613,7 @@
         -816,
         424
       ],
-      "id": "ec1bc0c9-d3a4-4907-b188-245cb35d4b50",
+      "id": "ef8f8341-997e-42c8-8299-92b2b8f3f657",
       "name": "Run Now (CLI)"
     }
   ],

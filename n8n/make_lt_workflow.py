@@ -80,9 +80,29 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "violence against children, and anything that cannot be told accurately in 15 seconds.\n"
     "- Avoid pure opinion columns, horoscopes, recipes, sponsored or thin posts, live blogs, and paywalled teasers.\n"
     "- Prefer stories about Lithuania or directly affecting Lithuanians over distant foreign news.\n\n"
-    "Output ONLY valid JSON, no markdown, no code fences:\n"
+    "- Prefer not to pick obituaries or death announcements unless the story is clearly the day's biggest news.\n\n"
+    "Output ONLY valid JSON, no markdown, no code fences. Inside JSON strings never use the ASCII double quote character; "
+    "write Lithuanian quotes as „ and “ instead.\n"
     "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\n"
     "CANDIDATES\n{{ $json.candidatesText }}")
+
+# ---- 4b) Parse Selection: Lithuanian titles contain „ ... " quotes that break naive JSON;
+#          recover the link with a regex and take the title from the candidates list.
+by_name["Parse Selection"]["parameters"]["jsCode"] = (
+    "const raw = $input.first().json.content[0].text;\n"
+    "let sel = null;\n"
+    "try { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(raw.slice(s, e + 1)); } catch (err) { sel = null; }\n"
+    "const cands = ($('Combine Feeds').first().json.candidates) || [];\n"
+    "if (!sel || !sel.link) {\n"
+    "  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n"
+    "  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n"
+    "  const link = m[1] || m[0];\n"
+    "  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n"
+    "  sel = { link, title: '', reason: rm ? rm[1] : '' };\n"
+    "}\n"
+    "const hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\n"
+    "if (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\n"
+    "return [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];")
 
 # ---- 5) Script prompt: same schema, Lithuanian voiceover/text, English visual.query, no crypto fields
 msg = by_name["Message a model"]["parameters"]["messages"]["values"][0]
@@ -90,7 +110,8 @@ article_expr = msg["content"].split("ARTICLE\n", 1)[1]        # keep the RSS-fal
 msg["content"] = (
     "=You are a short-form scriptwriter for a Lithuanian-language general news channel (TikTok/Reels). "
     "Turn ONE news article into a 15-second vertical video plan.\n\n"
-    "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON.\n\n"
+    "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. "
+    "Inside JSON strings never use the ASCII double quote character: write Lithuanian quotes as „ and “ instead.\n\n"
     "LANGUAGE\n"
     "- voiceover, every vo_segment, on_screen_text, hook, meta.title, center.label and hashtags are in NATURAL SPOKEN LITHUANIAN: "
     "the way a young Lithuanian news presenter actually talks. Correct grammar, correct cases and endings, correct diacritics "
