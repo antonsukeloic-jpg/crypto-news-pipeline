@@ -107,6 +107,60 @@ w["nodes"].append({
 })
 w["connections"]["Run Now (CLI)"] = {"main": [[{"node": "RSS A", "type": "main", "index": 0}]]}
 
+# 5) Telegram "/run" command: start the pipeline from the phone.
+#    Only messages from the owner's chat that start with /run pass the gate.
+#    The hourly schedule node is switched off so publishing doesn't start hourly runs.
+TG_CRED = {"telegramApi": {"id": "MsHdBVyurDnoXcyo", "name": "Telegram account"}}
+OWNER_CHAT = "694708370"
+sched["disabled"] = True
+x, y = sched["position"]
+w["nodes"] += [
+    {
+        "parameters": {"updates": ["message"], "additionalFields": {}},
+        "type": "n8n-nodes-base.telegramTrigger", "typeVersion": 1.2,
+        "position": [x - 440, y + 420], "id": str(uuid.uuid4()),
+        "name": "Telegram Command", "webhookId": str(uuid.uuid4()),
+        "credentials": TG_CRED,
+    },
+    {
+        "parameters": {
+            "conditions": {
+                "options": {"caseSensitive": False, "leftValue": "", "typeValidation": "loose", "version": 2},
+                "conditions": [
+                    {"id": str(uuid.uuid4()),
+                     "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
+                     "rightValue": OWNER_CHAT,
+                     "operator": {"type": "string", "operation": "equals"}},
+                    {"id": str(uuid.uuid4()),
+                     "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
+                     "rightValue": "/run",
+                     "operator": {"type": "string", "operation": "startsWith"}},
+                ],
+                "combinator": "and",
+            },
+            "options": {},
+        },
+        "type": "n8n-nodes-base.if", "typeVersion": 2.2,
+        "position": [x - 220, y + 420], "id": str(uuid.uuid4()), "name": "Is /run from me?",
+    },
+    {
+        "parameters": {
+            "chatId": OWNER_CHAT,
+            "text": "🎬 Got it — making a new video. It will arrive here in about 3–5 minutes.",
+            "additionalFields": {"appendAttribution": False},
+        },
+        "type": "n8n-nodes-base.telegram", "typeVersion": 1.2,
+        "position": [x, y + 520], "id": str(uuid.uuid4()), "name": "Reply: starting",
+        "credentials": TG_CRED,
+    },
+]
+w["connections"]["Telegram Command"] = {"main": [[{"node": "Is /run from me?", "type": "main", "index": 0}]]}
+w["connections"]["Is /run from me?"] = {"main": [
+    [{"node": "Reply: starting", "type": "main", "index": 0},
+     {"node": "RSS A", "type": "main", "index": 0}],
+    [],
+]}
+
 assert not any(n["type"].endswith("googleDrive") for n in w["nodes"]), "Drive node left"
 w["name"] = "Crypto Video Pipeline"
 json.dump(w, open(DST, "w"), indent=2)

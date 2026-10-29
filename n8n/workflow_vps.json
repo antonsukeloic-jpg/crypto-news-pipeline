@@ -445,7 +445,8 @@
       "position": [
         -816,
         224
-      ]
+      ],
+      "disabled": true
     },
     {
       "parameters": {
@@ -568,7 +569,7 @@
         1804,
         288
       ],
-      "id": "5b394231-13a4-4961-8ab5-e0ebab6fcc9b",
+      "id": "052ad73b-5b1b-402d-81b8-4d9558f68616",
       "name": "Save Job"
     },
     {
@@ -581,8 +582,96 @@
         -816,
         424
       ],
-      "id": "a1cf219d-0761-497b-857f-ddbccd1ef142",
+      "id": "a2cf4ad5-9eb5-4204-b6db-4abc5b5a2b9a",
       "name": "Run Now (CLI)"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1256,
+        644
+      ],
+      "id": "aac177b5-7e22-4cfb-9017-6bf29822e894",
+      "name": "Telegram Command",
+      "webhookId": "3b9b86ed-0eed-4429-b42c-22c31e0d9a6f",
+      "credentials": {
+        "telegramApi": {
+          "id": "MsHdBVyurDnoXcyo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "12d9b3dc-d952-4c32-8065-0cc2cf978f7a",
+              "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
+              "rightValue": "694708370",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "0ef50b21-def4-4146-a1d4-8f255dccbc18",
+              "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
+              "rightValue": "/run",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1036,
+        644
+      ],
+      "id": "cce735a7-8135-4672-972d-113def97a355",
+      "name": "Is /run from me?"
+    },
+    {
+      "parameters": {
+        "chatId": "694708370",
+        "text": "\ud83c\udfac Got it \u2014 making a new video. It will arrive here in about 3\u20135 minutes.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -816,
+        744
+      ],
+      "id": "9881db7d-8495-4b69-9e21-635d634a01cc",
+      "name": "Reply: starting",
+      "credentials": {
+        "telegramApi": {
+          "id": "MsHdBVyurDnoXcyo",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "connections": {
@@ -878,6 +967,34 @@
             "index": 0
           }
         ]
+      ]
+    },
+    "Telegram Command": {
+      "main": [
+        [
+          {
+            "node": "Is /run from me?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is /run from me?": {
+      "main": [
+        [
+          {
+            "node": "Reply: starting",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "RSS A",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
       ]
     }
   },

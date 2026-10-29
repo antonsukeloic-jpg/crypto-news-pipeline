@@ -45,6 +45,15 @@ $NX import:workflow --input=/data/shared/wf.json && say "WORKFLOW=imported $(pyt
 python3 -c "import json;print(json.load(open('$S/wf.json')).get('id') or '')" > $ST/wf_id
 rm -f $S/wf.json $S/all_wf.json
 
+# 3b) publish (makes the Telegram /run trigger live; hourly node stays disabled),
+#     then restart so n8n registers the Telegram webhook
+$NX publish:workflow --id="$(cat $ST/wf_id)" && say "PUBLISHED=yes" || say "PUBLISHED=FAILED"
+docker compose restart n8n
+for i in $(seq 1 30); do docker compose exec -T n8n n8n --version >/dev/null 2>&1 && break; sleep 2; done
+sleep 8
+. $ST/telegram.env 2>/dev/null
+say "TG_WEBHOOK=$(curl -s https://api.telegram.org/bot$TG_TOKEN/getWebhookInfo | python3 -c 'import json,sys;d=json.load(sys.stdin)["result"];print(d.get("url","")[:40] or "none", d.get("last_error_message",""))')"
+
 # 4) Telegram bot token from the migrated n8n credential (never printed)
 $NX export:credentials --all --decrypted --output=/data/shared/c.json
 python3 - <<'EOF'
