@@ -26,8 +26,20 @@ if ! docker compose exec -T n8n test -d /home/node/.n8n/nodes/node_modules/@elev
 fi
 say "ELEVENLABS_NODE=$(docker compose exec -T n8n test -d /home/node/.n8n/nodes/node_modules/@elevenlabs/n8n-nodes-elevenlabs && echo ok || echo missing)"
 
-# 3) build the local-disk workflow and overwrite the existing one (same id)
-python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf.json
+# 3) LT News Pipeline: a SEPARATE workflow (own fixed id), built from the crypto
+#    VPS workflow. Imported first so the crypto router can point at its id.
+#    It has no Telegram trigger and is not published: the crypto workflow's
+#    /lt command and `n8n execute --id` start it.
+python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf_base.json
+python3 $REPO/n8n/make_lt_workflow.py $S/wf_base.json $S/wf_lt.json
+LT_ID=$(python3 -c "import json;print(json.load(open('$S/wf_lt.json'))['id'])")
+chown 1000:1000 $S/wf_lt.json
+$NX import:workflow --input=/data/shared/wf_lt.json && say "LT_WORKFLOW=imported $LT_ID" || say "LT_WORKFLOW=IMPORT_FAILED"
+echo "$LT_ID" > $ST/lt_wf_id
+rm -f $S/wf_base.json $S/wf_lt.json
+
+# 3a) build the local-disk crypto workflow (+ /lt router) and overwrite the existing one (same id)
+python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf.json "$LT_ID"
 $NX export:workflow --all --output=/data/shared/all_wf.json
 python3 - <<'EOF'
 import json
@@ -38,7 +50,7 @@ w = json.load(open('/root/shared/wf.json'))
 ids = [x['id'] for x in a if x.get('name') == 'Crypto Video Pipeline']
 if ids: w['id'] = ids[0]
 json.dump(w, open('/root/shared/wf.json', 'w'))
-print('WF_IDS', ids)
+print('WF_IDS', ids, 'LT_IDS', [x['id'] for x in a if x.get('name') == 'LT News Pipeline'])
 EOF
 chown 1000:1000 $S/wf.json
 $NX import:workflow --input=/data/shared/wf.json && say "WORKFLOW=imported $(python3 -c "import json;print(json.load(open('$S/wf.json')).get('id'))")" || say "WORKFLOW=IMPORT_FAILED"

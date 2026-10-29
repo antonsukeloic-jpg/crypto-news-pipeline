@@ -1,0 +1,924 @@
+{
+  "name": "LT News Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "articleText",
+              "cssSelector": "body"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ceb68d7c-c371-4c79-b329-2fba48103d1d",
+      "name": "HTML",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a short-form scriptwriter for a Lithuanian-language general news channel (TikTok/Reels). Turn ONE news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON.\n\nLANGUAGE\n- voiceover, every vo_segment, on_screen_text, hook, meta.title, center.label and hashtags are in NATURAL SPOKEN LITHUANIAN: the way a young Lithuanian news presenter actually talks. Correct grammar, correct cases and endings, correct diacritics (ą č ę ė į š ų ū ž). Short sentences. No anglicisms, no bureaucratic phrasing, no literal translations from English.\n- Write numbers so they are read correctly aloud in Lithuanian: prefer words for small numbers and keep units spoken (e.g. \"penkiais procentais\", \"du milijonai eurų\", \"trisdešimt metų\"). Use digits only where natural (years, big figures).\n- Names of people and places stay in their Lithuanian form with correct declension.\n- visual.query stays in ENGLISH (the image model works better in English).\n\nRULES\n- voiceover: punchy spoken-word, ~35 words max (~15s total). Strong hook in sentence 1. Plain language, active voice. TONE: a fast, confident, energetic news presenter - urgent but factual; lead with the number or the stakes. No clickbait lies.\n- ACCURACY: use ONLY facts in the article. Never invent numbers, prices, dates, names or quotes. If a figure isn't in the article, don't state it.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + a duration.\n- duration_sec: integer seconds the scene shows. Scene durations MUST sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~5 words, Lithuanian.\n- visual.query: a vivid 1-2 sentence ENGLISH description of an image that clearly SHOWS the key subject of THIS sentence (follow VISUAL RULES).\n- center: per scene, pick what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"635\",\"prefix\":\"\",\"suffix\":\"%\",\"color\":\"red\",\"label\":\"max 5 Lithuanian words\"} for a scene built on ONE striking number (at most 1-2 scenes, most impactful figures only; value = digits only with optional decimal; prefix/suffix are SHORT symbols or units ONLY (€, %, mln., mlrd., tūkst., km, °C, or empty) - NEVER whole words like \"žmonių\" (put those in the label); color \"red\" for a loss/fall/bad, \"green\" for a gain/rise/good, otherwise omit color). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Vardas Pavardė\",\"wiki\":\"Exact lt.wikipedia page title\",\"wiki_en\":\"Exact en.wikipedia page title or none\"} when a specific well-known PUBLIC figure is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Short Name\",\"wiki\":\"Exact lt.wikipedia page title\",\"wiki_en\":\"Exact en.wikipedia page title or none\"} when a specific company, institution, party, club, city or organization is the subject - we fetch its photo/logo from Wikipedia and show it with the name. Give the EXACT Lithuanian Wikipedia page title in the NOMINATIVE case (e.g. \"Gitanas Nausėda\", \"Vilnius\", \"Lietuvos bankas\", \"Maxima\", \"Žalgiris\") and the English one if it exists (e.g. \"Gitanas Nausėda\", \"Bank of Lithuania\"); use \"none\" if unsure. Only well-known public figures or organizations, never a private individual or a victim. {\"type\":\"none\"} otherwise (general beats - the image carries it). Whenever a scene is centered on a named company, institution, party, club, city or a named public person you MUST set \"entity\" (not \"none\"). Keep the middle engaged across the WHOLE video, not just the first scene. NEVER invent a number: only use \"stat\" for figures actually stated in the article.\n- hook: most scroll-stopping line in Lithuanian, max 7 words.\n- hashtags: 4-6 Lithuanian hashtags, no spaces (e.g. #lietuva #naujienos).\n\nVISUAL RULES (for every visual.query, in English)\n- FIRST pick the KEY SUBJECT or ACTION of this scene's vo_segment - the one thing the viewer should literally SEE while they hear that line. Then describe an image that clearly SHOWS that exact thing, so the picture matches the spoken words.\n- Be SPECIFIC and literal to the sentence, not abstract filler. Examples: \"prices rise\" -> a shopper staring at a supermarket shelf price tag; \"a new law\" -> a hand stamping an official document in a parliament hall; \"storm\" -> wind bending trees on a Lithuanian village road; \"a win\" -> basketball players celebrating on the court. If a viewer paused on the frame, they should guess the sentence.\n- Set scenes in Lithuania / Northern Europe when relevant (Baltic architecture, old town streets, pine forests, Baltic sea coast, grey autumn light) - never generic American imagery.\n- Each scene visualizes ITS OWN sentence - a clearly DIFFERENT subject and setting every time. Never reuse the same location or motif across scenes.\n- NO readable text, numbers, words, logos, flags with writing, signage or watermarks in the image (we add those). Do NOT depict real people's faces or real company branding/logos.\n- Do NOT draw phone/computer/TV screens showing UI, charts or symbols - the AI renders these as fake gibberish. Show the real-world scene or ACTION instead. Also do NOT depict a specific real building or branded storefront; show a neutral real-world scene or the action.\n- Match the real sentiment of the article - do not show panic or disaster unless the news is genuinely negative. No gore, no injured people.\n- Vertical 9:16, main subject in the lower-middle, clean darker empty space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "d86acf53-9cde-4094-a33b-59320c8a5352",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "3pYNdkLM3jdNYjyM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst data = JSON.parse(raw.slice(s0, e0 + 1));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"Lietuvos naujienos\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"Lietuvos naujienos\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"lt_img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.voiceFile = \"lt_voice_\"+ts+\".mp3\";\ndata.outputFile = \"lt_video_\"+ts+\".mp4\";\ndata.jobFile = \"lt_job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = \"\";\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en')); }\n  try {\n    const u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en')); }\n  try {\n    const u1 = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS).concat([\"Sausio\", \"Sausis\", \"Vasario\", \"Vasaris\", \"Kovo\", \"Kovas\", \"Balandžio\", \"Balandis\", \"Gegužės\", \"Gegužė\", \"Birželio\", \"Birželis\", \"Liepos\", \"Liepa\", \"Rugpjūčio\", \"Rugpjūtis\", \"Rugsėjo\", \"Rugsėjis\", \"Spalio\", \"Spalis\", \"Lapkričio\", \"Lapkritis\", \"Gruodžio\", \"Gruodis\", \"Pirmadienį\", \"Pirmadienis\", \"Antradienį\", \"Antradienis\", \"Trečiadienį\", \"Trečiadienis\", \"Ketvirtadienį\", \"Ketvirtadienis\", \"Penktadienį\", \"Penktadienis\", \"Šeštadienį\", \"Šeštadienis\", \"Sekmadienį\", \"Sekmadienis\", \"Lietuva\", \"Lietuvos\", \"Lietuvoje\", \"Lietuvai\", \"Lietuvą\", \"Lietuviai\", \"Lietuvių\", \"Lietuviams\", \"Lietuvis\", \"Lietuvė\", \"Vilnius\", \"Vilniuje\", \"Vilniaus\", \"Vilnių\", \"Kaunas\", \"Kaune\", \"Kauno\", \"Kauną\", \"Klaipėda\", \"Klaipėdoje\", \"Klaipėdos\", \"Šiauliai\", \"Šiauliuose\", \"Panevėžys\", \"Panevėžyje\", \"Europa\", \"Europos\", \"Europoje\", \"Europą\", \"Rusija\", \"Rusijos\", \"Rusijoje\", \"Baltarusija\", \"Baltarusijos\", \"Latvija\", \"Latvijos\", \"Lenkija\", \"Lenkijos\", \"Ukraina\", \"Ukrainos\", \"Ukrainoje\", \"JAV\", \"ES\", \"NATO\", \"Vyriausybė\", \"Vyriausybės\", \"Seimas\", \"Seimo\", \"Seime\", \"Prezidentas\", \"Prezidento\", \"Ministras\", \"Ministrė\", \"Ministerija\", \"Policija\", \"Policijos\", \"Teismas\", \"Teismo\", \"Savivaldybė\", \"Savivaldybės\", \"Euras\", \"Eurų\", \"Eurai\", \"Eurais\", \"Šiandien\", \"Vakar\", \"Rytoj\", \"Šiąnakt\", \"Šįryt\", \"Tačiau\", \"Todėl\", \"Taip\", \"Dabar\", \"Jau\", \"Dar\", \"Bet\", \"Ir\", \"Kai\", \"Nes\", \"Kad\", \"Jis\", \"Ji\", \"Jie\", \"Jos\", \"Mes\", \"Jūs\", \"Tai\", \"Tas\", \"Ta\", \"Tie\", \"Tos\", \"Čia\", \"Ten\", \"Tik\", \"Net\", \"Pagal\", \"Anot\", \"Po\", \"Per\", \"Nuo\", \"Iki\", \"Prie\", \"Apie\", \"Dėl\", \"Su\", \"Be\", \"Už\", \"Ant\", \"Iš\", \"Į\", \"O\", \"Kaip\", \"Kodėl\", \"Kiek\", \"Kur\", \"Kas\", \"Jei\", \"Jeigu\", \"Nors\", \"Milijonas\", \"Milijonai\", \"Milijonų\", \"Milijardas\", \"Milijardų\", \"Tūkstančiai\", \"Tūkstančių\", \"Procentai\", \"Procentų\", \"Naujienos\", \"Delfi\", \"Lrytas\", \"BNS\", \"ELTA\", \"LRT\", \"Pranešama\", \"Pranešė\", \"Teigiama\", \"Sako\", \"Teigia\", \"Skelbia\"]));\nconst looksPerson = (n) => /^\\p{Lu}\\p{Ll}+ \\p{Lu}\\p{Ll}+$/u.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu; while ((m = reSingle.exec(vo))) add(m[1]);\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    const enT = (c.wiki_en && c.wiki_en !== 'none') ? c.wiki_en : '';\n    let img = isPerson ? (await wikiImage(title) || (enT ? await wikiImage(enT, 'en') : null) || (c.name && c.name !== title ? await wikiImage(c.name) : null))\n                       : (await resolveNonPerson(title) || (enT ? (await companyLogo(enT, 'en') || await wikiImage(enT, 'en')) : null));\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", channel:\"lt\", voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "9f26763f-c24a-46b5-a665-78f204c46ad4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "mode": "id",
+          "value": "8crourjnsg8XHpBXQXHa"
+        },
+        "text": "={{ $('Code in JavaScript').item.json.voiceover }}",
+        "additionalOptions": {
+          "model": {
+            "__rl": true,
+            "value": "eleven_v3",
+            "mode": "list",
+            "cachedResultName": "Eleven v3"
+          },
+          "voiceSettings": "{\n  \"stability\": 0.6,\n  \"similarity_boost\": 0.9,\n  \"style\": 0.2,\n  \"use_speaker_boost\": true,\n  \"speed\": 1.0\n}"
+        },
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -128
+      ],
+      "id": "3caa8980-37d9-4f6c-8dd7-673563a30b53",
+      "name": "Convert text to speech",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "lZ8pCRfAtMEwJkMM",
+          "name": "ElevenLabs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "694708370",
+        "message": "={{ $('Code in JavaScript').item.json.script_text }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        16
+      ],
+      "id": "46b10629-7bb4-4b32-84ce-a2a625fb9b9b",
+      "name": "Send message and wait for response",
+      "webhookId": "d4da0720-bf04-4bd1-afaa-ba4f7adde112",
+      "credentials": {
+        "telegramApi": {
+          "id": "MsHdBVyurDnoXcyo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/assets/{{ $('Split Scenes').item.json.imageFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        288
+      ],
+      "id": "fc863c87-5de5-4ed7-b078-63025c8bb5a3",
+      "name": "Save Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://platform.higgsfield.ai/higgsfield-ai/soul/standard",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 72afeec8-299d-45ff-87c5-2ffc4e2c1621:4b7d57d958299b7818787cfc6cbf2c846c27706447beb66b53e7a4f166381a01"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.image_prompt }}"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "9:16"
+            },
+            {
+              "name": "resolution",
+              "value": "720p"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        272
+      ],
+      "id": "baf2e861-304b-4ee4-801a-c40c796de427",
+      "name": "Image - Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.status_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 72afeec8-299d-45ff-87c5-2ffc4e2c1621:4b7d57d958299b7818787cfc6cbf2c846c27706447beb66b53e7a4f166381a01"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        608,
+        288
+      ],
+      "id": "eee5aa17-f3be-42c0-82ff-7a5c26251535",
+      "name": "Image - Get"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Image - Get').item.json.images[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1072,
+        288
+      ],
+      "id": "2f5454f4-6d7b-4116-b362-9b0a1fde345d",
+      "name": "Image - Download"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0eb3c8f7-efe9-4b64-a3aa-653b93d28f19",
+      "name": "Article - Fetch",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/assets/{{ $('Code in JavaScript').first().json.voiceFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -128
+      ],
+      "id": "2ca1a4f6-a950-4e5c-be21-f3cef9ae5db1",
+      "name": "Save Voice"
+    },
+    {
+      "parameters": {
+        "jsCode": "const txt = $('Add Captions').first().json.job_json;\nconst name = $('Code in JavaScript').first().json.jobFile;\nconst bin = await this.helpers.prepareBinaryData(Buffer.from(txt, 'utf8'), name, 'application/json');\nreturn [{ json: { jobFile: name }, binary: { data: bin } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        288
+      ],
+      "id": "d4f03489-3eae-42ac-880f-d6f532384f45",
+      "name": "Make Job File",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c6b32b51-e5c9-488c-9843-5c420e0820db",
+              "leftValue": "={{  $json.status  }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        304
+      ],
+      "id": "0ba7b4e6-5848-43fb-bbfa-5ececba55c83",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        432
+      ],
+      "id": "ea6aec4d-465d-4d8c-8cc9-ddf4673f54a3",
+      "name": "Wait",
+      "webhookId": "f6b0fa85-3563-433d-9319-2617c8c2acaf"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd3e9a8e-b8a4-469d-8cbf-e03c85ba7575",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        32
+      ],
+      "id": "d73f10f4-98be-4348-b794-8b58c94ea7e6",
+      "name": "Approved?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const STYLE=\" Style: cinematic editorial news photography, photorealistic, natural Northern European light, shallow depth of field, rich but realistic colours, high detail, dramatic but believable. Vertical 9:16. No text, no numbers, no logos, no flags with writing, no watermark.\";\nreturn $('Code in JavaScript').first().json.scenes.map(function(s){ s.image_prompt=(s.image_prompt||'')+STYLE; return { json: s }; });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        288
+      ],
+      "id": "1156e40d-d2d4-4f9b-a421-1758a87a0ccc",
+      "name": "Split Scenes"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/forced-alignment",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Code in JavaScript').item.json.voiceover }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "54e06a88-7eb1-48a5-ac2f-7372f3231799",
+      "name": "Align",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1696,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Ail8NJx7E0A34ghp",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
+      },
+      "id": "a0ab1e0d-3212-4369-88f1-09ca27dcab92",
+      "name": "Add Captions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "0366b5cf-a46b-483e-933c-776730b46a4f",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -816,
+        224
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const srcs=[['Delfi','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json).filter(j=>j&&!j.error);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nif(!all.length) throw new Error('Combine Feeds: no RSS stories collected');\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
+      },
+      "id": "4481b452-5fd0-402c-a120-95b55f4a53e0",
+      "name": "Combine Feeds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        208
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the editor of a Lithuanian general-news TikTok channel. Choose the SINGLE best story from the candidates for a 15-second vertical video for a Lithuanian audience.\n\nHARD RULES\n- Prefer concrete, surprising, number-driven, talked-about news: politics decisions, economy and prices, big events in Lithuania, science/tech, sport results, weather extremes, things people will share.\n- AVOID graphic tragedies, deaths of private persons, crime details, accidents with victims, suicide, violence against children, and anything that cannot be told accurately in 15 seconds.\n- Avoid pure opinion columns, horoscopes, recipes, sponsored or thin posts, live blogs, and paywalled teasers.\n- Prefer stories about Lithuania or directly affecting Lithuanians over distant foreign news.\n\nOutput ONLY valid JSON, no markdown, no code fences:\n{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\nCANDIDATES\n{{ $json.candidatesText }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {}
+      },
+      "id": "7c70adff-5e41-4a9c-bc0d-5c4ccff4b186",
+      "name": "Select Story",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        208
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "3pYNdkLM3jdNYjyM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw=$input.first().json.content[0].text;\nconst s=raw.indexOf('{'); const e=raw.lastIndexOf('}');\nconst sel=JSON.parse(raw.slice(s,e+1));\nreturn [{ json: { link: sel.link, title: sel.title||'', source_url: sel.link, reason: sel.reason||'' } }];"
+      },
+      "id": "a199b62d-787a-4e9d-93f5-25f1c54b184e",
+      "name": "Parse Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.delfi.lt/rss/feeds/daily.xml",
+        "options": {}
+      },
+      "id": "fbc2f176-20c6-49eb-845a-4bf02eed4cd1",
+      "name": "RSS A",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        0
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "url": "https://www.15min.lt/rss",
+        "options": {}
+      },
+      "id": "a0e1a52f-42ef-462a-bb96-656192d5a076",
+      "name": "RSS B",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        208
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "url": "https://www.lrytas.lt/rss",
+        "options": {}
+      },
+      "id": "a67baf20-3195-432c-86fd-f57f00563ce7",
+      "name": "RSS C",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        400
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/jobs/{{ $json.jobFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1804,
+        288
+      ],
+      "id": "5185012f-d8fc-41bc-b8b6-b39563e38f73",
+      "name": "Save Job"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        424
+      ],
+      "id": "1fa18719-6c0b-4505-8758-d0b2a5f1d82a",
+      "name": "Run Now (CLI)"
+    }
+  ],
+  "connections": {
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech": {
+      "main": [
+        [
+          {
+            "node": "Align",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Request": {
+      "main": [
+        [
+          {
+            "node": "Image - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Get": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Download": {
+      "main": [
+        [
+          {
+            "node": "Save Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article - Fetch": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Image - Download",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Image - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Split Scenes": {
+      "main": [
+        [
+          {
+            "node": "Image - Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Align": {
+      "main": [
+        [
+          {
+            "node": "Add Captions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Captions": {
+      "main": [
+        [
+          {
+            "node": "Save Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "RSS A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Feeds": {
+      "main": [
+        [
+          {
+            "node": "Select Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Story": {
+      "main": [
+        [
+          {
+            "node": "Parse Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Selection": {
+      "main": [
+        [
+          {
+            "node": "Article - Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS A": {
+      "main": [
+        [
+          {
+            "node": "RSS B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS B": {
+      "main": [
+        [
+          {
+            "node": "RSS C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS C": {
+      "main": [
+        [
+          {
+            "node": "Combine Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image": {
+      "main": [
+        [
+          {
+            "node": "Make Job File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Voice": {
+      "main": [
+        [
+          {
+            "node": "Split Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make Job File": {
+      "main": [
+        [
+          {
+            "node": "Save Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Now (CLI)": {
+      "main": [
+        [
+          {
+            "node": "RSS A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "id": "LtNewsPipeLine01"
+}

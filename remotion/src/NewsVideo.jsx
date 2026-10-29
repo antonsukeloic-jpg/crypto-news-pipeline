@@ -57,7 +57,10 @@ const syncedBoundaries = (scenes, caps, durationInFrames, fps) => {
   return b;
 };
 
-export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h}) => {
+export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h, channel}) => {
+  const ch = channel || 'crypto';   // 'crypto' (default, unchanged) or 'lt'
+  const kicker = ch === 'lt' ? 'Naujienos' : 'Crypto News';
+  const accent = ch === 'lt' ? '#FDB913' : '#F7931A';
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
   const caps = (captions && captions.length) ? captions : buildCaptions(voiceover, durationInFrames, f);
@@ -68,7 +71,7 @@ export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_
       <SceneMedia scene={s} durationInFrames={dur} zoomIn={i % 2 === 0} />
       <TopGradient />
       <CenterModule center={s.center} />
-      <Title text={s.on_screen_text} />
+      <Title text={s.on_screen_text} kicker={kicker} accent={accent} />
     </Sequence>
   );
 
@@ -95,8 +98,8 @@ export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_
   return (
     <AbsoluteFill style={{backgroundColor: 'black'}}>
       {seqs}
-      {btc_price != null && <BTCPrice price={btc_price} change={btc_change_24h} />}
-      {caps.length > 0 && <Captions captions={caps} />}
+      {ch === 'crypto' && btc_price != null && <BTCPrice price={btc_price} change={btc_change_24h} />}
+      {caps.length > 0 && <Captions captions={caps} accent={accent} />}
       <Audio src={staticFile(voice)} />
     </AbsoluteFill>
   );

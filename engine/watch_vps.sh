@@ -39,7 +39,7 @@ while true; do
     bash "$RENDER" "$dest" "$ROOT" "$ROOT/$outp"
     if [ -f "$ROOT/$outp" ]; then
       touch "$ARCH/.done_$outbase"; log "OK $outbase"
-      cap=$(python3 -c "import json;print(json.load(open('$dest')).get('voiceover','')[:900])" 2>/dev/null)
+      cap=$(python3 -c "import json;j=json.load(open('$dest'));print(('🇱🇹 ' if j.get('channel')=='lt' else '')+j.get('voiceover','')[:900])" 2>/dev/null)
       send_telegram "$ROOT/$outp" "$cap"
     else
       log "RENDER FAILED $outbase (see remotion/render_error.log)"

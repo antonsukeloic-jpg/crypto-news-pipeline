@@ -160,6 +160,60 @@ w["connections"]["Is /run from me?"] = {"main": [[{"node": "Reply: starting", "t
 w["connections"]["Reply: starting"] = {"main": [[{"node": "RSS A", "type": "main", "index": 0}]]}
 next(n for n in w["nodes"] if n["name"] == "Reply: starting")["onError"] = "continueRegularOutput"
 
+# 5b) Telegram "/lt" command: same bot (one bot = one webhook), so the crypto
+#     workflow routes it. Messages that are not /run go to a second gate; "/lt"
+#     from the owner replies first, then starts the separate LT workflow by id
+#     (its "Run Now (CLI)" Execute-Workflow trigger) without waiting for it.
+LT_ID = sys.argv[3] if len(sys.argv) > 3 else ""
+if LT_ID:
+    w["nodes"] += [
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {"caseSensitive": False, "leftValue": "", "typeValidation": "loose", "version": 2},
+                    "conditions": [
+                        {"id": str(uuid.uuid4()),
+                         "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
+                         "rightValue": OWNER_CHAT,
+                         "operator": {"type": "string", "operation": "equals"}},
+                        {"id": str(uuid.uuid4()),
+                         "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
+                         "rightValue": "/lt",
+                         "operator": {"type": "string", "operation": "startsWith"}},
+                    ],
+                    "combinator": "and",
+                },
+                "options": {},
+            },
+            "type": "n8n-nodes-base.if", "typeVersion": 2.2,
+            "position": [x - 220, y + 640], "id": str(uuid.uuid4()), "name": "Is /lt from me?",
+        },
+        {
+            "parameters": {
+                "chatId": OWNER_CHAT,
+                "text": "🇱🇹 Got it — making a new Lithuanian news video. It will arrive here in about 3–5 minutes.",
+                "additionalFields": {"appendAttribution": False},
+            },
+            "type": "n8n-nodes-base.telegram", "typeVersion": 1.2,
+            "position": [x, y + 740], "id": str(uuid.uuid4()), "name": "Reply: starting LT",
+            "credentials": TG_CRED, "onError": "continueRegularOutput",
+        },
+        {
+            "parameters": {
+                "workflowId": {"__rl": True, "value": LT_ID, "mode": "id"},
+                "workflowInputs": {"mappingMode": "defineBelow", "value": {}, "matchingColumns": [], "schema": [],
+                                   "attemptToConvertTypes": False, "convertFieldsToString": True},
+                "mode": "once",
+                "options": {"waitForSubWorkflow": False},
+            },
+            "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2,
+            "position": [x + 220, y + 740], "id": str(uuid.uuid4()), "name": "Start LT Pipeline",
+        },
+    ]
+    w["connections"]["Is /run from me?"]["main"][1] = [{"node": "Is /lt from me?", "type": "main", "index": 0}]
+    w["connections"]["Is /lt from me?"] = {"main": [[{"node": "Reply: starting LT", "type": "main", "index": 0}], []]}
+    w["connections"]["Reply: starting LT"] = {"main": [[{"node": "Start LT Pipeline", "type": "main", "index": 0}]]}
+
 # 6) Article fetch: browser-like request, retries, and never crash the run.
 #    If the site still refuses, the script is written from the RSS headline + summary.
 art = by_name["Article - Fetch"]

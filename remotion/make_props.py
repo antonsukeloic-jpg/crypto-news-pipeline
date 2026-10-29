@@ -51,11 +51,16 @@ for s in job['scenes']:
 out_obj = {'scenes': scenes, 'voice': voice_base, 'fps': 30}
 if job.get('ticker'): out_obj['ticker'] = job['ticker']
 if job.get('captions'): out_obj['captions'] = job['captions']
-# BTC live at render time (multi-source); fall back to job seed if all fail
-bp, bc = fetch_btc()
-if bp is None:
-    bp = job.get('btc_price'); bc = job.get('btc_change_24h')
-if bp is not None: out_obj['btc_price'] = bp
-if bc is not None: out_obj['btc_change_24h'] = bc
+channel = job.get('channel') or 'crypto'
+out_obj['channel'] = channel
+bp = bc = None
+if channel == 'crypto':
+    # BTC live at render time (multi-source); fall back to job seed if all fail
+    bp, bc = fetch_btc()
+    if bp is None:
+        bp = job.get('btc_price'); bc = job.get('btc_change_24h')
+    if bp is not None: out_obj['btc_price'] = bp
+    if bc is not None: out_obj['btc_change_24h'] = bc
+# other channels (e.g. "lt"): no BTC fetch, no BTC overlay
 json.dump(out_obj, open(out, 'w'))
-print('props ok scenes=%d btc=%s change=%s' % (len(scenes), bp, bc))
+print('props ok channel=%s scenes=%d btc=%s change=%s' % (channel, len(scenes), bp, bc))

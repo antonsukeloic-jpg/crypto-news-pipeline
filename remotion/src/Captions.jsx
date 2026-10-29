@@ -19,7 +19,7 @@ const buildPhrases = (caps, maxWords = 4) => {
   return phrases;
 };
 
-export const Captions = ({captions = []}) => {
+export const Captions = ({captions = [], accent = '#F7931A'}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const ms = (frame / fps) * 1000;
@@ -47,7 +47,7 @@ export const Captions = ({captions = []}) => {
         {ph.words.map((w, i) => {
           const active = ms >= w.startMs && ms < w.endMs;
           return (
-            <span key={i} style={{color: active ? '#F7931A' : 'white'}}>
+            <span key={i} style={{color: active ? accent : 'white'}}>
               {w.text}{i < ph.words.length - 1 ? ' ' : ''}
             </span>
           );
