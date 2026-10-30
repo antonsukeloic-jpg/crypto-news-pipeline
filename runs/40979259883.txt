@@ -1,0 +1,9 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+LT pipeline started (log: /root/exec_lt.log)
+"status": "success"
+"lastNodeExecuted": "Save Job"
+VO: Rokas Jokubaitis ir Miuncheno „Bayern“ Eurolygoje beviltiškai pralaimėjo Belgrado „Crvena Zvezda“ – net trisdešimt taškų skirtumu. Lietuvis per penkiolika minučių nepelnė nė taško ir tris kartus suklydo.
+align: 27 / 27
+[('stat', None), ('none', None)]
+Oct 30 00:24:32 srv2107298 bash[66633]: [00:24:32] OK lt_video_1793319769729.mp4
+Oct 30 00:24:33 srv2107298 bash[66633]: [00:24:33] sent to Telegram
