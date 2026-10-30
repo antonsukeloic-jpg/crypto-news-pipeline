@@ -60,6 +60,8 @@ rm -f $S/wf.json $S/all_wf.json
 # 3b) publish (makes the Telegram /run trigger live; hourly node stays disabled),
 #     then restart so n8n registers the Telegram webhook
 $NX publish:workflow --id="$(cat $ST/wf_id)" && say "PUBLISHED=yes" || say "PUBLISHED=FAILED"
+# LT must be published too: n8n 2.x only lets the /run lt Execute Workflow node call a published sub-workflow
+$NX publish:workflow --id="$(cat $ST/lt_wf_id)" && say "LT_PUBLISHED=yes" || say "LT_PUBLISHED=FAILED"
 docker compose restart n8n
 for i in $(seq 1 30); do docker compose exec -T n8n n8n --version >/dev/null 2>&1 && break; sleep 2; done
 sleep 25
