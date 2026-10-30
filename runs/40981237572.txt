@@ -1,0 +1,18 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+(16, 'tOGl1tIRFxUJZJKA', 'webhook', 'error', '2026-10-30 00:30:27.116', '2026-10-30 00:30:27.302')
+(15, 'tOGl1tIRFxUJZJKA', 'webhook', 'success', '2026-10-30 00:30:17.331', '2026-10-30 00:30:17.412')
+(14, 'LtNewsPipeLine01', 'cli', 'success', '2026-10-30 00:22:31.926', '2026-10-30 00:24:11.859')
+(13, 'LtNewsPipeLine01', 'cli', 'success', '2026-10-29 23:44:39.664', '2026-10-29 23:46:14.929')
+(12, 'LtNewsPipeLine01', 'cli', 'error', '2026-10-29 23:35:42.235', '2026-10-29 23:36:03.667')
+(11, 'LtNewsPipeLine01', 'cli', 'error', '2026-10-29 23:30:02.186', '2026-10-29 23:30:07.108')
+(10, 'tOGl1tIRFxUJZJKA', 'webhook', 'success', '2026-10-29 22:39:15.985', '2026-10-29 22:40:43.748')
+(9, 'tOGl1tIRFxUJZJKA', 'webhook', 'success', '2026-10-29 14:48:12.411', '2026-10-29 14:49:44.637')
+ERR: error
+ERR: Workflow is not active and cannot be executed.
+ERR: error
+ERR: error
+Oct 30 00:24:12 srv2107298 bash[66633]: [00:24:12] rendering...
+Oct 30 00:24:12 srv2107298 bash[67088]: props ok channel=lt scenes=2 btc=None change=None
+Oct 30 00:24:32 srv2107298 bash[66633]: [00:24:32] OK lt_video_1793319769729.mp4
+Oct 30 00:24:33 srv2107298 bash[66633]: [00:24:33] sent to Telegram
+Oct 30 00:24:38 srv2107298 bash[66633]: [00:24:38] lt_video_1793319769729.mp4 already done, dropping duplicate
