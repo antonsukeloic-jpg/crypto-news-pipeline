@@ -591,7 +591,7 @@
         1804,
         288
       ],
-      "id": "fbcbf810-f924-466a-9f88-e7ae97638b39",
+      "id": "cad1214e-c415-4fd9-964b-a7fe5ded7795",
       "name": "Save Job"
     },
     {
@@ -604,7 +604,7 @@
         -816,
         424
       ],
-      "id": "4241edf2-8d73-4dbf-8895-7c99eff6ee79",
+      "id": "af9f1c10-751f-4fda-b555-ddd2ba811411",
       "name": "Run Now (CLI)"
     },
     {
@@ -620,9 +620,9 @@
         -1256,
         644
       ],
-      "id": "73ea6d6f-a1dd-4c62-8790-ec786f2ed9b2",
+      "id": "0e8ca867-202a-4456-aa37-3938aa546bd9",
       "name": "Telegram Command",
-      "webhookId": "772d926a-1251-4b6f-94a0-12885b747562",
+      "webhookId": "d2aee0f5-c1dc-4f18-ac7e-ece39bc27e07",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -641,7 +641,7 @@
           },
           "conditions": [
             {
-              "id": "cc2eba21-0038-4796-ba3b-16c878889cae",
+              "id": "38b722ec-2512-418c-9036-b1985ce73036",
               "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
               "rightValue": "694708370",
               "operator": {
@@ -650,12 +650,13 @@
               }
             },
             {
-              "id": "0134e61c-fede-4fe4-894c-69636272ad1a",
-              "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
-              "rightValue": "/run",
+              "id": "a78e3c1e-2d46-4918-bf02-0b794347856d",
+              "leftValue": "={{ /^\\/run(\\s+crypto)?\\s*$/i.test(($json.message?.text ?? '').trim()) }}",
+              "rightValue": "",
               "operator": {
-                "type": "string",
-                "operation": "startsWith"
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
               }
             }
           ],
@@ -669,7 +670,7 @@
         -1036,
         644
       ],
-      "id": "9b697040-cee6-40c5-a809-75fa251a1239",
+      "id": "b023608c-7a16-432f-96be-f6fed9c15757",
       "name": "Is /run from me?"
     },
     {
@@ -686,7 +687,7 @@
         -816,
         744
       ],
-      "id": "75cc6675-6179-452f-84c3-11ef4c7e7671",
+      "id": "a911b52b-7373-4d76-be88-bd21c1e62e35",
       "name": "Reply: starting",
       "credentials": {
         "telegramApi": {

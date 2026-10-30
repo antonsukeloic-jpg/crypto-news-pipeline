@@ -20,11 +20,11 @@ DST = sys.argv[2] if len(sys.argv) > 2 else "n8n/workflow_lt.json"
 
 LT_WORKFLOW_ID = "LtNewsPipeLine01"          # fixed, 16 chars, never the crypto id
 LT_VOICE_ID = "8crourjnsg8XHpBXQXHa"         # "Audrius" - cloned native Lithuanian voice
-LT_MODEL = "eleven_v3"                       # Eleven v3 officially supports Lithuanian
+LT_MODEL = "eleven_v4"                       # Eleven v4 (Sept 2026): 90+ languages incl. Lithuanian, better clone fidelity
 
 FEEDS = [
-    # delfi.lt/rss/feeds/daily.xml is now just an index of feeds; this is its "Dienos naujienos" feed
-    ("Delfi", "https://feed.delfi.lt/v2/articles/6?format=rss"),
+    # Delfi's RSS is stale (feed.delfi.lt/v2/articles/6 last updated days ago) -> LRT instead, owner's decision 2026-10-30
+    ("LRT", "https://www.lrt.lt/?rss"),
     ("15min", "https://www.15min.lt/rss"),
     ("Lrytas", "https://www.lrytas.lt/rss"),
 ]
@@ -62,7 +62,7 @@ cf = by_name["Combine Feeds"]["parameters"]
 old = "const srcs=[['CoinDesk','RSS A'],['Cointelegraph','RSS B'],['Decrypt','RSS C']];"
 assert old in cf["jsCode"]
 cf["jsCode"] = cf["jsCode"].replace(
-    old, "const srcs=[['Delfi','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];")
+    old, "const srcs=[['LRT','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];")
 # RSS node errors arrive as items with an "error" key: ignore those
 cf["jsCode"] = cf["jsCode"].replace(
     "items=$(node).all().map(i=>i.json);",
@@ -228,7 +228,7 @@ LT_STOP = [
     'Jis','Ji','Jie','Jos','Mes','Jūs','Tai','Tas','Ta','Tie','Tos','Čia','Ten','Tik','Net','Pagal','Anot','Po','Per','Nuo',
     'Iki','Prie','Apie','Dėl','Su','Be','Už','Ant','Iš','Į','O','Kaip','Kodėl','Kiek','Kur','Kas','Jei','Jeigu','Nors',
     'Milijonas','Milijonai','Milijonų','Milijardas','Milijardų','Tūkstančiai','Tūkstančių','Procentai','Procentų',
-    'Naujienos','Delfi','Lrytas','BNS','ELTA','LRT','Pranešama','Pranešė','Teigiama','Sako','Teigia','Skelbia',
+    'Naujienos','Delfi','Lrytas','BNS','ELTA','LRT','Lrt','Pranešama','Pranešė','Teigiama','Sako','Teigia','Skelbia',
 ]
 rep("'Saturday','Sunday'].concat(MONTHS));",
     "'Saturday','Sunday'].concat(MONTHS).concat(" + json.dumps(LT_STOP, ensure_ascii=False) + "));")
@@ -251,7 +251,7 @@ ss["jsCode"] = ss["jsCode"].replace(
 # ---- 8) voice: Lithuanian cloned voice on Eleven v3
 tts = by_name["Convert text to speech"]["parameters"]
 tts["voice"] = {"__rl": True, "mode": "id", "value": LT_VOICE_ID}
-tts["additionalOptions"]["model"] = {"__rl": True, "value": LT_MODEL, "mode": "list", "cachedResultName": "Eleven v3"}
+tts["additionalOptions"]["model"] = {"__rl": True, "value": LT_MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
     {"stability": 0.6, "similarity_boost": 0.9, "style": 0.2, "use_speaker_boost": True, "speed": 1.0}, indent=2)
 

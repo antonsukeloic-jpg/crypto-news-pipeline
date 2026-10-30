@@ -108,7 +108,7 @@ w["nodes"].append({
 w["connections"]["Run Now (CLI)"] = {"main": [[{"node": "RSS A", "type": "main", "index": 0}]]}
 
 # 5) Telegram "/run" command: start the pipeline from the phone.
-#    Only messages from the owner's chat that start with /run pass the gate.
+#    Only "/run" or "/run crypto" from the owner's chat passes the gate ("/run lt" goes to the LT route).
 #    The hourly schedule node is switched off so publishing doesn't start hourly runs.
 TG_CRED = {"telegramApi": {"id": "MsHdBVyurDnoXcyo", "name": "Telegram account"}}
 OWNER_CHAT = "694708370"
@@ -132,9 +132,9 @@ w["nodes"] += [
                      "rightValue": OWNER_CHAT,
                      "operator": {"type": "string", "operation": "equals"}},
                     {"id": str(uuid.uuid4()),
-                     "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
-                     "rightValue": "/run",
-                     "operator": {"type": "string", "operation": "startsWith"}},
+                     "leftValue": "={{ /^\\/run(\\s+crypto)?\\s*$/i.test(($json.message?.text ?? '').trim()) }}",
+                     "rightValue": "",
+                     "operator": {"type": "boolean", "operation": "true", "singleValue": True}},
                 ],
                 "combinator": "and",
             },
@@ -177,9 +177,9 @@ if LT_ID:
                          "rightValue": OWNER_CHAT,
                          "operator": {"type": "string", "operation": "equals"}},
                         {"id": str(uuid.uuid4()),
-                         "leftValue": "={{ ($json.message?.text ?? '').trim() }}",
-                         "rightValue": "/lt",
-                         "operator": {"type": "string", "operation": "startsWith"}},
+                         "leftValue": "={{ /^\\/(run\\s+lt|lt)\\s*$/i.test(($json.message?.text ?? '').trim()) }}",
+                         "rightValue": "",
+                         "operator": {"type": "boolean", "operation": "true", "singleValue": True}},
                     ],
                     "combinator": "and",
                 },
