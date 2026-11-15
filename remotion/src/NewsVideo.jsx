@@ -5,6 +5,7 @@ import {Captions} from './Captions';
 import {BTCPrice} from './BTCPrice';
 import {CenterModule} from './CenterModule';
 import {EndCard} from './EndCard';
+import {FiveHuVideo} from './FiveHuVideo';
 
 // per-channel look: kicker label + accent colour. crypto stays the default.
 const CHANNELS = {
@@ -67,6 +68,7 @@ const syncedBoundaries = (scenes, caps, durationInFrames, fps) => {
 };
 
 export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h, channel, cta}) => {
+  if (channel === '5hu') return <FiveHuVideo scenes={scenes} voice={voice} captions={captions} voiceover={voiceover} fps={fps} />;
   const ch = channel || 'crypto';
   const {kicker, accent} = CHANNELS[ch] || CHANNELS.crypto;
   const {durationInFrames} = useVideoConfig();
