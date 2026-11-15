@@ -1,0 +1,9 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+927f20c 5HU speed: poll images every 3 s, 4-core veryfast render, pre-made grain tiles
+22:03:39
+90 Nov 15 22:02 /root/exec_5hu.log
+n8n Task Broker ready on 127.0.0.1, port 5684
+Failed to start Python task runner in internal mode. because Python 3 is missing from this system. Launching a Python runner in internal mode is intended only for debugging and is not recommended for production. Users are encouraged to deploy in external
+Nov 15 22:01:06 srv2107298 bash[1315455]: [22:01:06] OK 5hu_video_1794779957237.mp4
+Nov 15 22:01:08 srv2107298 bash[1315455]: [22:01:08] sent to Telegram
+Nov 15 22:03:08 srv2107298 bash[1315455]: [22:03:08] job 5hu_job_1794780168119.json -> 5hu_video_1794780168119.mp4
