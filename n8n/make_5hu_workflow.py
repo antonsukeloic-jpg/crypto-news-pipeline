@@ -13,7 +13,7 @@ import copy, json, sys, uuid
 SRC = sys.argv[1] if len(sys.argv) > 1 else "n8n/workflow_lt.json"
 DST = sys.argv[2] if len(sys.argv) > 2 else "n8n/workflow_5hu.json"
 FIVEHU_WORKFLOW_ID = "FiveHuFashion001"     # fixed 16-char id
-VOICE_ID = "FGY2WhTYpPnrIDTdsKH5"           # ElevenLabs premade "Laura" - young, upbeat, social-media voice (English)
+VOICE_ID = "6u6JbqKdaQy89ENzLSju"           # ElevenLabs library "Brielle" - very natural Gen-Z podcast voice (Laura sounded robotic)
 MODEL = "eleven_v4"
 
 # all tested from the VPS 2026-11-15 (fresh, readable).
@@ -246,7 +246,7 @@ tts = by_name["Convert text to speech"]["parameters"]
 tts["voice"] = {"__rl": True, "mode": "id", "value": VOICE_ID}
 tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
-    {"stability": 0.28, "similarity_boost": 0.8, "style": 0.7, "use_speaker_boost": True, "speed": 1.06}, indent=2)
+    {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35, "use_speaker_boost": True, "speed": 1.04}, indent=2)
 
 # ---- sanity
 names = [n["name"] for n in w["nodes"]]
