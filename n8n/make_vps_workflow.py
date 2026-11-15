@@ -214,6 +214,67 @@ if LT_ID:
     w["connections"]["Is /lt from me?"] = {"main": [[{"node": "Reply: starting LT", "type": "main", "index": 0}], []]}
     w["connections"]["Reply: starting LT"] = {"main": [[{"node": "Start LT Pipeline", "type": "main", "index": 0}]]}
 
+# 5c) Telegram "/run vikops [tema]" -> the separate Vikops ad workflow. The text after
+#     "/run vikops" is passed on as {topic} (its trigger passes input through).
+VIKOPS_ID = sys.argv[4] if len(sys.argv) > 4 else ""
+if LT_ID and VIKOPS_ID:
+    w["nodes"] += [
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {"caseSensitive": False, "leftValue": "", "typeValidation": "loose", "version": 2},
+                    "conditions": [
+                        {"id": str(uuid.uuid4()),
+                         "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
+                         "rightValue": OWNER_CHAT,
+                         "operator": {"type": "string", "operation": "equals"}},
+                        {"id": str(uuid.uuid4()),
+                         "leftValue": "={{ /^\\/(run\\s+)?vikops(\\s|$)/i.test(($json.message?.text ?? '').trim()) }}",
+                         "rightValue": "",
+                         "operator": {"type": "boolean", "operation": "true", "singleValue": True}},
+                    ],
+                    "combinator": "and",
+                },
+                "options": {},
+            },
+            "type": "n8n-nodes-base.if", "typeVersion": 2.2,
+            "position": [x - 220, y + 900], "id": str(uuid.uuid4()), "name": "Is /run vikops from me?",
+        },
+        {
+            "parameters": {
+                "chatId": OWNER_CHAT,
+                "text": "🪨 Gerai — kuriu naują Vikops reklaminį filmuką. Atkeliaus čia per ~3–5 min.",
+                "additionalFields": {"appendAttribution": False},
+            },
+            "type": "n8n-nodes-base.telegram", "typeVersion": 1.2,
+            "position": [x, y + 1000], "id": str(uuid.uuid4()), "name": "Reply: starting Vikops",
+            "credentials": TG_CRED, "onError": "continueRegularOutput",
+        },
+        {
+            "parameters": {"jsCode":
+                "const t = String($('Telegram Command').first().json.message?.text || '').trim();\n"
+                "const topic = t.replace(/^\\/(run\\s+)?vikops\\s*/i, '').trim();\n"
+                "return [{ json: { topic } }];"},
+            "type": "n8n-nodes-base.code", "typeVersion": 2,
+            "position": [x + 220, y + 1000], "id": str(uuid.uuid4()), "name": "Vikops Topic",
+        },
+        {
+            "parameters": {
+                "workflowId": {"__rl": True, "value": VIKOPS_ID, "mode": "id"},
+                "workflowInputs": {"mappingMode": "defineBelow", "value": {}, "matchingColumns": [], "schema": [],
+                                   "attemptToConvertTypes": False, "convertFieldsToString": True},
+                "mode": "once",
+                "options": {"waitForSubWorkflow": False},
+            },
+            "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2,
+            "position": [x + 440, y + 1000], "id": str(uuid.uuid4()), "name": "Start Vikops Pipeline",
+        },
+    ]
+    w["connections"]["Is /lt from me?"]["main"][1] = [{"node": "Is /run vikops from me?", "type": "main", "index": 0}]
+    w["connections"]["Is /run vikops from me?"] = {"main": [[{"node": "Reply: starting Vikops", "type": "main", "index": 0}], []]}
+    w["connections"]["Reply: starting Vikops"] = {"main": [[{"node": "Vikops Topic", "type": "main", "index": 0}]]}
+    w["connections"]["Vikops Topic"] = {"main": [[{"node": "Start Vikops Pipeline", "type": "main", "index": 0}]]}
+
 # 6) Article fetch: browser-like request, retries, and never crash the run.
 #    If the site still refuses, the script is written from the RSS headline + summary.
 art = by_name["Article - Fetch"]

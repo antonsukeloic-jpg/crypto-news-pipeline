@@ -4,6 +4,14 @@ import {Title} from './Title';
 import {Captions} from './Captions';
 import {BTCPrice} from './BTCPrice';
 import {CenterModule} from './CenterModule';
+import {EndCard} from './EndCard';
+
+// per-channel look: kicker label + accent colour. crypto stays the default.
+const CHANNELS = {
+  crypto: {kicker: 'Crypto News', accent: '#F7931A'},
+  lt: {kicker: 'Naujienos', accent: '#FDB913'},
+  vikops: {kicker: 'Vikops', accent: '#D9C4A1'},
+};
 
 const KenBurns = ({src, durationInFrames, zoomIn}) => {
   const frame = useCurrentFrame();
@@ -57,10 +65,9 @@ const syncedBoundaries = (scenes, caps, durationInFrames, fps) => {
   return b;
 };
 
-export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h, channel}) => {
-  const ch = channel || 'crypto';   // 'crypto' (default, unchanged) or 'lt'
-  const kicker = ch === 'lt' ? 'Naujienos' : 'Crypto News';
-  const accent = ch === 'lt' ? '#FDB913' : '#F7931A';
+export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h, channel, cta}) => {
+  const ch = channel || 'crypto';
+  const {kicker, accent} = CHANNELS[ch] || CHANNELS.crypto;
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
   const caps = (captions && captions.length) ? captions : buildCaptions(voiceover, durationInFrames, f);
@@ -99,6 +106,11 @@ export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_
     <AbsoluteFill style={{backgroundColor: 'black'}}>
       {seqs}
       {ch === 'crypto' && btc_price != null && <BTCPrice price={btc_price} change={btc_change_24h} />}
+      {cta && (
+        <Sequence from={Math.max(0, durationInFrames - Math.round(2.6 * f))}>
+          <EndCard brand={kicker.toUpperCase()} url={cta.url} phone={cta.phone} accent={accent} />
+        </Sequence>
+      )}
       {caps.length > 0 && <Captions captions={caps} accent={accent} />}
       <Audio src={staticFile(voice)} />
     </AbsoluteFill>

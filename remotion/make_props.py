@@ -51,6 +51,7 @@ for s in job['scenes']:
 out_obj = {'scenes': scenes, 'voice': voice_base, 'fps': 30}
 if job.get('ticker'): out_obj['ticker'] = job['ticker']
 if job.get('captions'): out_obj['captions'] = job['captions']
+if job.get('cta'): out_obj['cta'] = job['cta']   # ad end card (vikops)
 channel = job.get('channel') or 'crypto'
 out_obj['channel'] = channel
 bp = bc = None
