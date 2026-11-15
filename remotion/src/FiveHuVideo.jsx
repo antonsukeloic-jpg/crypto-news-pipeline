@@ -132,7 +132,7 @@ const Headline = ({text, layout, accent, from}) => {
   return (
     <div style={{position: 'absolute', top: L.top, left: L.left, right: L.right, textAlign: L.align, fontFamily: L.font, fontStyle: L.style,
       fontWeight: L.weight, fontSize: L.size, lineHeight: 0.95, letterSpacing: L.upper ? -4 : -2, color: BRAND.white,
-      textTransform: L.upper ? 'uppercase' : 'none', textShadow: '0 6px 40px rgba(0,0,0,0.5)', scale: String(pump)}}>
+      textTransform: L.upper ? 'uppercase' : 'none', textShadow: '0 2px 2px rgba(0,0,0,0.55), 0 6px 26px rgba(0,0,0,0.75), 0 0 60px rgba(0,0,0,0.5)', scale: String(pump)}}>
       {words.map((w, k) => {
         const p = spring({frame: frame - 3 - k * 3, fps, config: {damping: 13, mass: 0.6, stiffness: 180}});
         const isKey = k === key;
