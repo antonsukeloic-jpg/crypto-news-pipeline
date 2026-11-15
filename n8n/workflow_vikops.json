@@ -12,7 +12,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You write 15-second vertical video ADS (TikTok/Reels/Facebook) in Lithuanian for MB „Vikops“ (vikops.lt), a company that sells and installs natural limestone floor tiles near Vilnius.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. Inside JSON strings never use the ASCII double quote character: write Lithuanian quotes as „ and “ instead.\n\nLANGUAGE\n- voiceover, every vo_segment, on_screen_text, hook, meta.title, center.label and hashtags are in NATURAL SPOKEN LITHUANIAN: warm, confident, premium but friendly - like a good interior designer talking to a homeowner. Correct grammar, cases and diacritics (ą č ę ė į š ų ū ž). Short sentences. No anglicisms (product names Seashell, Highland Grey, Opus stay as they are), no bureaucratic phrasing.\n- Write prices so they are read correctly aloud: \"šešiasdešimt trys eurai už kvadratinį metrą\".\n- Do NOT spell the web address or phone in the voiceover: an end card shows vikops.lt and the phone. End the voiceover with a short call to action that names Vikops (e.g. „Užsuk į Vikops.“ / „Rinkis Vikops.“).\n- visual.query stays in ENGLISH.\n\nRULES\n- Build the ad around the ANGLE. Sentence 1 is a scroll-stopping hook (a surprising image or benefit, not the company name).\n- ACCURACY: state ONLY facts from FACTS. Never invent prices, discounts, guarantees, stock, delivery times, awards or reviews. No superlatives you cannot back up (\"geriausias Lietuvoje\").\n- voiceover: ~30-35 words total (~15 s).\n- scenes: exactly 5. Each = one short VO phrase (max 8 words) + one short on_screen_text + one visual + duration_sec 3. Durations sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~4 words, Lithuanian. The last scene's on_screen_text is the call to action (e.g. „Apžiūrėk gyvai“).\n- center: {\"type\":\"stat\",\"value\":\"63\",\"prefix\":\"\",\"suffix\":\"€/m²\",\"label\":\"Seashell kaina nuo\"} ONLY for a number that is in FACTS (prefix/suffix short units like €, €/m², %, m²; no color), at most 1 scene; otherwise {\"type\":\"none\"}. Never use \"entity\".\n- hook: max 7 words. hashtags: 4-6 Lithuanian/relevant hashtags, no spaces (e.g. #kalkakmenis #interjeras #grindys #vikops).\n\nVISUAL RULES (for every visual.query, in English)\n- Show the PRODUCT: honed natural limestone floor tiles. Seashell = light cream/beige limestone with visible small sea-shell fragments; Highland Grey = grey limestone with fossil fragments. Large rectangular slabs (60 cm wide, 60-90 cm long).\n- Mix: macro close-ups of shells/fossils in the stone; bright modern Scandinavian living rooms, kitchens, bathrooms and terraces with the limestone floor; an Opus pattern floor of mixed-length rectangular slabs; hands of a tiler setting a large slab; a calm stone warehouse with neat pallets of slabs. Each scene a clearly different shot that matches its sentence.\n- Photoreal, premium interior-magazine look. No readable text, numbers, logos or watermarks. No faces in close-up. Do not show other stone types (marble veining, travertine holes, slate) or glossy polished finish.\n- Vertical 9:16, main subject in the lower-middle, calmer darker space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":3}]}\n\nBRIEF\n{{ $json.brief }}"
+              "content": "=You write 15-second vertical video ADS (TikTok/Reels/Facebook) in Lithuanian for MB „Vikops“ (vikops.lt), a company that sells and installs natural limestone floor tiles near Vilnius.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. Inside JSON strings never use the ASCII double quote character: write Lithuanian quotes as „ and “ instead.\n\nLANGUAGE\n- voiceover, every vo_segment, on_screen_text, hook, meta.title, center.label and hashtags are in NATURAL SPOKEN LITHUANIAN: warm, confident, premium but friendly - like a good interior designer talking to a homeowner. Correct grammar, cases and diacritics (ą č ę ė į š ų ū ž). Short sentences. No anglicisms (product names Seashell, Highland Grey, Opus stay as they are), no bureaucratic phrasing.\n- Write prices so they are read correctly aloud: \"šešiasdešimt trys eurai už kvadratinį metrą\".\n- Do NOT spell the web address or phone in the voiceover: an end card shows vikops.lt and the phone. End the voiceover with a short call to action that names Vikops (e.g. „Užsuk į Vikops.“ / „Rinkis Vikops.“).\n- visual.query stays in ENGLISH.\n\nRULES\n- Build the ad around the ANGLE. Sentence 1 is a scroll-stopping hook (a surprising image or benefit, not the company name).\n- ACCURACY: state ONLY facts from FACTS. Never invent prices, discounts, guarantees, stock, delivery times, awards or reviews. No superlatives you cannot back up (\"geriausias Lietuvoje\").\n- voiceover: ~30-35 words total (~15 s).\n- scenes: exactly 5 (not 4, not 6). Each = one short VO phrase (max 8 words) + one short on_screen_text + one visual + duration_sec 3. Durations sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~4 words, Lithuanian. The last scene's on_screen_text is the call to action (e.g. „Apžiūrėk gyvai“).\n- center: {\"type\":\"stat\",\"value\":\"63\",\"prefix\":\"\",\"suffix\":\"€/m²\",\"label\":\"Seashell kaina nuo\"} ONLY for a number that is in FACTS (prefix/suffix short units like €, €/m², %, m²; no color), at most 1 scene; otherwise {\"type\":\"none\"}. Never use \"entity\".\n- hook: max 7 words. hashtags: 4-6 Lithuanian/relevant hashtags, no spaces (e.g. #kalkakmenis #interjeras #grindys #vikops).\n\nVISUAL RULES (for every visual.query, in English)\n- Show the PRODUCT: honed natural limestone floor tiles. Seashell = light cream/beige limestone with visible small sea-shell fragments; Highland Grey = grey limestone with fossil fragments. Large thin rectangular TILES (60 cm wide, 60-90 cm long, 13 mm thick) with perfectly straight sawn edges and a flat honed surface - NEVER rough, broken, chunky or irregular stone pieces, never natural rock boulders or flagstone.\n- Mix: macro close-ups of shells/fossils in the stone; bright modern Scandinavian living rooms, kitchens, bathrooms and terraces with the limestone floor; an Opus pattern floor of mixed-length rectangular slabs; hands of a tiler setting a large slab; a calm stone warehouse with neat pallets of slabs. Each scene a clearly different shot that matches its sentence.\n- Photoreal, premium interior-magazine look. No readable text, numbers, logos or watermarks. No faces in close-up. Do not show other stone types (marble veining, travertine holes, slate) or glossy polished finish.\n- Vertical 9:16, main subject in the lower-middle, calmer darker space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":3}]}\n\nBRIEF\n{{ $json.brief }}"
             }
           ]
         },
@@ -25,7 +25,7 @@
         592,
         0
       ],
-      "id": "d323ce98-6eb3-4cb8-a224-cf77f3f71b90",
+      "id": "303e0a22-051f-4e74-9f01-761c4552a7d6",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -44,7 +44,7 @@
         896,
         -16
       ],
-      "id": "105c6a3a-e4b5-4b8c-b7a2-6369b26aa6c6",
+      "id": "97dde035-cd80-44d4-9799-b3c6bb910400",
       "name": "Code in JavaScript"
     },
     {
@@ -73,7 +73,7 @@
         1488,
         -128
       ],
-      "id": "fabf26d4-a08c-43c4-8477-6236250d7120",
+      "id": "498a94ed-01dd-437c-b8d5-20e8436e05da",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -100,9 +100,9 @@
         1088,
         16
       ],
-      "id": "7a41767d-ca3c-40a3-8420-a527bce7cb44",
+      "id": "c6ae56b4-f508-4d69-9dce-825d2887e11a",
       "name": "Send message and wait for response",
-      "webhookId": "dfb8c0e4-0f56-4030-8527-996b82cd9f5c",
+      "webhookId": "cee88d19-6c1c-42a3-a0a3-242a00739853",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -123,7 +123,7 @@
         1232,
         288
       ],
-      "id": "95727499-3700-43c3-9f18-bf0c39dab8be",
+      "id": "58d15ad8-bf15-4fd7-9fe7-c523f32d2d88",
       "name": "Save Image"
     },
     {
@@ -168,7 +168,7 @@
         400,
         272
       ],
-      "id": "817a1262-95a7-44e1-b569-9bafc5c6dda1",
+      "id": "206a657e-9d20-4ff7-8a7d-fee10f8171a5",
       "name": "Image - Request"
     },
     {
@@ -192,7 +192,7 @@
         608,
         288
       ],
-      "id": "0c7ac59d-64c9-45eb-9bcd-8a67c3deec51",
+      "id": "84d75b35-d4af-41b3-afa8-9e4d8bfc00cd",
       "name": "Image - Get"
     },
     {
@@ -212,7 +212,7 @@
         1072,
         288
       ],
-      "id": "b1c0ef55-e366-4745-b9f0-0ac85be7fb6b",
+      "id": "9ae7725b-d130-4c5f-8fa9-f1f7163613d9",
       "name": "Image - Download"
     },
     {
@@ -228,7 +228,7 @@
         1648,
         -128
       ],
-      "id": "f8fee9b2-2616-419d-9bb7-bb2b4c0c0a6b",
+      "id": "be63cd45-4e54-459d-8812-bf9d6cd7a999",
       "name": "Save Voice"
     },
     {
@@ -241,7 +241,7 @@
         1584,
         288
       ],
-      "id": "1a73e3ae-809b-4eec-a271-4438cde6bf34",
+      "id": "cb08128d-9398-458d-b7b4-79ff297919a9",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -276,7 +276,7 @@
         800,
         304
       ],
-      "id": "2edcef16-48c7-4d38-bb9d-e686fe437c12",
+      "id": "f6171fee-b751-46de-8ec8-2f3840b1d224",
       "name": "If"
     },
     {
@@ -289,9 +289,9 @@
         976,
         432
       ],
-      "id": "c21db026-f65d-47d4-a863-d6eedd1e486f",
+      "id": "9595e03b-7b3c-4dbb-b78a-0378dc3261d6",
       "name": "Wait",
-      "webhookId": "ada058a4-4761-4dfe-a3f3-6f0f81bfdcfc"
+      "webhookId": "e4eadd4b-e421-4448-8b48-01ef0427be5b"
     },
     {
       "parameters": {
@@ -324,12 +324,12 @@
         1264,
         32
       ],
-      "id": "7921e349-9034-4541-a56f-6e570db52636",
+      "id": "37b60a85-1001-4c21-8522-f031dca1fd91",
       "name": "Approved?"
     },
     {
       "parameters": {
-        "jsCode": "const STYLE=\" Style: high-end interior and architectural photography, photorealistic natural honed limestone texture with visible shell and fossil details, soft natural daylight, warm neutral palette, calm premium editorial look, high detail. Vertical 9:16. No text, no numbers, no logos, no watermark.\";\nreturn $('Code in JavaScript').first().json.scenes.map(function(s){ s.image_prompt=(s.image_prompt||'')+STYLE; return { json: s }; });"
+        "jsCode": "const STYLE=\" Style: high-end interior and architectural photography, photorealistic natural honed limestone texture with visible shell and fossil details, thin rectangular tiles with straight sawn edges (never rough or irregular stone), soft natural daylight, warm neutral palette, calm premium editorial look, high detail. Vertical 9:16. No text, no numbers, no logos, no watermark.\";\nreturn $('Code in JavaScript').first().json.scenes.map(function(s){ s.image_prompt=(s.image_prompt||'')+STYLE; return { json: s }; });"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -337,7 +337,7 @@
         1360,
         288
       ],
-      "id": "62de02fd-c023-44a6-b937-eb24e3447bff",
+      "id": "dc340465-6bb2-4041-8bb5-66a246b26eb9",
       "name": "Split Scenes"
     },
     {
@@ -363,7 +363,7 @@
         },
         "options": {}
       },
-      "id": "877fa7ee-f426-4b77-9caa-1c97a1d2f3ca",
+      "id": "5f1883bd-37aa-4fbe-9d79-327f647002b2",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -383,7 +383,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "f12ee1db-c72d-4ac1-9c93-6c9cc5be2f2e",
+      "id": "99f540a9-5499-422c-a8f7-282d170e0db0",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -402,7 +402,7 @@
           ]
         }
       },
-      "id": "389e0b5a-52e3-458a-8149-260e008b9d28",
+      "id": "434d6087-ce42-45a1-b62b-7310bc58b85d",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -425,7 +425,7 @@
         1804,
         288
       ],
-      "id": "f9afaf1b-f522-4d9e-84af-be706fe90874",
+      "id": "0d0ab3a8-0a26-4502-92e5-bafc92fd63bb",
       "name": "Save Job"
     },
     {
@@ -438,7 +438,7 @@
         -816,
         424
       ],
-      "id": "d31e2e10-2dfc-4d50-bfd7-4fcc52c28ffe",
+      "id": "ec4d9a4a-b5c3-42b8-acdc-ff1b5b9bcec7",
       "name": "Run Now (CLI)"
     },
     {
@@ -451,7 +451,7 @@
         332,
         0
       ],
-      "id": "ce17ec9d-cf1a-4697-9c1e-76df9720dc86",
+      "id": "3f9b5111-c99a-403b-a150-3ef802509bb0",
       "name": "Pick Topic"
     }
   ],

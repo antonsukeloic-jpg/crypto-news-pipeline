@@ -95,7 +95,7 @@ by_name["Message a model"]["parameters"]["messages"]["values"][0]["content"] = (
     "- ACCURACY: state ONLY facts from FACTS. Never invent prices, discounts, guarantees, stock, delivery times, awards or reviews. "
     "No superlatives you cannot back up (\"geriausias Lietuvoje\").\n"
     "- voiceover: ~30-35 words total (~15 s).\n"
-    "- scenes: exactly 5. Each = one short VO phrase (max 8 words) + one short on_screen_text + one visual + duration_sec 3. Durations sum to exactly 15.\n"
+    "- scenes: exactly 5 (not 4, not 6). Each = one short VO phrase (max 8 words) + one short on_screen_text + one visual + duration_sec 3. Durations sum to exactly 15.\n"
     "- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n"
     "- on_screen_text: max ~4 words, Lithuanian. The last scene's on_screen_text is the call to action (e.g. „Apžiūrėk gyvai“).\n"
     "- center: {\"type\":\"stat\",\"value\":\"63\",\"prefix\":\"\",\"suffix\":\"€/m²\",\"label\":\"Seashell kaina nuo\"} ONLY for a number that is in FACTS "
@@ -103,7 +103,7 @@ by_name["Message a model"]["parameters"]["messages"]["values"][0]["content"] = (
     "- hook: max 7 words. hashtags: 4-6 Lithuanian/relevant hashtags, no spaces (e.g. #kalkakmenis #interjeras #grindys #vikops).\n\n"
     "VISUAL RULES (for every visual.query, in English)\n"
     "- Show the PRODUCT: honed natural limestone floor tiles. Seashell = light cream/beige limestone with visible small sea-shell fragments; "
-    "Highland Grey = grey limestone with fossil fragments. Large rectangular slabs (60 cm wide, 60-90 cm long).\n"
+    "Highland Grey = grey limestone with fossil fragments. Large thin rectangular TILES (60 cm wide, 60-90 cm long, 13 mm thick) with perfectly straight sawn edges and a flat honed surface - NEVER rough, broken, chunky or irregular stone pieces, never natural rock boulders or flagstone.\n"
     "- Mix: macro close-ups of shells/fossils in the stone; bright modern Scandinavian living rooms, kitchens, bathrooms and terraces with the limestone floor; "
     "an Opus pattern floor of mixed-length rectangular slabs; hands of a tiler setting a large slab; a calm stone warehouse with neat pallets of slabs. "
     "Each scene a clearly different shot that matches its sentence.\n"
@@ -144,7 +144,7 @@ i0 = ss["jsCode"].index('const STYLE="')
 i1 = ss["jsCode"].index('";', i0) + 2
 ss["jsCode"] = ss["jsCode"][:i0] + (
     'const STYLE=" Style: high-end interior and architectural photography, photorealistic natural honed limestone texture with visible '
-    'shell and fossil details, soft natural daylight, warm neutral palette, calm premium editorial look, high detail. Vertical 9:16. '
+    'shell and fossil details, thin rectangular tiles with straight sawn edges (never rough or irregular stone), soft natural daylight, warm neutral palette, calm premium editorial look, high detail. Vertical 9:16. '
     'No text, no numbers, no logos, no watermark.";') + ss["jsCode"][i1:]
 
 # ---- 6) sanity
