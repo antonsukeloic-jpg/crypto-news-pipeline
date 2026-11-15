@@ -6,7 +6,7 @@ import {buildCaptions, sceneTimeline} from './timing';
 // 5HU - "who's next" fashion look: editorial serif, flash cuts, grain, pink accents.
 const PINK = '#FF3D9A';
 const OUTRO_SEC = 1.7;
-const MUSIC_VOL = 0.32;   // techno bed under the voice (louder on the outro)
+const MUSIC_VOL = 0.42;   // techno bed under the voice (louder on the outro)
 
 const Grain = () => {
   const frame = useCurrentFrame();
@@ -23,21 +23,51 @@ const Grain = () => {
   );
 };
 
-const Media = ({scene, dur, i}) => {
+// techno-clip motion: kick pulse on every beat, hard re-frame every bar, glitch on scene cuts
+const BPM = 132;
+const FRAMINGS = [
+  {z: 1.0, x: 0, y: 0}, {z: 1.32, x: -60, y: -40}, {z: 1.16, x: 50, y: 60}, {z: 1.45, x: 30, y: -90},
+];
+const Media = ({scene, dur, i, from}) => {
   const frame = useCurrentFrame();
-  // punch-in on the cut, then a slow drift
-  const punch = interpolate(frame, [0, 8], [1.1, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
-  const drift = interpolate(frame, [0, dur], [1, 1.07]);
-  const x = interpolate(frame, [0, dur], [0, i % 2 ? -18 : 18]);
-  const style = {width: '100%', height: '100%', objectFit: 'cover', scale: String(punch * drift), translate: x + 'px 0px',
-    filter: 'contrast(1.1) saturate(0.9) brightness(0.96)'};
+  const {fps} = useVideoConfig();
+  const beat = (fps * 60) / BPM;
+  const abs = from + frame;
+  const sinceKick = abs % beat;
+  const kick = interpolate(sinceKick, [0, 5], [1.045, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
+  // hard re-frame every bar (4 beats) inside the scene
+  const bar = Math.floor(frame / (beat * 4));
+  const fr = FRAMINGS[(bar + i) % FRAMINGS.length];
+  const punch = interpolate(frame, [0, 7], [1.12, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+  const drift = interpolate(frame, [0, dur], [1, 1.05]);
+  // glitch on the cut: jitter + RGB-ish ghost for 6 frames
+  const glitch = frame < 6;
+  const jx = glitch ? ((frame * 37) % 7 - 3) * 14 : 0;
+  const base = {position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+    scale: String(fr.z * punch * drift * kick), translate: (fr.x + jx) + 'px ' + fr.y + 'px',
+    filter: 'contrast(1.14) saturate(0.88) brightness(0.95)'};
+  const src = scene.video ? null : staticFile(scene.image);
   return (
     <AbsoluteFill>
       {scene.video
-        ? <OffthreadVideo src={staticFile(scene.video)} muted style={style} />
-        : <Img src={staticFile(scene.image)} style={style} />}
+        ? <OffthreadVideo src={staticFile(scene.video)} muted style={base} />
+        : <Img src={src} style={base} />}
+      {glitch && src && <Img src={src} style={{...base, translate: (fr.x + jx + 22) + 'px ' + fr.y + 'px', mixBlendMode: 'screen', opacity: 0.55,
+        filter: 'hue-rotate(300deg) saturate(3)'}} />}
+      {glitch && src && <Img src={src} style={{...base, translate: (fr.x + jx - 22) + 'px ' + fr.y + 'px', mixBlendMode: 'screen', opacity: 0.45,
+        filter: 'hue-rotate(160deg) saturate(3)'}} />}
     </AbsoluteFill>
   );
+};
+
+// tiny strobe on every bar change inside a scene
+const BarFlash = ({from}) => {
+  const frame = useCurrentFrame();
+  const {fps} = useVideoConfig();
+  const bar = (fps * 60 / BPM) * 4;
+  const t = frame % bar;
+  if (frame < bar) return null;
+  return <AbsoluteFill style={{background: 'white', opacity: interpolate(t, [0, 3], [0.35, 0], {extrapolateRight: 'clamp'})}} />;
 };
 
 const Flash = () => {
@@ -202,7 +232,8 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps}) => {
     <AbsoluteFill style={{backgroundColor: 'black'}}>
       {scenes.map((s, i) => (
         <Sequence key={i} from={tl[i].from} durationInFrames={tl[i].dur}>
-          <Media scene={s} dur={tl[i].dur} i={i} />
+          <Media scene={s} dur={tl[i].dur} i={i} from={tl[i].from} />
+          <BarFlash from={tl[i].from} />
           <Grade />
           <Center center={s.center} />
           <Headline text={s.on_screen_text} />
@@ -215,7 +246,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps}) => {
       <Sequence from={outroFrom}><Outro /></Sequence>
       <Audio src={staticFile(voice)} />
       <Audio src={staticFile('music/5hu_techno.mp3')} loop
-        volume={(fr) => interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, MUSIC_VOL, 0.6, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
+        volume={(fr) => interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, MUSIC_VOL, 0.75, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
     </AbsoluteFill>
   );
 };

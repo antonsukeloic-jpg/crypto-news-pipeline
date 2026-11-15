@@ -13,7 +13,7 @@ import copy, json, sys, uuid
 SRC = sys.argv[1] if len(sys.argv) > 1 else "n8n/workflow_lt.json"
 DST = sys.argv[2] if len(sys.argv) > 2 else "n8n/workflow_5hu.json"
 FIVEHU_WORKFLOW_ID = "FiveHuFashion001"     # fixed 16-char id
-VOICE_ID = "6u6JbqKdaQy89ENzLSju"           # ElevenLabs library "Brielle" - very natural Gen-Z podcast voice (Laura sounded robotic)
+VOICE_ID = "Hx5CHMHGoSXR9An8HMln"           # "5HU Voice" - designed 2026-11-15 (owner picked A): smoky, breathy, slow-dramatic, slight Eastern European accent
 MODEL = "eleven_v4"
 
 # all tested from the VPS 2026-11-15 (fresh, readable).
@@ -161,15 +161,15 @@ msg["content"] = (
     "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. "
     "Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\n"
     "VOICE\n"
-    "- English, spoken, fast and fun: a stylish insider spilling the news to a friend - excited, confident, a little playful, never cringe. Write for an EXPRESSIVE read: short bursts, exclamations where earned, a question to tease, contrast and rhythm (\"Not Paris. Not Milan. Copenhagen.\"). "
+    "- English, spoken, fast and fun: a cool, effortless insider letting you in on a secret - confident, never cringe. Write for a cool, smoky, effortless read: short weighted phrases, suspense pauses, contrast and rhythm (\"Not Paris. Not Milan. Copenhagen.\"). "
     "Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n"
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
-    "- voiceover: ~35 words max (~15 s). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- voiceover: 22-26 words MAX (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
-    "- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n"
+    "- scenes: exactly 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n"
     "- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n"
     "- on_screen_text: max ~5 words.\n"
     "- center: per scene, what shows in the MIDDLE of the frame. "
@@ -246,7 +246,7 @@ tts = by_name["Convert text to speech"]["parameters"]
 tts["voice"] = {"__rl": True, "mode": "id", "value": VOICE_ID}
 tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
-    {"stability": 0.45, "similarity_boost": 0.8, "style": 0.35, "use_speaker_boost": True, "speed": 1.04}, indent=2)
+    {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True}, indent=2)
 
 # ---- sanity
 names = [n["name"] for n in w["nodes"]]
