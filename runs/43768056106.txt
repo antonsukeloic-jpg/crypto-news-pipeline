@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-"status": "success"
-VO: Louis Vuitton has been repairing its pieces since 1860. Outside Paris... a hidden atelier breathes life back into well-travelled leather. Stitch by stitch. 600,000 pieces a year. This is luxury's quietest secret.
-align 32 / 32 scenes 4
-Nov 15 22:11:36 srv2107298 bash[1315455]: [22:11:36] job 5hu_job_1794780675249.json -> 5hu_video_1794780675249.mp4
-Nov 15 22:12:59 srv2107298 bash[1315455]: [22:12:59] OK 5hu_video_1794780675249.mp4
-Nov 15 22:13:02 srv2107298 bash[1315455]: [22:13:02] sent to Telegram
