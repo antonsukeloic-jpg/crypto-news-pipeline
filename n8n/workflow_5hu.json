@@ -20,7 +20,7 @@
         416,
         0
       ],
-      "id": "72bd82a6-a103-4805-9143-a78466e93f32",
+      "id": "1d4baa76-0714-4470-91ab-ca5f2d0eecda",
       "name": "HTML",
       "onError": "continueRegularOutput"
     },
@@ -35,7 +35,7 @@
         "messages": {
           "values": [
             {
-              "content": "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\nVOICE\n- English, spoken, fast and fun: a stylish insider spilling the news to a friend - confident, a little playful, never cringe. Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n- Say names exactly as they are spelled in the article.\n\nRULES\n- voiceover: ~35 words max (~15 s). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n- No body or weight comments about anyone. Describe clothes, not bodies.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~5 words.\n- center: per scene, what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"2\",\"prefix\":\"$\",\"suffix\":\"B\",\"color\":\"green\",\"label\":\"max 5 words\"} for ONE striking number from the article (at most 1-2 scenes; value digits only; prefix/suffix short units like $, €, %, B, M, K; color red for a fall/loss, green for a rise, otherwise omit). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a well-known PUBLIC figure (designer, celebrity, model, CEO) is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Brand\",\"wiki\":\"Exact English Wikipedia page title\"} when a fashion house, brand or retailer is the subject (we fetch its photo/logo from Wikipedia). Whenever a scene is centered on a named brand or public person you MUST use \"entity\". {\"type\":\"none\"} otherwise. NEVER invent a number.\n- hook: max 7 words. hashtags: 4-6, e.g. #5HU #emergingdesigners #fashion plus the label/designer and city.\n\nVISUAL RULES (visual.query, English)\n- Show what the sentence is about: the garments, fabrics, accessories, shoes, a runway, a backstage rail, a boutique window, a sneaker on a pedestal, a street-style moment. Fashion-editorial, specific and literal to the sentence.\n- Do NOT depict real people's faces or recognisable celebrities: show anonymous models from behind or cropped at the shoulders, hands, silhouettes, or just the clothes. Do NOT draw real brand logos, monograms or trademarked patterns - describe colour, cut, material and mood instead.\n- No readable text, numbers or watermarks. No phone/computer screens with UI.\n- Each scene a clearly different shot and setting. Vertical 9:16, subject lower-middle, calmer space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
+              "content": "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\nVOICE\n- English, spoken, fast and fun: a stylish insider spilling the news to a friend - excited, confident, a little playful, never cringe. Write for an EXPRESSIVE read: short bursts, exclamations where earned, a question to tease, contrast and rhythm (\"Not Paris. Not Milan. Copenhagen.\"). Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n- Say names exactly as they are spelled in the article.\n\nRULES\n- voiceover: ~35 words max (~15 s). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n- No body or weight comments about anyone. Describe clothes, not bodies.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~5 words.\n- center: per scene, what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"2\",\"prefix\":\"$\",\"suffix\":\"B\",\"color\":\"green\",\"label\":\"max 5 words\"} for ONE striking number from the article (at most 1-2 scenes; value digits only; prefix/suffix short units like $, €, %, B, M, K; color red for a fall/loss, green for a rise, otherwise omit). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a well-known PUBLIC figure (designer, celebrity, model, CEO) is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Brand\",\"wiki\":\"Exact English Wikipedia page title\"} when a fashion house, brand or retailer is the subject (we fetch its photo/logo from Wikipedia). Whenever a scene is centered on a named brand or public person you MUST use \"entity\". {\"type\":\"none\"} otherwise. NEVER invent a number.\n- hook: max 7 words. hashtags: 4-6, e.g. #5HU #emergingdesigners #fashion plus the label/designer and city.\n\nVISUAL RULES (visual.query, English)\n- Show what the sentence is about: the garments, fabrics, accessories, shoes, a runway, a backstage rail, a boutique window, a sneaker on a pedestal, a street-style moment. Fashion-editorial, specific and literal to the sentence.\n- Do NOT depict real people's faces or recognisable celebrities: show anonymous models from behind or cropped at the shoulders, hands, silhouettes, or just the clothes. Do NOT draw real brand logos, monograms or trademarked patterns - describe colour, cut, material and mood instead.\n- No readable text, numbers or watermarks. No phone/computer screens with UI.\n- Each scene a clearly different shot and setting. Vertical 9:16, subject lower-middle, calmer space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
             }
           ]
         },
@@ -48,7 +48,7 @@
         592,
         0
       ],
-      "id": "77553cc3-b59f-4d2e-a5fc-8c22d67b6efb",
+      "id": "053be959-e906-4030-ab25-6e606ad8d9f4",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -67,7 +67,7 @@
         896,
         -16
       ],
-      "id": "0da0493d-dc99-4980-acec-43ee500bf779",
+      "id": "0145f593-58c1-4917-9efb-3ee59280ee5e",
       "name": "Code in JavaScript"
     },
     {
@@ -86,7 +86,7 @@
             "mode": "list",
             "cachedResultName": "Eleven v4"
           },
-          "voiceSettings": "{\n  \"stability\": 0.45,\n  \"similarity_boost\": 0.85,\n  \"style\": 0.35,\n  \"use_speaker_boost\": true,\n  \"speed\": 1.05\n}"
+          "voiceSettings": "{\n  \"stability\": 0.28,\n  \"similarity_boost\": 0.8,\n  \"style\": 0.7,\n  \"use_speaker_boost\": true,\n  \"speed\": 1.06\n}"
         },
         "requestOptions": {}
       },
@@ -96,7 +96,7 @@
         1488,
         -128
       ],
-      "id": "5cb0f3e5-1025-455b-96ba-03f5470646f1",
+      "id": "93ad5a18-6464-4367-83bd-b2a3038c9b95",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -123,9 +123,9 @@
         1088,
         16
       ],
-      "id": "305fd061-67eb-43cd-adf5-c13aa47ddb30",
+      "id": "bfbb3162-00ea-402d-b2bc-4012afb12222",
       "name": "Send message and wait for response",
-      "webhookId": "bccf2abe-6eb6-4a8e-8df1-949da251623c",
+      "webhookId": "966608b1-ba30-42e9-ae6a-0c91a61893fc",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -146,7 +146,7 @@
         1232,
         288
       ],
-      "id": "7f0b9741-25d3-4a61-9818-45c8b6641c35",
+      "id": "a8944cde-6ec2-49a5-90bf-3497d3445f1d",
       "name": "Save Image"
     },
     {
@@ -191,7 +191,7 @@
         400,
         272
       ],
-      "id": "24905ea5-05cb-4cf3-ae0b-d005d267bbc6",
+      "id": "fe1785d9-c6da-4186-beb7-91eed0e4fe66",
       "name": "Image - Request"
     },
     {
@@ -215,7 +215,7 @@
         608,
         288
       ],
-      "id": "7557ad20-6129-4766-ac1b-c6fe21a55fa7",
+      "id": "db6d65d4-cdc3-46ac-8e0f-8cf1a97e0c9f",
       "name": "Image - Get"
     },
     {
@@ -235,7 +235,7 @@
         1072,
         288
       ],
-      "id": "e284c45a-7803-49a2-8c48-159078e3a7c3",
+      "id": "b10e8d01-2b2e-475d-bc2f-48b2720e4a6a",
       "name": "Image - Download"
     },
     {
@@ -266,7 +266,7 @@
         208,
         0
       ],
-      "id": "c2f772c5-21da-490d-a405-132df838ff55",
+      "id": "46372f74-faab-4802-90fe-947a04b746fb",
       "name": "Article - Fetch",
       "retryOnFail": true,
       "maxTries": 3,
@@ -286,7 +286,7 @@
         1648,
         -128
       ],
-      "id": "e30d980f-2f03-4d83-a00c-12fc6773d4f1",
+      "id": "8d409f0d-1d05-49ee-b177-fd06b233099b",
       "name": "Save Voice"
     },
     {
@@ -299,7 +299,7 @@
         1584,
         288
       ],
-      "id": "7ab59e88-41e0-4294-a198-8c10eb591fa6",
+      "id": "c3b267f4-4988-4e15-88e6-f917d26338cf",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -334,7 +334,7 @@
         800,
         304
       ],
-      "id": "644750d6-8f2f-4d4a-a59a-b58f89dec806",
+      "id": "8250e8af-091a-498c-a311-48f0854159e0",
       "name": "If"
     },
     {
@@ -347,9 +347,9 @@
         976,
         432
       ],
-      "id": "152a3c2d-1d5e-4e73-bb83-d15cbe169727",
+      "id": "f0231985-f199-4715-bc37-cf8fca068638",
       "name": "Wait",
-      "webhookId": "3eaadbc6-76eb-4e03-864d-780bc1eb300a"
+      "webhookId": "f4d8bb7a-e8f4-4e4f-9b0e-a4dc3e4481f5"
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
         1264,
         32
       ],
-      "id": "c3c8dd7b-b4c3-41f3-a47b-d5aabad3c726",
+      "id": "55048540-5ad3-424a-875c-db847257cc1d",
       "name": "Approved?"
     },
     {
@@ -395,7 +395,7 @@
         1360,
         288
       ],
-      "id": "5b6c70ad-d010-4e2b-965d-4d4e9ed3d9ef",
+      "id": "b94ae467-fa35-47f9-8381-bfe12149ed1a",
       "name": "Split Scenes"
     },
     {
@@ -421,7 +421,7 @@
         },
         "options": {}
       },
-      "id": "5422e979-e1a4-4121-94fb-4f0265eac358",
+      "id": "c15c9644-0afb-41e0-816c-bd47a8fee142",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -441,7 +441,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "e1a0febf-30d2-42f5-a0a3-0bdafe497855",
+      "id": "61807c25-4d9b-47e7-a2c3-750813d9c299",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +460,7 @@
           ]
         }
       },
-      "id": "e99a01fb-c164-44e1-a9de-c18b3fbfa559",
+      "id": "0e071000-a057-4dfa-84df-83197763cb25",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -474,7 +474,7 @@
       "parameters": {
         "jsCode": "const FEEDS = [[\"Scandinavian MIND\", \"https://www.scandinavianmind.com/feed\", \"emerging\"], [\"BON (Stockholm)\", \"https://bon.se/feed\", \"emerging\"], [\"10 Magazine (London)\", \"https://www.10magazine.com/feed/\", \"emerging\"], [\"Office Magazine (NY)\", \"https://www.officemagazine.net/rss.xml\", \"emerging\"], [\"Kaltblut (Berlin)\", \"https://www.kaltblut-magazine.com/feed/\", \"emerging\"], [\"Highxtar\", \"https://highxtar.com/feed/\", \"emerging\"], [\"Numero\", \"https://www.numero.com/en/rss\", \"niche\"], [\"Interview\", \"https://www.interviewmagazine.com/feed\", \"niche\"], [\"NYLON\", \"https://www.nylon.com/feeds/feed.rss\", \"niche\"], [\"The Fashionisto\", \"https://www.thefashionisto.com/feed/\", \"niche\"], [\"FashionUnited\", \"https://fashionunited.uk/rss-news\", \"main\"], [\"Coveteur\", \"https://coveteur.com/feeds/feed.rss\", \"main\"], [\"Vogue\", \"https://www.vogue.com/feed/rss\", \"main\"], [\"British Vogue\", \"https://www.vogue.co.uk/feed/rss\", \"main\"], [\"WWD\", \"https://wwd.com/feed/\", \"main\"], [\"Harper's Bazaar\", \"https://www.harpersbazaar.com/rss/all.xml/\", \"main\"], [\"Elle\", \"https://www.elle.com/rss/all.xml/\", \"main\"], [\"Fashionista\", \"https://fashionista.com/.rss/excerpt/\", \"main\"], [\"Who What Wear\", \"https://www.whowhatwear.com/rss\", \"main\"], [\"Esquire Style\", \"https://www.esquire.com/rss/style.xml/\", \"main\"], [\"Hypebeast\", \"https://hypebeast.com/feed\", \"niche\"], [\"Hypebae\", \"https://www.hypebae.com/feed\", \"niche\"], [\"Highsnobiety\", \"https://www.highsnobiety.com/feed/\", \"niche\"], [\"Dazed\", \"https://www.dazeddigital.com/rss\", \"niche\"], [\"i-D\", \"https://i-d.co/feed/\", \"niche\"], [\"PAPER\", \"https://www.papermag.com/feeds/feed.rss\", \"niche\"], [\"Refinery29 Fashion\", \"https://www.refinery29.com/en-us/fashion/rss.xml\", \"niche\"], [\"Permanent Style\", \"https://www.permanentstyle.com/feed\", \"niche\"], [\"Put This On\", \"https://www.putthison.com/rss\", \"niche\"], [\"Heddels\", \"https://www.heddels.com/feed/\", \"niche\"], [\"DMARGE\", \"https://www.dmarge.com/feed\", \"niche\"]];\nconst UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';\nconst decode = (s) => String(s || '')\n  .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1').replace(/<[^>]+>/g, ' ')\n  .replace(/&#8217;|&rsquo;|&#8216;|&lsquo;|&#039;|&#39;|&apos;/g, \"'\").replace(/&#8220;|&#8221;|&ldquo;|&rdquo;|&quot;/g, '\"')\n  .replace(/&#8211;|&ndash;/g, '-').replace(/&#8212;|&mdash;/g, '-').replace(/&nbsp;|&#160;/g, ' ')\n  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&amp;/g, '&')\n  .replace(/\\s+/g, ' ').trim();\nconst tag = (b, t) => { const m = b.match(new RegExp('<' + t + '(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)</' + t + '>', 'i')); return m ? m[1] : ''; };\nconst parse = (xml, source, tier) => {\n  const blocks = xml.match(/<item[\\s>][\\s\\S]*?<\\/item>/gi) || xml.match(/<entry[\\s>][\\s\\S]*?<\\/entry>/gi) || [];\n  return blocks.map(b => {\n    let link = decode(tag(b, 'link'));\n    if (!link) { const m = b.match(/<link[^>]*href=\"([^\"]+)\"/i); link = m ? m[1] : ''; }\n    if (!link) link = decode(tag(b, 'guid'));\n    const date = decode(tag(b, 'pubDate') || tag(b, 'published') || tag(b, 'updated') || tag(b, 'dc:date'));\n    const snippet = decode(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content:encoded')).slice(0, 240);\n    return { source, tier, title: decode(tag(b, 'title')), link: link.trim(), snippet, date };\n  }).filter(x => x.title && /^https?:/.test(x.link));\n};\nconst res = await Promise.allSettled(FEEDS.map(([name, url, tier]) =>\n  this.helpers.httpRequest({ url, timeout: 15000, headers: { 'User-Agent': UA, 'Accept': 'application/rss+xml,application/xml,text/xml,*/*' } })\n    .then(body => parse(typeof body === 'string' ? body : String(body), name, tier))));\nlet all = [], ok = 0;\nres.forEach(r => { if (r.status === 'fulfilled' && r.value.length) { ok++; all = all.concat(r.value); } });\n// only new stories: skip links already used (kept in workflow static data) and older than 72 h\nconst _st = $getWorkflowStaticData('global'); const _seen = new Set(_st.seen5hu || []);\nconst age = (x) => Date.now() - (new Date(x.date).getTime() || 0);\nall = all.filter(x => !_seen.has(x.link) && age(x) < (x.tier === 'emerging' ? 120 : 72) * 3600e3);\nif (!all.length) throw new Error('5HU: no new fashion stories (feeds read: ' + ok + ')');\n// newest 2 per source, then a pool with niche sources first: up to 8 niche + 4 mainstream, shuffled\nconst per = {}; all.sort((a, b) => age(a) - age(b));\nall = all.filter(x => (per[x.source] = (per[x.source] || 0) + 1) <= 2);\nconst shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };\nconst RISING = /\\b(emerging|newcomer|debut (collection|show|runway|store|season)|first (collection|show|runway|store)|designers? to (watch|know)|labels? to (watch|know)|rising (star|label|designer|brand)|new (label|brand|designer)|up-and-coming|graduate collection|LVMH Prize|ANDAM|Woolmark|Fashion East|NEWGEN|Copenhagen Fashion Week|Stockholm|Oslo|Helsinki|Scandinavian (label|brand|designer|fashion)|Nordic (label|brand|designer|fashion)|Tokyo Fashion Week|Seoul Fashion Week|independent (label|brand|designer)|indie (label|brand|designer)|young designer|breakout|cult (label|brand|sneaker|favourite|favorite))\\b/i;\nconst rising = (x) => RISING.test(x.title + ' ' + x.snippet);\nconst used = new Set(); const take = (arr, n) => arr.filter(x => !used.has(x.link)).slice(0, n).map(x => (used.add(x.link), x));\nconst pool = [].concat(\n  take(shuffle(all.filter(rising)), 6),\n  take(shuffle(all.filter(x => x.tier === 'emerging')), 4),\n  take(shuffle(all.filter(x => x.tier === 'niche')), 3),\n  take(shuffle(all.filter(x => x.tier === 'main')), 2));\nconst candidates = shuffle(pool.length ? pool : all.slice(0, 12));\nconst candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier !== 'main' ? ', ' + x.tier : '') + (rising(x) ? ', RISING' : '') + '] ' + x.title + '\\n   ' + x.snippet + '\\n   LINK: ' + x.link).join('\\n\\n');\nreturn [{ json: { candidates, candidatesText, feedsRead: ok } }];"
       },
-      "id": "760ec8c1-81f4-44d0-94c6-026526e67572",
+      "id": "dff90afd-5584-43a7-90ee-fcc9c59d8686",
       "name": "Combine Feeds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -502,7 +502,7 @@
         "simplify": false,
         "options": {}
       },
-      "id": "acf57824-0972-4793-8c1d-de920a0b00a4",
+      "id": "f9d73c68-de01-4ad9-8d94-4a4305675102",
       "name": "Select Story",
       "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
@@ -521,7 +521,7 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json.content[0].text;\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nlet sel = null;\ntry { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(fixJson(raw.slice(s, e + 1))); } catch (err) { sel = null; }\nconst cands = ($('Combine Feeds').first().json.candidates) || [];\nif (!sel || !sel.link) {\n  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n  const link = m[1] || m[0];\n  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n  sel = { link, title: '', reason: rm ? rm[1] : '' };\n}\nconst hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\nif (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\nconst _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\nreturn [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];"
       },
-      "id": "47a6579b-280d-492d-be59-3d4c1b8f327b",
+      "id": "1a08234f-4a78-4216-8b48-221d6aaf7ddb",
       "name": "Parse Selection",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -543,7 +543,7 @@
         1804,
         288
       ],
-      "id": "549d2501-1f53-496a-b8fc-7882aa98bead",
+      "id": "bf861a3b-4419-4251-be81-60cee9e2b776",
       "name": "Save Job"
     },
     {
@@ -556,7 +556,7 @@
         -816,
         424
       ],
-      "id": "bdf12ab0-bf16-4737-af06-4e0165726dd7",
+      "id": "17188bef-6f5e-4efa-a2c1-bcfc402d602e",
       "name": "Run Now (CLI)"
     }
   ],

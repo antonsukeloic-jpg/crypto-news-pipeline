@@ -161,7 +161,7 @@ msg["content"] = (
     "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. "
     "Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\n"
     "VOICE\n"
-    "- English, spoken, fast and fun: a stylish insider spilling the news to a friend - confident, a little playful, never cringe. "
+    "- English, spoken, fast and fun: a stylish insider spilling the news to a friend - excited, confident, a little playful, never cringe. Write for an EXPRESSIVE read: short bursts, exclamations where earned, a question to tease, contrast and rhythm (\"Not Paris. Not Milan. Copenhagen.\"). "
     "Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n"
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
@@ -231,7 +231,7 @@ tts = by_name["Convert text to speech"]["parameters"]
 tts["voice"] = {"__rl": True, "mode": "id", "value": VOICE_ID}
 tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
-    {"stability": 0.45, "similarity_boost": 0.85, "style": 0.35, "use_speaker_boost": True, "speed": 1.05}, indent=2)
+    {"stability": 0.28, "similarity_boost": 0.8, "style": 0.7, "use_speaker_boost": True, "speed": 1.06}, indent=2)
 
 # ---- sanity
 names = [n["name"] for n in w["nodes"]]
