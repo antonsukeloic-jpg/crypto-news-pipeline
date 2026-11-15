@@ -289,7 +289,7 @@ if LT_ID and VIKOPS_ID and FIVEHU_ID:
                          "rightValue": OWNER_CHAT,
                          "operator": {"type": "string", "operation": "equals"}},
                         {"id": str(uuid.uuid4()),
-                         "leftValue": "={{ /^\\/(run\\s+)?5hu\\s*$/i.test(($json.message?.text ?? '').trim()) }}",
+                         "leftValue": "={{ /^\\/(run\\s+)?(5hu|fashion)\\s*$/i.test(($json.message?.text ?? '').trim()) }}",
                          "rightValue": "",
                          "operator": {"type": "boolean", "operation": "true", "singleValue": True}},
                     ],

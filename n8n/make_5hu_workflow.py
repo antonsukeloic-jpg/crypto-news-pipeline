@@ -16,11 +16,31 @@ FIVEHU_WORKFLOW_ID = "FiveHuFashion001"     # fixed 16-char id
 VOICE_ID = "FGY2WhTYpPnrIDTdsKH5"           # ElevenLabs premade "Laura" - young, upbeat, social-media voice (English)
 MODEL = "eleven_v4"
 
-# tested from the VPS 2026-11-15 (all fresh): luxury / industry / streetwear
+# all tested from the VPS 2026-11-15 (fresh, readable). tier "niche" gets priority in the candidate pool.
 FEEDS = [
-    ("Vogue", "https://www.vogue.com/feed/rss"),
-    ("Fashionista", "https://fashionista.com/.rss/excerpt/"),
-    ("Hypebeast", "https://hypebeast.com/feed"),
+    # mainstream / industry
+    ("Vogue", "https://www.vogue.com/feed/rss", "main"),
+    ("British Vogue", "https://www.vogue.co.uk/feed/rss", "main"),
+    ("WWD", "https://wwd.com/feed/", "main"),
+    ("Harper's Bazaar", "https://www.harpersbazaar.com/rss/all.xml/", "main"),
+    ("Elle", "https://www.elle.com/rss/all.xml/", "main"),
+    ("Fashionista", "https://fashionista.com/.rss/excerpt/", "main"),
+    ("Who What Wear", "https://www.whowhatwear.com/rss", "main"),
+    ("Esquire Style", "https://www.esquire.com/rss/style.xml/", "main"),
+    # streetwear / sneakers
+    ("Hypebeast", "https://hypebeast.com/feed", "niche"),
+    ("Hypebae", "https://www.hypebae.com/feed", "niche"),
+    ("Highsnobiety", "https://www.highsnobiety.com/feed/", "niche"),
+    # culture / indie / niche
+    ("Dazed", "https://www.dazeddigital.com/rss", "niche"),
+    ("i-D", "https://i-d.co/feed/", "niche"),
+    ("PAPER", "https://www.papermag.com/feeds/feed.rss", "niche"),
+    ("Refinery29 Fashion", "https://www.refinery29.com/en-us/fashion/rss.xml", "niche"),
+    # menswear / craft / denim
+    ("Permanent Style", "https://www.permanentstyle.com/feed", "niche"),
+    ("Put This On", "https://www.putthison.com/rss", "niche"),
+    ("Heddels", "https://www.heddels.com/feed/", "niche"),
+    ("DMARGE", "https://www.dmarge.com/feed", "niche"),
 ]
 
 src = json.load(open(SRC))
@@ -36,23 +56,56 @@ for n in w["nodes"]:
 by_name = {n["name"]: n for n in w["nodes"]}
 by_name["Every Hour"]["disabled"] = True
 
-# ---- feeds
-for (name, url), node in zip(FEEDS, ("RSS A", "RSS B", "RSS C")):
-    by_name[node]["parameters"]["url"] = url
-cf = by_name["Combine Feeds"]["parameters"]
-old = "const srcs=[['LRT','RSS A'],['15min','RSS B'],['Lrytas','RSS C']];"
-assert old in cf["jsCode"]
-cf["jsCode"] = cf["jsCode"].replace(old, "const srcs=" + json.dumps([[n, f"RSS {c}"] for (n, _), c in zip(FEEDS, "ABC")]) + ";")
+# ---- feeds: one node reads every feed in parallel (replaces RSS A/B/C).
+#      Keeps the name "Combine Feeds" and the same output shape, so later nodes work unchanged.
+DROP = {"RSS A", "RSS B", "RSS C"}
+w["nodes"] = [n for n in w["nodes"] if n["name"] not in DROP]
+for d in DROP:
+    w["connections"].pop(d, None)
+by_name = {n["name"]: n for n in w["nodes"]}
+w["connections"]["Run Now (CLI)"] = {"main": [[{"node": "Combine Feeds", "type": "main", "index": 0}]]}
+w["connections"]["Every Hour"] = {"main": [[{"node": "Combine Feeds", "type": "main", "index": 0}]]}
+cf = by_name["Combine Feeds"]
+cf["parameters"]["jsCode"] = (
+    "const FEEDS = " + json.dumps(FEEDS, ensure_ascii=False) + ";\n"
+    + r"""const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
+const decode = (s) => String(s || '')
+  .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, ' ')
+  .replace(/&#8217;|&rsquo;|&#8216;|&lsquo;|&#039;|&#39;|&apos;/g, "'").replace(/&#8220;|&#8221;|&ldquo;|&rdquo;|&quot;/g, '"')
+  .replace(/&#8211;|&ndash;/g, '-').replace(/&#8212;|&mdash;/g, '-').replace(/&nbsp;|&#160;/g, ' ')
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&amp;/g, '&')
+  .replace(/\s+/g, ' ').trim();
+const tag = (b, t) => { const m = b.match(new RegExp('<' + t + '(?:\\s[^>]*)?>([\\s\\S]*?)</' + t + '>', 'i')); return m ? m[1] : ''; };
+const parse = (xml, source, tier) => {
+  const blocks = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) || xml.match(/<entry[\s>][\s\S]*?<\/entry>/gi) || [];
+  return blocks.map(b => {
+    let link = decode(tag(b, 'link'));
+    if (!link) { const m = b.match(/<link[^>]*href="([^"]+)"/i); link = m ? m[1] : ''; }
+    if (!link) link = decode(tag(b, 'guid'));
+    const date = decode(tag(b, 'pubDate') || tag(b, 'published') || tag(b, 'updated') || tag(b, 'dc:date'));
+    const snippet = decode(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content:encoded')).slice(0, 240);
+    return { source, tier, title: decode(tag(b, 'title')), link: link.trim(), snippet, date };
+  }).filter(x => x.title && /^https?:/.test(x.link));
+};
+const res = await Promise.allSettled(FEEDS.map(([name, url, tier]) =>
+  this.helpers.httpRequest({ url, timeout: 15000, headers: { 'User-Agent': UA, 'Accept': 'application/rss+xml,application/xml,text/xml,*/*' } })
+    .then(body => parse(typeof body === 'string' ? body : String(body), name, tier))));
+let all = [], ok = 0;
+res.forEach(r => { if (r.status === 'fulfilled' && r.value.length) { ok++; all = all.concat(r.value); } });
+// only new stories: skip links already used (kept in workflow static data) and older than 72 h
+const _st = $getWorkflowStaticData('global'); const _seen = new Set(_st.seen5hu || []);
+const age = (x) => Date.now() - (new Date(x.date).getTime() || 0);
+all = all.filter(x => !_seen.has(x.link) && age(x) < 72 * 3600e3);
+if (!all.length) throw new Error('5HU: no new fashion stories (feeds read: ' + ok + ')');
+// newest 2 per source, then a pool with niche sources first: up to 8 niche + 4 mainstream, shuffled
+const per = {}; all.sort((a, b) => age(a) - age(b));
+all = all.filter(x => (per[x.source] = (per[x.source] || 0) + 1) <= 2);
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };
+const pool = shuffle(all.filter(x => x.tier === 'niche')).slice(0, 8).concat(shuffle(all.filter(x => x.tier !== 'niche')).slice(0, 4));
+const candidates = shuffle(pool.length ? pool : all.slice(0, 12));
+const candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier === 'niche' ? ', niche' : '') + '] ' + x.title + '\n   ' + x.snippet + '\n   LINK: ' + x.link).join('\n\n');
+return [{ json: { candidates, candidatesText, feedsRead: ok } }];""")
 
-# ---- "all new": skip stories already used (workflow static data, kept by n8n for
-#      scheduled/production runs) and prefer stories from the last 48 h
-old = "all=all.filter(x=>x.title&&x.link);"
-assert old in cf["jsCode"]
-cf["jsCode"] = cf["jsCode"].replace(old, old + "\n"
-    "const _st=$getWorkflowStaticData('global'); const _seen=new Set(_st.seen5hu||[]);\n"
-    "all=all.filter(x=>!_seen.has(x.link));\n"
-    "const _fresh=all.filter(x=>Date.now()-new Date(x.date||0).getTime()<48*3600e3); if(_fresh.length>=3) all=_fresh;\n"
-    "if(!all.length) throw new Error('5HU: no new fashion stories since the last video');")
 ps = by_name["Parse Selection"]["parameters"]
 old = "return [{ json: { link: sel.link,"
 assert ps["jsCode"].count(old) == 1
@@ -63,6 +116,7 @@ ps["jsCode"] = ps["jsCode"].replace(old,
 by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "=You are the editor of 5HU, a trending FASHION news channel on TikTok/Reels for a young, style-obsessed global audience. "
     "Choose the SINGLE best story from the candidates for a 15-second vertical video.\n\n"
+    "PREFER NICHE: stories marked \"niche\" (streetwear, sneakers, indie designers, menswear craft, denim, subculture, emerging labels, archive fashion) are the channel's identity - pick one of them unless a mainstream story is clearly the biggest fashion news of the day. Insider, specific stories beat generic celebrity gossip.\n"
     "PICK what people will talk about and share today: viral celebrity looks and red-carpet moments, runway shows and standout collections, "
     "designer moves (new creative directors, exits, debuts), big collabs and drops, sneaker and streetwear releases, brand deals, "
     "trend shifts with a clear name, and fashion-business news with a striking number.\n"
@@ -157,6 +211,7 @@ for outs in w["connections"].values():
 blob = json.dumps(w, ensure_ascii=False)
 for gone in ("lrt.lt", "15min.lt", "lrytas", "lt_img_"):
     assert gone not in blob, gone
+assert 'RSS A' not in [n['name'] for n in w['nodes']]
 assert all(n["id"] != o["id"] for n in w["nodes"] for o in src["nodes"])
 json.dump(w, open(DST, "w"), indent=2, ensure_ascii=False)
 print(f"OK -> {DST}: {len(w['nodes'])} nodes, id={w['id']}")
