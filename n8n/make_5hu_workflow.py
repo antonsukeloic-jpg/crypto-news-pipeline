@@ -184,6 +184,10 @@ rep('"Lietuvos naujienos"', '"fashion runway editorial"', 2)
 rep('channel:"lt",', 'channel:"5hu",')
 rep("return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en'));", "return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt'));")
 rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'));", "return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt'));")
+# English fashion text: a lone capitalised word ("Dead" from "Brain Dead") is a bad brand guess that pulls a
+# random Wikipedia image. Auto-spot only multi-word names and ALL-CAPS/CamelCase brands; the script's explicit entities still work.
+rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((m = reSingle.exec(vo)))",
+    "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
 
 # ---- image style
