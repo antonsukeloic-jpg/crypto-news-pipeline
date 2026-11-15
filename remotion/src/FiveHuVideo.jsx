@@ -3,10 +3,13 @@ import {AbsoluteFill, Img, Audio, OffthreadVideo, Sequence, staticFile, useCurre
 import {serif, inter, mono} from './fonts';
 import {buildCaptions, sceneTimeline} from './timing';
 
-// 5HU - "who's next" fashion look: editorial serif, flash cuts, grain, pink accents.
-const PINK = '#FF3D9A';
-const OUTRO_SEC = 1.7;
-const MUSIC_VOL = 0.3;    // under the voice; ducks to 0.16 while a word is spoken, swells in pauses   // techno bed under the voice (louder on the outro)
+// 5HU brand system. Constant: logo + lime dot, lime/pink/cyan on black & white, lime dot impact on every cut,
+// RGB-split outro. Varies per video (seeded): headline layout, transition order, second accent.
+const BRAND = {lime: '#C8FF2E', pink: '#FF3D9A', cyan: '#2EE6FF', black: '#0A0A0A', white: '#F5F5F2'};
+const OUTRO_SEC = 1.8;
+const MUSIC_VOL = 0.3;    // ducks to 0.16 while a word is spoken, swells in pauses
+
+const seedOf = (voice) => { const m = String(voice || '').match(/(\d{13})/); return m ? Number(m[1].slice(-6)) : 7; };
 
 const Grain = () => {
   const frame = useCurrentFrame();
@@ -64,32 +67,83 @@ const BarFlash = ({from}) => {
   return <AbsoluteFill style={{background: 'white', opacity: interpolate(t, [0, 3], [0.35, 0], {extrapolateRight: 'clamp'})}} />;
 };
 
-const Flash = () => {
+
+// ---- impact transitions (first ~10 frames of every scene after the first)
+const shakeOf = (frame, kind) => {
+  if (frame > 9) return '0px 0px';
+  const a = interpolate(frame, [0, 9], [kind === 'smash' ? 34 : 14, 0], {extrapolateRight: 'clamp'});
+  return ((frame * 53) % 3 - 1) * a + 'px ' + ((frame * 31) % 3 - 1) * a + 'px';
+};
+
+const Impact = ({kind, accent}) => {
   const frame = useCurrentFrame();
-  const o = interpolate(frame, [0, 1, 6], [0.95, 0.85, 0], {extrapolateRight: 'clamp'});
-  return <AbsoluteFill style={{background: 'white', opacity: o}} />;
+  const ring = interpolate(frame, [0, 12], [0, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+  const dot = (
+    <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{width: 60 + ring * 1500, height: 60 + ring * 1500, borderRadius: '50%', border: (28 * (1 - ring) + 2) + 'px solid ' + BRAND.lime, opacity: 1 - ring}} />
+    </AbsoluteFill>
+  );
+  if (kind === 'wipe') {
+    const x = interpolate(frame, [0, 8], [-10, 110], {extrapolateRight: 'clamp', easing: Easing.inOut(Easing.cubic)});
+    return (<>
+      <div style={{position: 'absolute', top: 0, bottom: 0, left: (x - 30) + '%', width: '30%', background: BRAND.lime}} />
+      <div style={{position: 'absolute', top: 0, bottom: 0, left: (x - 42) + '%', width: '12%', background: accent}} />
+      {dot}
+    </>);
+  }
+  if (kind === 'split') {
+    if (frame > 7) return dot;
+    const bars = [0.18, 0.47, 0.71];
+    return (<>
+      {bars.map((y, k) => (
+        <div key={k} style={{position: 'absolute', left: 0, right: 0, top: (y * 100) + '%', height: 70 + k * 30,
+          background: k % 2 ? BRAND.cyan : BRAND.pink, mixBlendMode: 'screen', opacity: 0.75,
+          translate: (((frame + k) * 97) % 200 - 100) + 'px 0px'}} />
+      ))}
+      {dot}
+    </>);
+  }
+  // smash: white flash + shake (shake applied to the scene) + dot
+  const o = interpolate(frame, [0, 2, 6], [1, 0.8, 0], {extrapolateRight: 'clamp'});
+  return (<><AbsoluteFill style={{background: BRAND.white, opacity: o}} />{dot}</>);
 };
 
 const Grade = () => (
   <>
-    <AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 34%, rgba(0,0,0,0) 58%, rgba(0,0,0,0.7) 100%)'}} />
+    <AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0) 34%, rgba(0,0,0,0) 56%, rgba(0,0,0,0.72) 100%)'}} />
     <AbsoluteFill style={{background: 'radial-gradient(120% 80% at 50% 45%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%)'}} />
   </>
 );
 
-const Headline = ({text}) => {
+// ---- kinetic typography: words slam in (scale + blur), the key word gets a lime block, everything pumps on the kick
+const Headline = ({text, layout, accent, from}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   if (!text) return null;
   const words = String(text).split(/\s+/).filter(Boolean);
+  const key = words.reduce((b, w, k) => (w.replace(/[^\p{L}\d]/gu, '').length > words[b].replace(/[^\p{L}\d]/gu, '').length ? k : b), 0);
+  const beat = (fps * 60) / 132;
+  const pump = interpolate((from + frame) % beat, [0, 5], [1.03, 1], {extrapolateRight: 'clamp'});
+  const L = [
+    {top: 250, left: 72, right: 110, font: serif, style: 'italic', size: 138, weight: 400, upper: false, align: 'left'},
+    {top: 560, left: 60, right: 60, font: inter, style: 'normal', size: 128, weight: 900, upper: true, align: 'center'},
+    {top: 1080, left: 72, right: 90, font: inter, style: 'normal', size: 112, weight: 900, upper: true, align: 'left'},
+  ][layout];
   return (
-    <div style={{position: 'absolute', top: 250, left: 72, right: 110, fontFamily: serif, fontStyle: 'italic', fontSize: 132,
-      lineHeight: 0.98, letterSpacing: -2, color: 'white', textShadow: '0 6px 40px rgba(0,0,0,0.45)'}}>
-      {words.map((w, i) => {
-        const p = spring({frame: frame - 4 - i * 3, fps, config: {damping: 18, mass: 0.7}});
+    <div style={{position: 'absolute', top: L.top, left: L.left, right: L.right, textAlign: L.align, fontFamily: L.font, fontStyle: L.style,
+      fontWeight: L.weight, fontSize: L.size, lineHeight: 0.95, letterSpacing: L.upper ? -4 : -2, color: BRAND.white,
+      textTransform: L.upper ? 'uppercase' : 'none', textShadow: '0 6px 40px rgba(0,0,0,0.5)', scale: String(pump)}}>
+      {words.map((w, k) => {
+        const p = spring({frame: frame - 3 - k * 3, fps, config: {damping: 13, mass: 0.6, stiffness: 180}});
+        const isKey = k === key;
+        const fill = interpolate(frame - 6 - k * 3, [0, 6], [0, 100], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
         return (
-          <span key={i} style={{display: 'inline-block', overflow: 'hidden', verticalAlign: 'top', paddingBottom: 14, marginRight: 26}}>
-            <span style={{display: 'inline-block', translate: '0px ' + interpolate(p, [0, 1], [110, 0]) + '%'}}>{w}</span>
+          <span key={k} style={{display: 'inline-block', marginRight: '0.22em', position: 'relative',
+            scale: String(interpolate(p, [0, 1], [2.1, 1])), opacity: Math.min(1, p * 1.4),
+            filter: 'blur(' + interpolate(p, [0, 1], [14, 0]) + 'px)', rotate: interpolate(p, [0, 1], [k % 2 ? 6 : -6, 0]) + 'deg'}}>
+            {isKey && <span style={{position: 'absolute', left: '-0.08em', right: '-0.08em', top: '0.1em', bottom: '0.02em',
+              background: BRAND.lime, clipPath: 'inset(0 ' + (100 - fill) + '% 0 0)', zIndex: 0}} />}
+            <span style={{position: 'relative', zIndex: 1, color: isKey ? BRAND.black : BRAND.white, textShadow: isKey ? 'none' : undefined}}>{w}</span>
           </span>
         );
       })}
@@ -97,42 +151,47 @@ const Headline = ({text}) => {
   );
 };
 
-const Header = ({stamp}) => {
+const Header = ({stamp, accent}) => {
   const frame = useCurrentFrame();
-  const {durationInFrames} = useVideoConfig();
+  const {durationInFrames, fps} = useVideoConfig();
   const prog = frame / Math.max(1, durationInFrames - 1);
+  const intro = spring({frame, fps, config: {damping: 16}});
   return (
     <>
-      <div style={{position: 'absolute', top: 110, left: 72, right: 72, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <div style={{fontFamily: inter, fontWeight: 900, fontSize: 58, letterSpacing: -3, color: 'white', display: 'flex', alignItems: 'baseline'}}>
-          5HU<span style={{color: PINK, marginLeft: 2}}>.</span>
+      <div style={{position: 'absolute', top: 110, left: 72, right: 72, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        translate: '0px ' + interpolate(intro, [0, 1], [-60, 0]) + 'px', opacity: intro}}>
+        <div style={{fontFamily: inter, fontWeight: 900, fontSize: 60, letterSpacing: -3, color: BRAND.white, display: 'flex', alignItems: 'baseline'}}>
+          5HU<span style={{display: 'inline-block', width: 16, height: 16, borderRadius: 8, background: BRAND.lime, marginLeft: 5}} />
         </div>
-        <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 3, color: 'white', opacity: 0.9}}>WHO'S NEXT · {stamp}</div>
+        <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 3, color: BRAND.white, opacity: 0.9}}>
+          WHO'S NEXT <span style={{color: accent}}>●</span> {stamp}
+        </div>
       </div>
-      <div style={{position: 'absolute', top: 196, left: 72, right: 72, height: 3, background: 'rgba(255,255,255,0.25)'}}>
-        <div style={{width: (prog * 100) + '%', height: '100%', background: PINK}} />
+      <div style={{position: 'absolute', top: 196, left: 72, right: 72, height: 4, background: 'rgba(255,255,255,0.22)'}}>
+        <div style={{width: (prog * 100) + '%', height: '100%', background: BRAND.lime}} />
       </div>
-      <div style={{position: 'absolute', top: 960, right: -168, rotate: '90deg', fontFamily: mono, fontSize: 21, letterSpacing: 6, color: 'white', opacity: 0.7, whiteSpace: 'nowrap'}}>
+      <div style={{position: 'absolute', top: 960, right: -168, rotate: '90deg', fontFamily: mono, fontSize: 21, letterSpacing: 6, color: accent, opacity: 0.85, whiteSpace: 'nowrap'}}>
         WE FIND THEM FIRST — 5HU — WE FIND THEM FIRST
       </div>
     </>
   );
 };
 
-const Center = ({center}) => {
+const Center = ({center, accent}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   if (!center || !center.type || center.type === 'none') return null;
-  const p = spring({frame: frame - 6, fps, config: {damping: 14, mass: 0.8}});
+  const p = spring({frame: frame - 6, fps, config: {damping: 12, mass: 0.8}});
   if (center.type === 'entity' && center.logo_url) {
     const isPerson = center.kind === 'person';
     return (
       <div style={{position: 'absolute', top: 640, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
-        <div style={{background: '#f6f3ee', padding: '20px 20px 0 20px', boxShadow: '0 30px 70px rgba(0,0,0,0.55)',
-          rotate: interpolate(p, [0, 1], [-14, -4]) + 'deg', scale: String(interpolate(p, [0, 1], [0.7, 1])), opacity: p}}>
+        <div style={{position: 'relative', background: BRAND.white, padding: '20px 20px 0 20px', boxShadow: '0 30px 70px rgba(0,0,0,0.55)',
+          rotate: interpolate(p, [0, 1], [-16, -4]) + 'deg', scale: String(interpolate(p, [0, 1], [0.6, 1])), opacity: p}}>
+          <div style={{position: 'absolute', top: -18, left: 120, width: 150, height: 38, background: BRAND.lime, opacity: 0.9, rotate: '3deg'}} />
           <Img src={center.logo_url} style={{width: 380, height: isPerson ? 440 : 300, objectFit: isPerson ? 'cover' : 'contain', background: 'white', display: 'block'}} />
-          <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 2, color: '#111', textTransform: 'uppercase', padding: '20px 4px 24px', maxWidth: 380}}>
-            {center.name || ''}
+          <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 2, color: BRAND.black, textTransform: 'uppercase', padding: '20px 4px 24px', maxWidth: 380}}>
+            {center.name || ''} <span style={{color: accent}}>●</span>
           </div>
         </div>
       </div>
@@ -140,13 +199,14 @@ const Center = ({center}) => {
   }
   if (center.type === 'stat') {
     const target = Number(center.value) || 0;
-    const prog = interpolate(frame, [4, 30], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+    const prog = interpolate(frame, [4, 26], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
     const decimals = (String(center.value).split('.')[1] || '').length;
     const num = (center.prefix || '') + Number((target * prog).toFixed(decimals)).toLocaleString('en-US', {minimumFractionDigits: decimals, maximumFractionDigits: decimals}) + (center.suffix || '');
     return (
-      <div style={{position: 'absolute', top: 700, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: p}}>
-        <div style={{fontFamily: serif, fontSize: 300, lineHeight: 0.85, color: PINK, letterSpacing: -6, textShadow: '0 12px 60px rgba(0,0,0,0.5)'}}>{num}</div>
-        {center.label ? <div style={{fontFamily: mono, fontSize: 28, letterSpacing: 3, color: 'white', textTransform: 'uppercase', marginTop: 18, textAlign: 'center', maxWidth: 860}}>{center.label}</div> : null}
+      <div style={{position: 'absolute', top: 700, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: p,
+        scale: String(interpolate(p, [0, 1], [1.6, 1]))}}>
+        <div style={{fontFamily: inter, fontWeight: 900, fontSize: 280, lineHeight: 0.85, color: BRAND.lime, letterSpacing: -12, textShadow: '8px 0 0 ' + accent + ', 0 12px 60px rgba(0,0,0,0.5)'}}>{num}</div>
+        {center.label ? <div style={{fontFamily: mono, fontSize: 28, letterSpacing: 3, color: BRAND.white, textTransform: 'uppercase', marginTop: 18, textAlign: 'center', maxWidth: 860}}>{center.label}</div> : null}
       </div>
     );
   }
@@ -171,17 +231,19 @@ const Subs = ({caps}) => {
   let ph = null;
   for (const p of phrases) if (ms >= p[0].startMs) ph = p;
   if (!ph) return null;
-  const local = frame - (ph[0].startMs / 1000) * fps;
-  const pop = spring({frame: local, fps, config: {damping: 20, mass: 0.5}});
   return (
     <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 360, paddingLeft: 80, paddingRight: 80}}>
-      <div style={{fontFamily: inter, fontWeight: 800, fontSize: 64, lineHeight: 1.25, letterSpacing: -1, color: 'white', textAlign: 'center',
-        textShadow: '0 4px 22px rgba(0,0,0,0.8)', translate: '0px ' + interpolate(pop, [0, 1], [18, 0]) + 'px', opacity: pop}}>
-        {ph.map((w, i) => {
+      <div style={{fontFamily: inter, fontWeight: 800, fontSize: 62, lineHeight: 1.3, letterSpacing: -1, color: BRAND.white, textAlign: 'center',
+        textShadow: '0 4px 22px rgba(0,0,0,0.85)'}}>
+        {ph.map((w, k) => {
+          const st = (w.startMs / 1000) * fps;
+          const p = spring({frame: frame - st, fps, config: {damping: 14, mass: 0.5}});
           const on = ms >= w.startMs && ms < w.endMs + 60;
+          const shown = ms >= w.startMs - 40;
           return (
-            <span key={i} style={{display: 'inline-block', margin: '0 6px', padding: '0 12px', borderRadius: 12,
-              background: on ? PINK : 'transparent', color: on ? '#0b0b0b' : 'white', textShadow: on ? 'none' : undefined}}>
+            <span key={k} style={{display: 'inline-block', margin: '0 6px', padding: '0 12px', borderRadius: 10,
+              background: on ? BRAND.lime : 'transparent', color: on ? BRAND.black : BRAND.white, textShadow: on ? 'none' : undefined,
+              opacity: shown ? 1 : 0.35, scale: String(on ? interpolate(p, [0, 1], [1.25, 1.08]) : 1)}}>
               {w.text}
             </span>
           );
@@ -194,16 +256,25 @@ const Subs = ({caps}) => {
 const Outro = () => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const bg = interpolate(frame, [0, 8], [0, 0.88], {extrapolateRight: 'clamp'});
-  const p = spring({frame: frame - 3, fps, config: {damping: 16}});
+  const bg = interpolate(frame, [0, 6], [0, 0.94], {extrapolateRight: 'clamp'});
+  const p = spring({frame: frame - 2, fps, config: {damping: 14}});
   const q = spring({frame: frame - 10, fps, config: {damping: 18}});
+  const split = interpolate(frame, [0, 14], [26, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+  const logo = (color, dx, extra) => (
+    <div style={{position: 'absolute', fontFamily: inter, fontWeight: 900, fontSize: 300, letterSpacing: -16, color, lineHeight: 0.9,
+      translate: dx + 'px 0px', ...extra}}>5HU</div>
+  );
   return (
-    <AbsoluteFill style={{background: 'rgba(8,8,8,' + bg + ')', justifyContent: 'center', alignItems: 'center'}}>
-      <div style={{fontFamily: inter, fontWeight: 900, fontSize: 300, letterSpacing: -16, color: 'white', lineHeight: 0.9, scale: String(interpolate(p, [0, 1], [1.25, 1])), opacity: p}}>
-        5HU<span style={{color: PINK}}>.</span>
+    <AbsoluteFill style={{background: 'rgba(10,10,10,' + bg + ')', justifyContent: 'center', alignItems: 'center'}}>
+      <div style={{position: 'relative', width: 640, height: 280, display: 'flex', justifyContent: 'center', scale: String(interpolate(p, [0, 1], [1.4, 1])), opacity: p}}>
+        {logo(BRAND.pink, -split, {mixBlendMode: 'screen', opacity: 0.9})}
+        {logo(BRAND.cyan, split, {mixBlendMode: 'screen', opacity: 0.9})}
+        {logo(BRAND.white, 0, {})}
+        <div style={{position: 'absolute', right: 2, bottom: 26, width: 52, height: 52, borderRadius: 26, background: BRAND.lime,
+          scale: String(spring({frame: frame - 8, fps, config: {damping: 9}}))}} />
       </div>
-      <div style={{fontFamily: serif, fontStyle: 'italic', fontSize: 84, color: PINK, marginTop: 10, opacity: q, translate: '0px ' + interpolate(q, [0, 1], [30, 0]) + 'px'}}>we find them first.</div>
-      <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 5, color: 'white', marginTop: 40, opacity: q}}>FOLLOW FOR THE NEXT BIG NAME</div>
+      <div style={{fontFamily: serif, fontStyle: 'italic', fontSize: 84, color: BRAND.lime, marginTop: 16, opacity: q, translate: '0px ' + interpolate(q, [0, 1], [30, 0]) + 'px'}}>we find them first.</div>
+      <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 5, color: BRAND.white, marginTop: 40, opacity: q}}>FOLLOW FOR THE NEXT BIG NAME</div>
     </AbsoluteFill>
   );
 };
@@ -215,27 +286,41 @@ const stampFrom = (voice) => {
   return p(d.getUTCDate()) + '.' + p(d.getUTCMonth() + 1) + '.' + String(d.getUTCFullYear()).slice(2);
 };
 
+const KINDS = ['wipe', 'split', 'smash'];
+
+const Scene = ({s, i, from, dur, layout, kind, accent}) => {
+  const frame = useCurrentFrame();
+  return (
+    <AbsoluteFill style={{translate: i > 0 ? shakeOf(frame, kind) : '0px 0px'}}>
+      <Media scene={s} dur={dur} i={i} from={from} />
+      <BarFlash from={from} />
+      <Grade />
+      <Center center={s.center} accent={accent} />
+      <Headline text={s.on_screen_text} layout={layout} accent={accent} from={from} />
+      {i > 0 && <Sequence durationInFrames={14}><Impact kind={kind} accent={accent} /></Sequence>}
+    </AbsoluteFill>
+  );
+};
+
 export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps}) => {
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
+  const seed = seedOf(voice);
+  const accent = seed % 2 ? BRAND.pink : BRAND.cyan;
   const caps = (captions && captions.length) ? captions : buildCaptions(voiceover, durationInFrames, f);
   const tl = sceneTimeline(scenes, caps, durationInFrames, f);
   const outroFrom = Math.max(0, durationInFrames - Math.round(OUTRO_SEC * f));
   const subsCaps = caps.filter((c) => (c.startMs / 1000) * f < outroFrom);
   return (
-    <AbsoluteFill style={{backgroundColor: 'black'}}>
+    <AbsoluteFill style={{backgroundColor: BRAND.black}}>
       {scenes.map((s, i) => (
         <Sequence key={i} from={tl[i].from} durationInFrames={tl[i].dur}>
-          <Media scene={s} dur={tl[i].dur} i={i} from={tl[i].from} />
-          <BarFlash from={tl[i].from} />
-          <Grade />
-          <Center center={s.center} />
-          <Headline text={s.on_screen_text} />
-          {i > 0 && <Sequence durationInFrames={8}><Flash /></Sequence>}
+          <Scene s={s} i={i} from={tl[i].from} dur={tl[i].dur} accent={accent}
+            layout={(seed + i) % 3} kind={KINDS[(seed + i) % KINDS.length]} />
         </Sequence>
       ))}
       <Grain />
-      <Header stamp={stampFrom(voice)} />
+      <Header stamp={stampFrom(voice)} accent={accent} />
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
       <Sequence from={outroFrom}><Outro /></Sequence>
       <Audio src={staticFile(voice)} />

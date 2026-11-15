@@ -125,7 +125,8 @@ const pool = [].concat(
   take(shuffle(all.filter(x => x.tier === 'main')), 2));
 const candidates = shuffle(pool.length ? pool : all.slice(0, 12));
 const candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier !== 'main' ? ', ' + x.tier : '') + (rising(x) ? ', RISING' : '') + '] ' + x.title + '\n   ' + x.snippet + '\n   LINK: ' + x.link).join('\n\n');
-return [{ json: { candidates, candidatesText, feedsRead: ok } }];""")
+const recentHooks = (_st.hooks5hu || []).slice(0, 12).map(h => '- ' + h).join('\n') || '(none yet)';
+return [{ json: { candidates, candidatesText, feedsRead: ok, recentHooks } }];""")
 
 ps = by_name["Parse Selection"]["parameters"]
 old = "return [{ json: { link: sel.link,"
@@ -144,7 +145,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "a breakout collab, a designer from a small label getting a bigger job.\n"
     "2. A cult / boutique brand doing something new (drop, collab, archive revival, new direction).\n"
     "3. A new micro-trend or scene with a clear name and concrete examples.\n"
-    "4. Only if nothing above exists: the most interesting insider story from a big house (not celebrity gossip).\n"
+    "4. If nothing above exists: a smaller independent or streetwear brand story from a niche source. A big luxury house (Louis Vuitton, Chanel, Dior, Gucci...) only as the very last resort, and only for an insider angle - never celebrity gossip.\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
     "AVOID: deaths and obituaries, body or weight talk, anything about minors' bodies, crime/lawsuits with victims, shopping roundups, "
     "sales/affiliate lists, horoscopes, sponsored posts, celebrity relationship gossip, essays without news, "
@@ -166,7 +167,7 @@ msg["content"] = (
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
     "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 15 s around it. Never stack names, dates and numbers one after another.\n"
-    "- voiceover: 18-22 words MAX, 4 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- voiceover: 18-22 words. HARD LIMIT: count the words before answering; if more than 22, rewrite shorter. 4 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
@@ -218,7 +219,7 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
 # "5HU" is said "Shoo" (Slavic ШУ), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "data.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
+rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
 for _n in ("Convert text to speech",):
     _p = by_name[_n]["parameters"]
