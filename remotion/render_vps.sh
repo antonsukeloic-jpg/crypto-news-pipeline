@@ -9,6 +9,6 @@ python3 "$PROJ/make_props.py" "$JOB" "$ROOT" "$PROJ/public" "$PROJ/props.json" |
 cd "$PROJ" || exit 1
 EXTRA="--concurrency=3"
 CH=$(python3 -c "import json;print(json.load(open('$JOB')).get('channel',''))" 2>/dev/null)
-[ "$CH" = "5hu" ] && EXTRA="--concurrency=4 --x264-preset=veryfast --scale=0.6667"   # 5HU: 720x1280, speed over file size
+[ "$CH" = "5hu" ] && EXTRA="--concurrency=4 --x264-preset=veryfast --scale=0.75"   # 5HU: 810x1440 (integer dims), speed over file size
 npx remotion render src/index.js NewsVideo "$OUT" \
   --props="$PROJ/props.json" --port=3999 $EXTRA --log=error 2>&1 | tee "$PROJ/render_error.log"
