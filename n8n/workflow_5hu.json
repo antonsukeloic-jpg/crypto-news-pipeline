@@ -20,7 +20,7 @@
         416,
         0
       ],
-      "id": "7d875390-b5d3-4a5c-82f5-7b8e06fd245a",
+      "id": "52e183fc-f7bc-4a60-8882-a05cced45f27",
       "name": "HTML",
       "onError": "continueRegularOutput"
     },
@@ -48,7 +48,7 @@
         592,
         0
       ],
-      "id": "723cd5f9-8be5-43c6-95b9-4b6fdbe7b9ed",
+      "id": "3a35c01a-b4b7-49ab-8b48-f4837eabe470",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -67,7 +67,7 @@
         896,
         -16
       ],
-      "id": "8812ad79-a305-46bf-b4f1-ccedbf31718d",
+      "id": "a937bbb8-0717-4927-a412-6ab5ce066786",
       "name": "Code in JavaScript"
     },
     {
@@ -96,7 +96,7 @@
         1488,
         -128
       ],
-      "id": "dec3532a-bf71-4569-8f75-021430992fc7",
+      "id": "616fa4d5-653d-4ade-80ed-ba78853a756b",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -123,9 +123,9 @@
         1088,
         16
       ],
-      "id": "679edf21-8264-4b49-8acd-3e507271bbbb",
+      "id": "bae71afc-2bcc-4b3b-8f3e-8857933303b7",
       "name": "Send message and wait for response",
-      "webhookId": "0c964986-50d3-4d2e-861f-da6e76eed831",
+      "webhookId": "05daa4ef-243e-4f32-89e7-4a4a0f9df6f6",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -146,7 +146,7 @@
         1232,
         288
       ],
-      "id": "2cabe081-e481-4999-ba0d-266008190eaa",
+      "id": "64365d5d-9603-4b95-8110-e26b8a1b73d3",
       "name": "Save Image"
     },
     {
@@ -191,7 +191,7 @@
         400,
         272
       ],
-      "id": "0c9133f2-0c43-433a-89a6-156219975821",
+      "id": "00857bcc-83bc-454a-933d-3e94506d97d0",
       "name": "Image - Request"
     },
     {
@@ -215,7 +215,7 @@
         608,
         288
       ],
-      "id": "2d58dabf-889d-49d8-96e2-6a1f950c356f",
+      "id": "ae8d5e7e-897d-4940-9c43-7e640c094038",
       "name": "Image - Get"
     },
     {
@@ -235,7 +235,7 @@
         1072,
         288
       ],
-      "id": "515b6f76-9f8b-4b7f-8eae-4e1568775db9",
+      "id": "0dfdd969-e319-4e55-a59b-e767d0f18c35",
       "name": "Image - Download"
     },
     {
@@ -266,7 +266,7 @@
         208,
         0
       ],
-      "id": "48021f5d-9e6f-4983-be62-2170276f6c5e",
+      "id": "7aaa77af-9e96-41c8-a873-83f61aefd085",
       "name": "Article - Fetch",
       "retryOnFail": true,
       "maxTries": 3,
@@ -286,7 +286,7 @@
         1648,
         -128
       ],
-      "id": "50467181-9ef9-4aea-bee6-7f357efb6f9d",
+      "id": "82e228a4-3ad3-4975-9c86-c6483b68c821",
       "name": "Save Voice"
     },
     {
@@ -299,7 +299,7 @@
         1584,
         288
       ],
-      "id": "8ef77e61-ae89-4c8a-b59c-4d39588c3b34",
+      "id": "6201a75d-5454-4df1-a54f-b0dff91750c4",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -334,12 +334,12 @@
         800,
         304
       ],
-      "id": "cf410181-300d-4e42-aca8-46d407a04c14",
+      "id": "0ff0b181-6677-43fd-adf2-0761f212509d",
       "name": "If"
     },
     {
       "parameters": {
-        "amount": 10
+        "amount": 3
       },
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -347,9 +347,9 @@
         976,
         432
       ],
-      "id": "f0b880ce-c54b-4439-9159-e80edd577044",
+      "id": "99771f33-982f-44b2-ae0f-0c8990602271",
       "name": "Wait",
-      "webhookId": "aaacc173-9abf-418d-bb68-50183cd4cca8"
+      "webhookId": "e61ca1a8-0f4e-4739-9a90-27cd7f8e900b"
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
         1264,
         32
       ],
-      "id": "b58d5a09-bcc9-4839-af6d-f7e4f783b7e6",
+      "id": "4cdc10bb-83fc-4df5-9e7a-dee67870e51f",
       "name": "Approved?"
     },
     {
@@ -395,7 +395,7 @@
         1360,
         288
       ],
-      "id": "afca5b24-8e0e-466b-952f-c6d47045f0a8",
+      "id": "e976429b-6aa2-4f3c-998e-c98d4e861265",
       "name": "Split Scenes"
     },
     {
@@ -421,7 +421,7 @@
         },
         "options": {}
       },
-      "id": "f49c11e9-4aee-41cd-9276-fd871acced4d",
+      "id": "146bbcf4-9210-4e7d-8db9-352685c0575e",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -441,7 +441,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim().replace(/^shoo(?=[^A-Za-z]*$)/i, '5HU'), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "c963910f-c195-4b6f-8d7e-9e10855d9fa6",
+      "id": "c153f269-5974-4332-ac79-e2f4b58d4b32",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +460,7 @@
           ]
         }
       },
-      "id": "f45d3dc3-2164-4bd8-a43a-0fcd1ede7d25",
+      "id": "9e90dc5e-f1cb-413a-90e6-fade4e453fef",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -474,7 +474,7 @@
       "parameters": {
         "jsCode": "const FEEDS = [[\"Scandinavian MIND\", \"https://www.scandinavianmind.com/feed\", \"emerging\"], [\"BON (Stockholm)\", \"https://bon.se/feed\", \"emerging\"], [\"10 Magazine (London)\", \"https://www.10magazine.com/feed/\", \"emerging\"], [\"Office Magazine (NY)\", \"https://www.officemagazine.net/rss.xml\", \"emerging\"], [\"Kaltblut (Berlin)\", \"https://www.kaltblut-magazine.com/feed/\", \"emerging\"], [\"Highxtar\", \"https://highxtar.com/feed/\", \"emerging\"], [\"Numero\", \"https://www.numero.com/en/rss\", \"niche\"], [\"Interview\", \"https://www.interviewmagazine.com/feed\", \"niche\"], [\"NYLON\", \"https://www.nylon.com/feeds/feed.rss\", \"niche\"], [\"The Fashionisto\", \"https://www.thefashionisto.com/feed/\", \"niche\"], [\"FashionUnited\", \"https://fashionunited.uk/rss-news\", \"main\"], [\"Coveteur\", \"https://coveteur.com/feeds/feed.rss\", \"main\"], [\"Vogue\", \"https://www.vogue.com/feed/rss\", \"main\"], [\"British Vogue\", \"https://www.vogue.co.uk/feed/rss\", \"main\"], [\"WWD\", \"https://wwd.com/feed/\", \"main\"], [\"Harper's Bazaar\", \"https://www.harpersbazaar.com/rss/all.xml/\", \"main\"], [\"Elle\", \"https://www.elle.com/rss/all.xml/\", \"main\"], [\"Fashionista\", \"https://fashionista.com/.rss/excerpt/\", \"main\"], [\"Who What Wear\", \"https://www.whowhatwear.com/rss\", \"main\"], [\"Esquire Style\", \"https://www.esquire.com/rss/style.xml/\", \"main\"], [\"Hypebeast\", \"https://hypebeast.com/feed\", \"niche\"], [\"Hypebae\", \"https://www.hypebae.com/feed\", \"niche\"], [\"Highsnobiety\", \"https://www.highsnobiety.com/feed/\", \"niche\"], [\"Dazed\", \"https://www.dazeddigital.com/rss\", \"niche\"], [\"i-D\", \"https://i-d.co/feed/\", \"niche\"], [\"PAPER\", \"https://www.papermag.com/feeds/feed.rss\", \"niche\"], [\"Refinery29 Fashion\", \"https://www.refinery29.com/en-us/fashion/rss.xml\", \"niche\"], [\"Permanent Style\", \"https://www.permanentstyle.com/feed\", \"niche\"], [\"Put This On\", \"https://www.putthison.com/rss\", \"niche\"], [\"Heddels\", \"https://www.heddels.com/feed/\", \"niche\"], [\"DMARGE\", \"https://www.dmarge.com/feed\", \"niche\"]];\nconst UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';\nconst decode = (s) => String(s || '')\n  .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1').replace(/<[^>]+>/g, ' ')\n  .replace(/&#8217;|&rsquo;|&#8216;|&lsquo;|&#039;|&#39;|&apos;/g, \"'\").replace(/&#8220;|&#8221;|&ldquo;|&rdquo;|&quot;/g, '\"')\n  .replace(/&#8211;|&ndash;/g, '-').replace(/&#8212;|&mdash;/g, '-').replace(/&nbsp;|&#160;/g, ' ')\n  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&amp;/g, '&')\n  .replace(/\\s+/g, ' ').trim();\nconst tag = (b, t) => { const m = b.match(new RegExp('<' + t + '(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)</' + t + '>', 'i')); return m ? m[1] : ''; };\nconst parse = (xml, source, tier) => {\n  const blocks = xml.match(/<item[\\s>][\\s\\S]*?<\\/item>/gi) || xml.match(/<entry[\\s>][\\s\\S]*?<\\/entry>/gi) || [];\n  return blocks.map(b => {\n    let link = decode(tag(b, 'link'));\n    if (!link) { const m = b.match(/<link[^>]*href=\"([^\"]+)\"/i); link = m ? m[1] : ''; }\n    if (!link) link = decode(tag(b, 'guid'));\n    const date = decode(tag(b, 'pubDate') || tag(b, 'published') || tag(b, 'updated') || tag(b, 'dc:date'));\n    const snippet = decode(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content:encoded')).slice(0, 240);\n    return { source, tier, title: decode(tag(b, 'title')), link: link.trim(), snippet, date };\n  }).filter(x => x.title && /^https?:/.test(x.link));\n};\nconst res = await Promise.allSettled(FEEDS.map(([name, url, tier]) =>\n  this.helpers.httpRequest({ url, timeout: 15000, headers: { 'User-Agent': UA, 'Accept': 'application/rss+xml,application/xml,text/xml,*/*' } })\n    .then(body => parse(typeof body === 'string' ? body : String(body), name, tier))));\nlet all = [], ok = 0;\nres.forEach(r => { if (r.status === 'fulfilled' && r.value.length) { ok++; all = all.concat(r.value); } });\n// only new stories: skip links already used (kept in workflow static data) and older than 72 h\nconst _st = $getWorkflowStaticData('global'); const _seen = new Set(_st.seen5hu || []);\nconst age = (x) => Date.now() - (new Date(x.date).getTime() || 0);\nall = all.filter(x => !_seen.has(x.link) && age(x) < (x.tier === 'emerging' ? 120 : 72) * 3600e3);\nif (!all.length) throw new Error('5HU: no new fashion stories (feeds read: ' + ok + ')');\n// newest 2 per source, then a pool with niche sources first: up to 8 niche + 4 mainstream, shuffled\nconst per = {}; all.sort((a, b) => age(a) - age(b));\nall = all.filter(x => (per[x.source] = (per[x.source] || 0) + 1) <= 2);\nconst shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };\nconst RISING = /\\b(emerging|newcomer|debut (collection|show|runway|store|season)|first (collection|show|runway|store)|designers? to (watch|know)|labels? to (watch|know)|rising (star|label|designer|brand)|new (label|brand|designer)|up-and-coming|graduate collection|LVMH Prize|ANDAM|Woolmark|Fashion East|NEWGEN|Copenhagen Fashion Week|Stockholm|Oslo|Helsinki|Scandinavian (label|brand|designer|fashion)|Nordic (label|brand|designer|fashion)|Tokyo Fashion Week|Seoul Fashion Week|independent (label|brand|designer)|indie (label|brand|designer)|young designer|breakout|cult (label|brand|sneaker|favourite|favorite))\\b/i;\nconst rising = (x) => RISING.test(x.title + ' ' + x.snippet);\nconst used = new Set(); const take = (arr, n) => arr.filter(x => !used.has(x.link)).slice(0, n).map(x => (used.add(x.link), x));\nconst pool = [].concat(\n  take(shuffle(all.filter(rising)), 6),\n  take(shuffle(all.filter(x => x.tier === 'emerging')), 4),\n  take(shuffle(all.filter(x => x.tier === 'niche')), 3),\n  take(shuffle(all.filter(x => x.tier === 'main')), 2));\nconst candidates = shuffle(pool.length ? pool : all.slice(0, 12));\nconst candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier !== 'main' ? ', ' + x.tier : '') + (rising(x) ? ', RISING' : '') + '] ' + x.title + '\\n   ' + x.snippet + '\\n   LINK: ' + x.link).join('\\n\\n');\nreturn [{ json: { candidates, candidatesText, feedsRead: ok } }];"
       },
-      "id": "37f8fb56-e4e1-46b6-ad1d-b36175b866e3",
+      "id": "bcfa471f-b629-42bc-ad5b-14311e589563",
       "name": "Combine Feeds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -502,7 +502,7 @@
         "simplify": false,
         "options": {}
       },
-      "id": "5c2411d4-ce6d-42a5-8ef7-8ce2c2e53c49",
+      "id": "546ed2e1-2b40-425d-a1e6-2bd4c072adc1",
       "name": "Select Story",
       "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
@@ -521,7 +521,7 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json.content[0].text;\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nlet sel = null;\ntry { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(fixJson(raw.slice(s, e + 1))); } catch (err) { sel = null; }\nconst cands = ($('Combine Feeds').first().json.candidates) || [];\nif (!sel || !sel.link) {\n  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n  const link = m[1] || m[0];\n  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n  sel = { link, title: '', reason: rm ? rm[1] : '' };\n}\nconst hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\nif (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\nconst _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\nreturn [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];"
       },
-      "id": "fabcbfad-8e6b-4d67-b474-cdf788c27ea9",
+      "id": "68eecbac-065c-49af-b3f6-df2a9836d909",
       "name": "Parse Selection",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -543,7 +543,7 @@
         1804,
         288
       ],
-      "id": "56d94826-8569-499b-a65b-8b76bfccea15",
+      "id": "5bb5a386-94e2-42ce-8efc-4c26a75fff38",
       "name": "Save Job"
     },
     {
@@ -556,7 +556,7 @@
         -816,
         424
       ],
-      "id": "c90b13a5-abdb-484c-b5f0-bad8a201617b",
+      "id": "2a89c41a-3419-4845-97c6-87723d3e485d",
       "name": "Run Now (CLI)"
     }
   ],

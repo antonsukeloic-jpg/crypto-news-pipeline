@@ -248,6 +248,10 @@ tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
     {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True}, indent=2)
 
+# ---- speed: poll Higgsfield every 3 s instead of 10 s (images are ready in ~10 s)
+assert by_name["Wait"]["parameters"].get("amount") == 10
+by_name["Wait"]["parameters"]["amount"] = 3
+
 # ---- sanity
 names = [n["name"] for n in w["nodes"]]
 for outs in w["connections"].values():

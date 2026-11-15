@@ -4,7 +4,11 @@ JOB="$1"; ROOT="$2"; OUT="$3"
 PROJ="$(cd "$(dirname "$0")" && pwd)"
 mkdir -p "$PROJ/public/logos" && cp -f "$PROJ"/logos/*.png "$PROJ/public/logos/"   # coin logos
 mkdir -p "$PROJ/public/music" && cp -f "$PROJ"/music/*.mp3 "$PROJ/public/music/" 2>/dev/null   # music beds (5HU)
+mkdir -p "$PROJ/public/fx" && cp -f "$PROJ"/fx/*.png "$PROJ/public/fx/" 2>/dev/null   # grain tiles (5HU)
 python3 "$PROJ/make_props.py" "$JOB" "$ROOT" "$PROJ/public" "$PROJ/props.json" || exit 1
 cd "$PROJ" || exit 1
+EXTRA="--concurrency=3"
+CH=$(python3 -c "import json;print(json.load(open('$JOB')).get('channel',''))" 2>/dev/null)
+[ "$CH" = "5hu" ] && EXTRA="--concurrency=4 --x264-preset=veryfast"   # 5HU: speed over file size
 npx remotion render src/index.js NewsVideo "$OUT" \
-  --props="$PROJ/props.json" --port=3999 --concurrency=3 --log=error 2>&1 | tee "$PROJ/render_error.log"
+  --props="$PROJ/props.json" --port=3999 $EXTRA --log=error 2>&1 | tee "$PROJ/render_error.log"

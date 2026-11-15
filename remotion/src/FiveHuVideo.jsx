@@ -11,14 +11,8 @@ const MUSIC_VOL = 0.42;   // techno bed under the voice (louder on the outro)
 const Grain = () => {
   const frame = useCurrentFrame();
   return (
-    <AbsoluteFill style={{mixBlendMode: 'overlay', opacity: 0.22, pointerEvents: 'none'}}>
-      <svg width="1080" height="1920">
-        <filter id={'g' + (frame % 8)}>
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed={frame % 8} stitchTiles="stitch" />
-          <feColorMatrix type="saturate" values="0" />
-        </filter>
-        <rect width="100%" height="100%" filter={'url(#g' + (frame % 8) + ')'} />
-      </svg>
+    <AbsoluteFill style={{mixBlendMode: 'overlay', opacity: 0.28, pointerEvents: 'none'}}>
+      <Img src={staticFile('fx/grain_' + (frame % 6) + '.png')} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
     </AbsoluteFill>
   );
 };
