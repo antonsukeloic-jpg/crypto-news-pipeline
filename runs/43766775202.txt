@@ -1,0 +1,51 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+exec 63 2026-11-15 21:58:59.881 2026-11-15 22:00:17.856
+   0.0s     0.0s  Run Now (CLI)
+   0.0s     3.7s  Combine Feeds
+   3.7s     2.1s  Select Story
+   5.8s     0.0s  Parse Selection
+   5.8s     0.1s  Article - Fetch
+   5.9s     0.0s  HTML
+   5.9s    11.3s  Message a model
+  17.3s     1.9s  Code in JavaScript
+  19.2s     5.8s  Convert text to speech
+  25.0s     0.5s  Align
+  25.5s     0.0s  Add Captions
+  25.5s     0.0s  Save Voice
+  25.6s     0.0s  Split Scenes
+  25.6s     0.6s  Image - Request
+  26.2s     0.1s  Image - Get
+  26.3s     0.0s  If
+  26.3s    10.0s  Wait
+  36.3s     0.1s  Image - Get
+  36.4s     0.0s  If
+  36.4s     0.2s  Image - Download
+  36.6s     0.0s  Save Image
+  36.6s     0.0s  Make Job File
+  36.6s     0.0s  Save Job
+  36.6s    10.0s  Wait
+  46.6s     0.1s  Image - Get
+  46.7s     0.0s  If
+  46.7s    10.0s  Wait
+  56.7s     0.1s  Image - Get
+  56.8s     0.0s  If
+  56.8s     0.3s  Image - Download
+  57.0s     0.0s  Save Image
+  57.0s     0.0s  Make Job File
+  57.1s     0.0s  Save Job
+  57.1s    10.0s  Wait
+  67.1s     0.1s  Image - Get
+  67.2s     0.0s  If
+  67.2s     0.3s  Image - Download
+  67.5s     0.0s  Save Image
+  67.5s     0.0s  Make Job File
+  67.5s     0.0s  Save Job
+  67.5s    10.0s  Wait
+  77.5s     0.1s  Image - Get
+  77.6s     0.0s  If
+  77.6s     0.3s  Image - Download
+  77.9s     0.0s  Save Image
+  77.9s     0.0s  Make Job File
+  77.9s     0.0s  Save Job
+Nov 15 21:55:38 srv2107298 bash[1315455]: [21:55:38] OK 5hu_video_1794779480516.mp4
+Nov 15 21:59:40 srv2107298 bash[1315455]: [21:59:40] job 5hu_job_1794779957237.json -> 5hu_video_1794779957237.mp4
