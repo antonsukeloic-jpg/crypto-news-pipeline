@@ -215,7 +215,22 @@ rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'))
 # random Wikipedia image. Auto-spot only multi-word names and ALL-CAPS/CamelCase brands; the script's explicit entities still work.
 rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((m = reSingle.exec(vo)))",
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
+# "5HU" is said "Shoo" (Slavic ШУ), never "five-H-U": the voice + alignment get a phonetic copy,
+# captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
+rep("return [{ json: data }];", "data.voiceover_tts = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\nreturn [{ json: data }];")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
+for _n in ("Convert text to speech",):
+    _p = by_name[_n]["parameters"]
+    assert _p["text"] == "={{ $('Code in JavaScript').item.json.voiceover }}"
+    _p["text"] = "={{ $('Code in JavaScript').item.json.voiceover_tts }}"
+for _bp in by_name["Align"]["parameters"]["bodyParameters"]["parameters"]:
+    if _bp.get("name") == "text":
+        assert _bp["value"] == "={{ $('Code in JavaScript').item.json.voiceover }}"
+        _bp["value"] = "={{ $('Code in JavaScript').item.json.voiceover_tts }}"
+_ac = by_name["Add Captions"]["parameters"]
+_old = "const captions = words.map(w => ({ text: w.text.trim(),"
+assert _ac["jsCode"].count(_old) == 1
+_ac["jsCode"] = _ac["jsCode"].replace(_old, "const captions = words.map(w => ({ text: w.text.trim().replace(/^shoo(?=[^A-Za-z]*$)/i, '5HU'),")
 
 # ---- image style
 ss = by_name["Split Scenes"]["parameters"]
