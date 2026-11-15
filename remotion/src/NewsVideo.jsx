@@ -11,6 +11,7 @@ const CHANNELS = {
   crypto: {kicker: 'Crypto News', accent: '#F7931A'},
   lt: {kicker: 'Naujienos', accent: '#FDB913'},
   vikops: {kicker: 'Vikops', accent: '#D9C4A1'},
+  '5hu': {kicker: '5HU', accent: '#FF3D9A'},
 };
 
 const KenBurns = ({src, durationInFrames, zoomIn}) => {

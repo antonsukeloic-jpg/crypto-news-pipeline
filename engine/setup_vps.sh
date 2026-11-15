@@ -42,10 +42,17 @@ VIKOPS_ID=$(python3 -c "import json;print(json.load(open('$S/wf_vikops.json'))['
 chown 1000:1000 $S/wf_vikops.json
 $NX import:workflow --input=/data/shared/wf_vikops.json && say "VIKOPS_WORKFLOW=imported $VIKOPS_ID" || say "VIKOPS_WORKFLOW=IMPORT_FAILED"
 echo "$VIKOPS_ID" > $ST/vikops_wf_id
+# 5HU fashion news workflow (own fixed id), built from the LT one: started by /run 5hu
+python3 $REPO/n8n/make_5hu_workflow.py $S/wf_lt.json $S/wf_5hu.json
+FIVEHU_ID=$(python3 -c "import json;print(json.load(open('$S/wf_5hu.json'))['id'])")
+chown 1000:1000 $S/wf_5hu.json
+$NX import:workflow --input=/data/shared/wf_5hu.json && say "5HU_WORKFLOW=imported $FIVEHU_ID" || say "5HU_WORKFLOW=IMPORT_FAILED"
+echo "$FIVEHU_ID" > $ST/5hu_wf_id
+rm -f $S/wf_5hu.json
 rm -f $S/wf_base.json $S/wf_lt.json $S/wf_vikops.json
 
 # 3a) build the local-disk crypto workflow (+ /lt router) and overwrite the existing one (same id)
-python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf.json "$LT_ID" "$VIKOPS_ID"
+python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf.json "$LT_ID" "$VIKOPS_ID" "$FIVEHU_ID"
 $NX export:workflow --all --output=/data/shared/all_wf.json
 python3 - <<'EOF'
 import json
@@ -69,6 +76,7 @@ $NX publish:workflow --id="$(cat $ST/wf_id)" && say "PUBLISHED=yes" || say "PUBL
 # LT must be published too: n8n 2.x only lets the /run lt Execute Workflow node call a published sub-workflow
 $NX publish:workflow --id="$(cat $ST/lt_wf_id)" && say "LT_PUBLISHED=yes" || say "LT_PUBLISHED=FAILED"
 $NX publish:workflow --id="$(cat $ST/vikops_wf_id)" && say "VIKOPS_PUBLISHED=yes" || say "VIKOPS_PUBLISHED=FAILED"
+$NX publish:workflow --id="$(cat $ST/5hu_wf_id)" && say "5HU_PUBLISHED=yes" || say "5HU_PUBLISHED=FAILED"
 docker compose restart n8n
 for i in $(seq 1 30); do docker compose exec -T n8n n8n --version >/dev/null 2>&1 && break; sleep 2; done
 sleep 25

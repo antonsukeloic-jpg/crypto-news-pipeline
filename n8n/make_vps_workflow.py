@@ -275,6 +275,57 @@ if LT_ID and VIKOPS_ID:
     w["connections"]["Reply: starting Vikops"] = {"main": [[{"node": "Vikops Topic", "type": "main", "index": 0}]]}
     w["connections"]["Vikops Topic"] = {"main": [[{"node": "Start Vikops Pipeline", "type": "main", "index": 0}]]}
 
+# 5d) Telegram "/run 5hu" -> the separate 5HU fashion news workflow.
+FIVEHU_ID = sys.argv[5] if len(sys.argv) > 5 else ""
+if LT_ID and VIKOPS_ID and FIVEHU_ID:
+    w["nodes"] += [
+        {
+            "parameters": {
+                "conditions": {
+                    "options": {"caseSensitive": False, "leftValue": "", "typeValidation": "loose", "version": 2},
+                    "conditions": [
+                        {"id": str(uuid.uuid4()),
+                         "leftValue": "={{ String($json.message?.chat?.id ?? '') }}",
+                         "rightValue": OWNER_CHAT,
+                         "operator": {"type": "string", "operation": "equals"}},
+                        {"id": str(uuid.uuid4()),
+                         "leftValue": "={{ /^\\/(run\\s+)?5hu\\s*$/i.test(($json.message?.text ?? '').trim()) }}",
+                         "rightValue": "",
+                         "operator": {"type": "boolean", "operation": "true", "singleValue": True}},
+                    ],
+                    "combinator": "and",
+                },
+                "options": {},
+            },
+            "type": "n8n-nodes-base.if", "typeVersion": 2.2,
+            "position": [x - 220, y + 1160], "id": str(uuid.uuid4()), "name": "Is /run 5hu from me?",
+        },
+        {
+            "parameters": {
+                "chatId": OWNER_CHAT,
+                "text": "👗 Got it — making a new 5HU fashion news video. It will arrive here in about 3–5 minutes.",
+                "additionalFields": {"appendAttribution": False},
+            },
+            "type": "n8n-nodes-base.telegram", "typeVersion": 1.2,
+            "position": [x, y + 1260], "id": str(uuid.uuid4()), "name": "Reply: starting 5HU",
+            "credentials": TG_CRED, "onError": "continueRegularOutput",
+        },
+        {
+            "parameters": {
+                "workflowId": {"__rl": True, "value": FIVEHU_ID, "mode": "id"},
+                "workflowInputs": {"mappingMode": "defineBelow", "value": {}, "matchingColumns": [], "schema": [],
+                                   "attemptToConvertTypes": False, "convertFieldsToString": True},
+                "mode": "once",
+                "options": {"waitForSubWorkflow": False},
+            },
+            "type": "n8n-nodes-base.executeWorkflow", "typeVersion": 1.2,
+            "position": [x + 220, y + 1260], "id": str(uuid.uuid4()), "name": "Start 5HU Pipeline",
+        },
+    ]
+    w["connections"]["Is /run vikops from me?"]["main"][1] = [{"node": "Is /run 5hu from me?", "type": "main", "index": 0}]
+    w["connections"]["Is /run 5hu from me?"] = {"main": [[{"node": "Reply: starting 5HU", "type": "main", "index": 0}], []]}
+    w["connections"]["Reply: starting 5HU"] = {"main": [[{"node": "Start 5HU Pipeline", "type": "main", "index": 0}]]}
+
 # 6) Article fetch: browser-like request, retries, and never crash the run.
 #    If the site still refuses, the script is written from the RSS headline + summary.
 art = by_name["Article - Fetch"]

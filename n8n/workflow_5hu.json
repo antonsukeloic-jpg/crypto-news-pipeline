@@ -1,0 +1,924 @@
+{
+  "name": "5HU Fashion News",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "articleText",
+              "cssSelector": "body"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "66c8aebc-aefe-4906-adfc-2e244187ebb2",
+      "name": "HTML",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the scriptwriter for 5HU, a trending fashion news channel (TikTok/Reels). Turn ONE fashion news article into a 15-second vertical video plan.\n\nOutput ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\nVOICE\n- English, spoken, fast and fun: a stylish insider spilling the news to a friend - confident, a little playful, never cringe. Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n- Say names exactly as they are spelled in the article.\n\nRULES\n- voiceover: ~35 words max (~15 s). Sentence 1 is the hook: lead with the look, the name or the number.\n- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n- No body or weight comments about anyone. Describe clothes, not bodies.\n- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n- on_screen_text: max ~5 words.\n- center: per scene, what shows in the MIDDLE of the frame. {\"type\":\"stat\",\"value\":\"2\",\"prefix\":\"$\",\"suffix\":\"B\",\"color\":\"green\",\"label\":\"max 5 words\"} for ONE striking number from the article (at most 1-2 scenes; value digits only; prefix/suffix short units like $, €, %, B, M, K; color red for a fall/loss, green for a rise, otherwise omit). {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"Name\",\"wiki\":\"Exact English Wikipedia page title\"} when a well-known PUBLIC figure (designer, celebrity, model, CEO) is the subject, OR {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Brand\",\"wiki\":\"Exact English Wikipedia page title\"} when a fashion house, brand or retailer is the subject (we fetch its photo/logo from Wikipedia). Whenever a scene is centered on a named brand or public person you MUST use \"entity\". {\"type\":\"none\"} otherwise. NEVER invent a number.\n- hook: max 7 words. hashtags: 4-6, e.g. #fashion #fashionnews #5HU plus the brand/designer.\n\nVISUAL RULES (visual.query, English)\n- Show what the sentence is about: the garments, fabrics, accessories, shoes, a runway, a backstage rail, a boutique window, a sneaker on a pedestal, a street-style moment. Fashion-editorial, specific and literal to the sentence.\n- Do NOT depict real people's faces or recognisable celebrities: show anonymous models from behind or cropped at the shoulders, hands, silhouettes, or just the clothes. Do NOT draw real brand logos, monograms or trademarked patterns - describe colour, cut, material and mood instead.\n- No readable text, numbers or watermarks. No phone/computer screens with UI.\n- Each scene a clearly different shot and setting. Vertical 9:16, subject lower-middle, calmer space in the top third.\n\nSCHEMA\n{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\",\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\nARTICLE\n{{ ($json.articleText && $json.articleText.length > 300) ? $json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet) }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "9aae2fcf-3eee-46bb-a01f-0a242d759e8d",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "3pYNdkLM3jdNYjyM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nconst data = JSON.parse(fixJson(raw.slice(s0, e0 + 1)));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"fashion runway editorial\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"fashion runway editorial\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"5hu_img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.voiceFile = \"5hu_voice_\"+ts+\".mp3\";\ndata.outputFile = \"5hu_video_\"+ts+\".mp4\";\ndata.jobFile = \"5hu_job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = \"\";\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt')); }\n  try {\n    const u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt')); }\n  try {\n    const u1 = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS).concat([\"Sausio\", \"Sausis\", \"Vasario\", \"Vasaris\", \"Kovo\", \"Kovas\", \"Balandžio\", \"Balandis\", \"Gegužės\", \"Gegužė\", \"Birželio\", \"Birželis\", \"Liepos\", \"Liepa\", \"Rugpjūčio\", \"Rugpjūtis\", \"Rugsėjo\", \"Rugsėjis\", \"Spalio\", \"Spalis\", \"Lapkričio\", \"Lapkritis\", \"Gruodžio\", \"Gruodis\", \"Pirmadienį\", \"Pirmadienis\", \"Antradienį\", \"Antradienis\", \"Trečiadienį\", \"Trečiadienis\", \"Ketvirtadienį\", \"Ketvirtadienis\", \"Penktadienį\", \"Penktadienis\", \"Šeštadienį\", \"Šeštadienis\", \"Sekmadienį\", \"Sekmadienis\", \"Lietuva\", \"Lietuvos\", \"Lietuvoje\", \"Lietuvai\", \"Lietuvą\", \"Lietuviai\", \"Lietuvių\", \"Lietuviams\", \"Lietuvis\", \"Lietuvė\", \"Vilnius\", \"Vilniuje\", \"Vilniaus\", \"Vilnių\", \"Kaunas\", \"Kaune\", \"Kauno\", \"Kauną\", \"Klaipėda\", \"Klaipėdoje\", \"Klaipėdos\", \"Šiauliai\", \"Šiauliuose\", \"Panevėžys\", \"Panevėžyje\", \"Europa\", \"Europos\", \"Europoje\", \"Europą\", \"Rusija\", \"Rusijos\", \"Rusijoje\", \"Baltarusija\", \"Baltarusijos\", \"Latvija\", \"Latvijos\", \"Lenkija\", \"Lenkijos\", \"Ukraina\", \"Ukrainos\", \"Ukrainoje\", \"JAV\", \"ES\", \"NATO\", \"Vyriausybė\", \"Vyriausybės\", \"Seimas\", \"Seimo\", \"Seime\", \"Prezidentas\", \"Prezidento\", \"Ministras\", \"Ministrė\", \"Ministerija\", \"Policija\", \"Policijos\", \"Teismas\", \"Teismo\", \"Savivaldybė\", \"Savivaldybės\", \"Euras\", \"Eurų\", \"Eurai\", \"Eurais\", \"Šiandien\", \"Vakar\", \"Rytoj\", \"Šiąnakt\", \"Šįryt\", \"Tačiau\", \"Todėl\", \"Taip\", \"Dabar\", \"Jau\", \"Dar\", \"Bet\", \"Ir\", \"Kai\", \"Nes\", \"Kad\", \"Jis\", \"Ji\", \"Jie\", \"Jos\", \"Mes\", \"Jūs\", \"Tai\", \"Tas\", \"Ta\", \"Tie\", \"Tos\", \"Čia\", \"Ten\", \"Tik\", \"Net\", \"Pagal\", \"Anot\", \"Po\", \"Per\", \"Nuo\", \"Iki\", \"Prie\", \"Apie\", \"Dėl\", \"Su\", \"Be\", \"Už\", \"Ant\", \"Iš\", \"Į\", \"O\", \"Kaip\", \"Kodėl\", \"Kiek\", \"Kur\", \"Kas\", \"Jei\", \"Jeigu\", \"Nors\", \"Milijonas\", \"Milijonai\", \"Milijonų\", \"Milijardas\", \"Milijardų\", \"Tūkstančiai\", \"Tūkstančių\", \"Procentai\", \"Procentų\", \"Naujienos\", \"Delfi\", \"Lrytas\", \"BNS\", \"ELTA\", \"LRT\", \"Lrt\", \"Pranešama\", \"Pranešė\", \"Teigiama\", \"Sako\", \"Teigia\", \"Skelbia\"]));\nconst looksPerson = (n) => /^\\p{Lu}\\p{Ll}+ \\p{Lu}\\p{Ll}+$/u.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((m = reSingle.exec(vo))) { const before = vo.slice(0, m.index).replace(/[\\s„“\"'(]+$/, ''); if (before === '' || /[.!?:;–-]$/.test(before)) continue; add(m[1]); }\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    const enT = (c.wiki_en && c.wiki_en !== 'none') ? c.wiki_en : '';\n    let img = isPerson ? (await wikiImage(title) || (enT ? await wikiImage(enT, 'en') : null) || (c.name && c.name !== title ? await wikiImage(c.name) : null))\n                       : (await resolveNonPerson(title) || (enT ? (await companyLogo(enT, 'en') || await wikiImage(enT, 'en')) : null));\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", channel:\"5hu\", voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nreturn [{ json: data }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -16
+      ],
+      "id": "b43e3e33-9dc1-4ddf-8a56-4da7c195a538",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "speech",
+        "voice": {
+          "__rl": true,
+          "mode": "id",
+          "value": "FGY2WhTYpPnrIDTdsKH5"
+        },
+        "text": "={{ $('Code in JavaScript').item.json.voiceover }}",
+        "additionalOptions": {
+          "model": {
+            "__rl": true,
+            "value": "eleven_v4",
+            "mode": "list",
+            "cachedResultName": "Eleven v4"
+          },
+          "voiceSettings": "{\n  \"stability\": 0.45,\n  \"similarity_boost\": 0.85,\n  \"style\": 0.35,\n  \"use_speaker_boost\": true,\n  \"speed\": 1.05\n}"
+        },
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        1488,
+        -128
+      ],
+      "id": "bd32e1a3-c061-4572-926d-e8d6ec4e948e",
+      "name": "Convert text to speech",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "lZ8pCRfAtMEwJkMM",
+          "name": "ElevenLabs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "694708370",
+        "message": "={{ $('Code in JavaScript').item.json.script_text }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1088,
+        16
+      ],
+      "id": "2cb8745f-3110-4a1d-ad4b-820a0806fbae",
+      "name": "Send message and wait for response",
+      "webhookId": "6f9861f6-e28d-445c-879c-949a6d5903ae",
+      "credentials": {
+        "telegramApi": {
+          "id": "MsHdBVyurDnoXcyo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/assets/{{ $('Split Scenes').item.json.imageFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        288
+      ],
+      "id": "ee3e9fc1-8d23-410d-92aa-2d69d04d1e9c",
+      "name": "Save Image"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://platform.higgsfield.ai/higgsfield-ai/soul/standard",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 72afeec8-299d-45ff-87c5-2ffc4e2c1621:4b7d57d958299b7818787cfc6cbf2c846c27706447beb66b53e7a4f166381a01"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.image_prompt }}"
+            },
+            {
+              "name": "aspect_ratio",
+              "value": "9:16"
+            },
+            {
+              "name": "resolution",
+              "value": "720p"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        272
+      ],
+      "id": "ac470bf3-6a08-4be6-8851-1a46ef287c8d",
+      "name": "Image - Request"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.status_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Key 72afeec8-299d-45ff-87c5-2ffc4e2c1621:4b7d57d958299b7818787cfc6cbf2c846c27706447beb66b53e7a4f166381a01"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        608,
+        288
+      ],
+      "id": "7ab01e9b-940c-48ea-8637-58c719ec1ce4",
+      "name": "Image - Get"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Image - Get').item.json.images[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1072,
+        288
+      ],
+      "id": "afe4e917-dcba-4c3b-b08c-b92f18557d9e",
+      "name": "Image - Download"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {},
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "fa2bb891-1db0-40a1-880f-fe50a61eeb03",
+      "name": "Article - Fetch",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/assets/{{ $('Code in JavaScript').first().json.voiceFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        -128
+      ],
+      "id": "2cb7cf65-f791-4094-846c-0244825d9202",
+      "name": "Save Voice"
+    },
+    {
+      "parameters": {
+        "jsCode": "const txt = $('Add Captions').first().json.job_json;\nconst name = $('Code in JavaScript').first().json.jobFile;\nconst bin = await this.helpers.prepareBinaryData(Buffer.from(txt, 'utf8'), name, 'application/json');\nreturn [{ json: { jobFile: name }, binary: { data: bin } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1584,
+        288
+      ],
+      "id": "429f6202-cef8-4580-841e-306d7d597a81",
+      "name": "Make Job File",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c6b32b51-e5c9-488c-9843-5c420e0820db",
+              "leftValue": "={{  $json.status  }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        304
+      ],
+      "id": "d5834b5c-72fc-452d-8bb5-03acaa73cef6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        976,
+        432
+      ],
+      "id": "cdbfb1ab-b220-43b1-9b42-57ed64f6002d",
+      "name": "Wait",
+      "webhookId": "d7d2b372-271f-4540-b577-78911cfbcdb5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bd3e9a8e-b8a4-469d-8cbf-e03c85ba7575",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1264,
+        32
+      ],
+      "id": "cd1a72ce-3263-4967-8a48-01b045058a7d",
+      "name": "Approved?"
+    },
+    {
+      "parameters": {
+        "jsCode": "const STYLE=\" Style: high-fashion editorial photography, photorealistic, Vogue-style art direction, rich fabric texture, dramatic studio or runway lighting, bold but tasteful colour, shallow depth of field. Anonymous models only (no recognisable faces), no real brand logos. Vertical 9:16. No text, no numbers, no watermark.\";\nreturn $('Code in JavaScript').first().json.scenes.map(function(s){ s.image_prompt=(s.image_prompt||'')+STYLE; return { json: s }; });"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        288
+      ],
+      "id": "20af99c2-8045-4a53-bc17-6d719b73855c",
+      "name": "Split Scenes"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/forced-alignment",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Code in JavaScript').item.json.voiceover }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6b15cc4-914d-4acd-9ab0-2f011331f3c2",
+      "name": "Align",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1696,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Ail8NJx7E0A34ghp",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim(), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
+      },
+      "id": "9adcfc07-46bc-47ab-8afd-1d04679babc6",
+      "name": "Add Captions",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "30115e43-4a2f-439b-bf8b-2753f23100e0",
+      "name": "Every Hour",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -816,
+        224
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const srcs=[[\"Vogue\", \"RSS A\"], [\"Fashionista\", \"RSS B\"], [\"Hypebeast\", \"RSS C\"]];\nlet all=[];\nfor(const [name,node] of srcs){ let items=[]; try{ items=$(node).all().map(i=>i.json).filter(j=>j&&!j.error);}catch(e){} items.forEach(it=>{ all.push({source:name,title:(it.title||'').toString(),link:(it.link||it.guid||'').toString(),snippet:(it.contentSnippet||it.content||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,220),date:it.isoDate||it.pubDate||''}); }); }\nall=all.filter(x=>x.title&&x.link);\nconst _st=$getWorkflowStaticData('global'); const _seen=new Set(_st.seen5hu||[]);\nall=all.filter(x=>!_seen.has(x.link));\nconst _fresh=all.filter(x=>Date.now()-new Date(x.date||0).getTime()<48*3600e3); if(_fresh.length>=3) all=_fresh;\nif(!all.length) throw new Error('5HU: no new fashion stories since the last video');\nif(!all.length) throw new Error('Combine Feeds: no RSS stories collected');\nall.sort((a,b)=> new Date(b.date||0)-new Date(a.date||0));\nall=all.slice(0,20);\n// variety: shuffle the recent pool and sample so each run rotates\nfor(let i=all.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));const t=all[i];all[i]=all[k];all[k]=t;}\nall=all.slice(0,5);\nconst candidatesText=all.map((x,i)=>(i+1)+'. ['+x.source+'] '+x.title+'\\n   '+x.snippet+'\\n   LINK: '+x.link).join('\\n\\n');\nreturn [{ json: { candidates: all, candidatesText } }];"
+      },
+      "id": "1ede6e49-83d0-4d70-9f70-df7b3d91fa9b",
+      "name": "Combine Feeds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        208
+      ],
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the editor of 5HU, a trending FASHION news channel on TikTok/Reels for a young, style-obsessed global audience. Choose the SINGLE best story from the candidates for a 15-second vertical video.\n\nPICK what people will talk about and share today: viral celebrity looks and red-carpet moments, runway shows and standout collections, designer moves (new creative directors, exits, debuts), big collabs and drops, sneaker and streetwear releases, brand deals, trend shifts with a clear name, and fashion-business news with a striking number.\nAVOID: deaths and obituaries, body-shaming or weight talk, anything about minors' bodies, crime and lawsuits with victims, pure shopping lists / sales roundups / affiliate deals, horoscopes, sponsored posts, long essays without news, and anything that can't be told accurately in 15 seconds.\n\nOutput ONLY valid JSON, no markdown, no code fences. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\nCANDIDATES\n{{ $json.candidatesText }}"
+            }
+          ]
+        },
+        "simplify": false,
+        "options": {}
+      },
+      "id": "a3e8643f-051d-4a85-8fee-54b10d8cde4c",
+      "name": "Select Story",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        208
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "3pYNdkLM3jdNYjyM",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.content[0].text;\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nlet sel = null;\ntry { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(fixJson(raw.slice(s, e + 1))); } catch (err) { sel = null; }\nconst cands = ($('Combine Feeds').first().json.candidates) || [];\nif (!sel || !sel.link) {\n  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n  const link = m[1] || m[0];\n  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n  sel = { link, title: '', reason: rm ? rm[1] : '' };\n}\nconst hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\nif (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\nconst _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\nreturn [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];"
+      },
+      "id": "dbb04860-b430-47c9-9086-97e0b87ff40d",
+      "name": "Parse Selection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.vogue.com/feed/rss",
+        "options": {}
+      },
+      "id": "88c457c4-9e87-4b95-bb9d-57828183038a",
+      "name": "RSS A",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        0
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "url": "https://fashionista.com/.rss/excerpt/",
+        "options": {}
+      },
+      "id": "b588e5b3-e73f-4ada-a449-accd4ae3e335",
+      "name": "RSS B",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        208
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "url": "https://hypebeast.com/feed",
+        "options": {}
+      },
+      "id": "faf41129-8f10-4db3-b146-30a55919dd6d",
+      "name": "RSS C",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        -608,
+        400
+      ],
+      "executeOnce": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/jobs/{{ $json.jobFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1804,
+        288
+      ],
+      "id": "a9146cc1-f1fe-49ca-955b-be7f81f5426f",
+      "name": "Save Job"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -816,
+        424
+      ],
+      "id": "7559c7d7-58f5-4770-b362-7c1806b6bd31",
+      "name": "Run Now (CLI)"
+    }
+  ],
+  "connections": {
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert text to speech": {
+      "main": [
+        [
+          {
+            "node": "Align",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Request": {
+      "main": [
+        [
+          {
+            "node": "Image - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Get": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image - Download": {
+      "main": [
+        [
+          {
+            "node": "Save Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article - Fetch": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Image - Download",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Image - Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Convert text to speech",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Split Scenes": {
+      "main": [
+        [
+          {
+            "node": "Image - Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Align": {
+      "main": [
+        [
+          {
+            "node": "Add Captions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Captions": {
+      "main": [
+        [
+          {
+            "node": "Save Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every Hour": {
+      "main": [
+        [
+          {
+            "node": "RSS A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Feeds": {
+      "main": [
+        [
+          {
+            "node": "Select Story",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Story": {
+      "main": [
+        [
+          {
+            "node": "Parse Selection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Selection": {
+      "main": [
+        [
+          {
+            "node": "Article - Fetch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS A": {
+      "main": [
+        [
+          {
+            "node": "RSS B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS B": {
+      "main": [
+        [
+          {
+            "node": "RSS C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS C": {
+      "main": [
+        [
+          {
+            "node": "Combine Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image": {
+      "main": [
+        [
+          {
+            "node": "Make Job File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Voice": {
+      "main": [
+        [
+          {
+            "node": "Split Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make Job File": {
+      "main": [
+        [
+          {
+            "node": "Save Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Now (CLI)": {
+      "main": [
+        [
+          {
+            "node": "RSS A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "id": "FiveHuFashion001"
+}
