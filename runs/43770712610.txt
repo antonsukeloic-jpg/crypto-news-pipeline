@@ -1,5 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-9766be1 5HU brand system: lime/pink/cyan palette, lime-dot logo + impact ring, kinetic typography, wipe/split/smash transitions, seeded layouts; fresh openings memory, 22-word cap, small brands first, 720p render
-FIVEHU_PUBLISHED (n8n restarted)
-22:42:33
-5HU pipeline started (log: /root/exec_5hu.log)
