@@ -5,7 +5,9 @@ LtNewsPipeLine01|LT News Pipeline
 VikopsAdPipeln01|Vikops Ad Pipeline
 FiveHuFashion001|5HU Fashion News
 FiveHuFashion001
+5hu_job_1794776966484.json
 5hu_job_1794776237860.json
+TELEGRAM=ok
 REMOTION=ok
 WATCHER=active
 SETUP_DONE
