@@ -6,7 +6,7 @@ import {buildCaptions, sceneTimeline} from './timing';
 // 5HU - "who's next" fashion look: editorial serif, flash cuts, grain, pink accents.
 const PINK = '#FF3D9A';
 const OUTRO_SEC = 1.7;
-const MUSIC_VOL = 0.42;   // techno bed under the voice (louder on the outro)
+const MUSIC_VOL = 0.3;    // under the voice; ducks to 0.16 while a word is spoken, swells in pauses   // techno bed under the voice (louder on the outro)
 
 const Grain = () => {
   const frame = useCurrentFrame();
@@ -239,8 +239,13 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps}) => {
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
       <Sequence from={outroFrom}><Outro /></Sequence>
       <Audio src={staticFile(voice)} />
-      <Audio src={staticFile('music/5hu_techno.mp3')} loop
-        volume={(fr) => interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, MUSIC_VOL, 0.75, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'})} />
+      <Audio src={staticFile('music/5hu_techno.mp3')} loop volume={(fr) => {
+        const ms = (fr / f) * 1000;
+        const speaking = caps.some((c) => ms >= c.startMs - 80 && ms <= c.endMs + 120);
+        const bed = speaking ? 0.16 : MUSIC_VOL;
+        const env = interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+        return (fr >= outroFrom ? 0.55 : bed) * env;
+      }} />
     </AbsoluteFill>
   );
 };

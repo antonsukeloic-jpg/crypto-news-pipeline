@@ -165,7 +165,8 @@ msg["content"] = (
     "Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n"
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
-    "- voiceover: 22-26 words MAX (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 15 s around it. Never stack names, dates and numbers one after another.\n"
+    "- voiceover: 18-22 words MAX, 4 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
@@ -217,7 +218,7 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
 # "5HU" is said "Shoo" (Slavic ШУ), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "data.voiceover_tts = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\nreturn [{ json: data }];")
+rep("return [{ json: data }];", "data.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
 for _n in ("Convert text to speech",):
     _p = by_name[_n]["parameters"]
@@ -226,7 +227,7 @@ for _n in ("Convert text to speech",):
 for _bp in by_name["Align"]["parameters"]["bodyParameters"]["parameters"]:
     if _bp.get("name") == "text":
         assert _bp["value"] == "={{ $('Code in JavaScript').item.json.voiceover }}"
-        _bp["value"] = "={{ $('Code in JavaScript').item.json.voiceover_tts }}"
+        _bp["value"] = "={{ $('Code in JavaScript').item.json.voiceover_align }}"
 _ac = by_name["Add Captions"]["parameters"]
 _old = "const captions = words.map(w => ({ text: w.text.trim(),"
 assert _ac["jsCode"].count(_old) == 1
