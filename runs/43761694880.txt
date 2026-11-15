@@ -1,0 +1,40 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+200 items=30 last=Sun, 15 Nov 2026 20:08:22  https://www.vogue.com/feed/rss
+200 items=50 last=Sun, 15 Nov 2026 21:00:32  https://fashionista.com/.rss/excerpt/
+200 items=20 last=Sun, 15 Nov 2026 16:00:25  https://hypebeast.com/feed
+200 items=8 last=Sun, 15 Nov 2026 20:28:25  https://www.highsnobiety.com/feed/
+200 items=10 last=Sun, 15 Nov 2026 19:39:08  https://wwd.com/feed/
+200 items=50 last=Sun, 15 Nov 2026 18:30:08  https://www.harpersbazaar.com/rss/all.xml/
+200 items=50 last=Sun, 15 Nov 2026 19:22:19  https://www.elle.com/rss/all.xml/
+200 items=15 last=2026-11-15T20:57:59Z https://www.dazeddigital.com/rss
+404 items=0 last= https://www.anothermag.com/rss
+200 items=10 last=Fri, 13 Nov 2026 14:15:02  https://i-d.co/feed/
+200 items=0 last= https://www.thefashionlaw.com/feed/
+403 items=0 last= https://www.fashionnetwork.com/rss/feed/en
+404 items=0 last= https://www.complex.com/style/rss
+403 items=0 last= https://www.sneakernews.com/feed/
+404 items=0 last= https://www.grailed.com/drycleanonly/feed
+200 items=36 last=Wed, 11 Nov 2026 19:38:39  https://www.dmarge.com/feed
+200 items=20 last=Fri, 13 Nov 2026 21:17:09  https://www.hypebae.com/feed
+403 items=0 last= https://www.ssense.com/en-us/editorial/rss
+200 items=10 last=Fri, 13 Nov 2026 09:00:57  https://www.permanentstyle.com/feed
+200 items=10 last=Fri, 13 Nov 2026 19:24:34  https://www.putthison.com/rss
+200 items=10 last=Fri, 13 Nov 2026 11:00:24  https://www.heddels.com/feed/
+200 items=0 last= https://www.dieworkwear.com/feed
+404 items=0 last= https://www.nssmag.com/en/rss
+200 items=50 last=Sun, 15 Nov 2026 07:00:00  https://www.vogue.co.uk/feed/rss
+200 items=50 last=Sun, 15 Nov 2026 19:18:55  https://www.whowhatwear.com/rss
+200 items=10 last=Tue, 10 Nov 2026 22:13:48  https://www.refinery29.com/en-us/fashion/rss.xml
+curl: (60) SSL: no alternative certificate subject name matches target host name 'www.manrepeller.com'
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+000 items=10 last=Tue, 10 Nov 2026 22:13:48  https://www.manrepeller.com/feed
+404 items=0 last= https://www.1granary.com/feed/
+422 items=0 last= https://fashionunited.com/rss/news
+402 items=0 last= https://www.instyle.com/rss
+404 items=0 last= https://www.gq.com/feed/style/rss
+200 items=50 last=Fri, 13 Nov 2026 22:08:26  https://www.esquire.com/rss/style.xml/
+200 items=30 last=Fri, 13 Nov 2026 16:00:45  https://www.papermag.com/feeds/feed.rss
