@@ -16,8 +16,22 @@ FIVEHU_WORKFLOW_ID = "FiveHuFashion001"     # fixed 16-char id
 VOICE_ID = "FGY2WhTYpPnrIDTdsKH5"           # ElevenLabs premade "Laura" - young, upbeat, social-media voice (English)
 MODEL = "eleven_v4"
 
-# all tested from the VPS 2026-11-15 (fresh, readable). tier "niche" gets priority in the candidate pool.
+# all tested from the VPS 2026-11-15 (fresh, readable).
+# tiers: "emerging" (new designers / local scenes) > "niche" (indie, streetwear, craft) > "main" (big titles).
 FEEDS = [
+    # emerging designers + local scenes: Scandinavia, London, New York, Berlin, Madrid/Seoul
+    ("Scandinavian MIND", "https://www.scandinavianmind.com/feed", "emerging"),
+    ("BON (Stockholm)", "https://bon.se/feed", "emerging"),
+    ("10 Magazine (London)", "https://www.10magazine.com/feed/", "emerging"),
+    ("Office Magazine (NY)", "https://www.officemagazine.net/rss.xml", "emerging"),
+    ("Kaltblut (Berlin)", "https://www.kaltblut-magazine.com/feed/", "emerging"),
+    ("Highxtar", "https://highxtar.com/feed/", "emerging"),
+    ("Numero", "https://www.numero.com/en/rss", "niche"),
+    ("Interview", "https://www.interviewmagazine.com/feed", "niche"),
+    ("NYLON", "https://www.nylon.com/feeds/feed.rss", "niche"),
+    ("The Fashionisto", "https://www.thefashionisto.com/feed/", "niche"),
+    ("FashionUnited", "https://fashionunited.uk/rss-news", "main"),
+    ("Coveteur", "https://coveteur.com/feeds/feed.rss", "main"),
     # mainstream / industry
     ("Vogue", "https://www.vogue.com/feed/rss", "main"),
     ("British Vogue", "https://www.vogue.co.uk/feed/rss", "main"),
@@ -95,15 +109,22 @@ res.forEach(r => { if (r.status === 'fulfilled' && r.value.length) { ok++; all =
 // only new stories: skip links already used (kept in workflow static data) and older than 72 h
 const _st = $getWorkflowStaticData('global'); const _seen = new Set(_st.seen5hu || []);
 const age = (x) => Date.now() - (new Date(x.date).getTime() || 0);
-all = all.filter(x => !_seen.has(x.link) && age(x) < 72 * 3600e3);
+all = all.filter(x => !_seen.has(x.link) && age(x) < (x.tier === 'emerging' ? 120 : 72) * 3600e3);
 if (!all.length) throw new Error('5HU: no new fashion stories (feeds read: ' + ok + ')');
 // newest 2 per source, then a pool with niche sources first: up to 8 niche + 4 mainstream, shuffled
 const per = {}; all.sort((a, b) => age(a) - age(b));
 all = all.filter(x => (per[x.source] = (per[x.source] || 0) + 1) <= 2);
 const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };
-const pool = shuffle(all.filter(x => x.tier === 'niche')).slice(0, 8).concat(shuffle(all.filter(x => x.tier !== 'niche')).slice(0, 4));
+const RISING = /emerging|newcomer|debut|first (collection|show|runway|store)|to watch|to know|rising|new (label|brand|designer|name)|up-and-coming|graduate|LVMH Prize|ANDAM|Woolmark|Fashion East|NEWGEN|Copenhagen|Stockholm|Oslo|Helsinki|Reykjavik|Scandinavian|Nordic|Tokyo|Seoul|independent|indie|young designer|breakout|cult/i;
+const rising = (x) => RISING.test(x.title + ' ' + x.snippet);
+const used = new Set(); const take = (arr, n) => arr.filter(x => !used.has(x.link)).slice(0, n).map(x => (used.add(x.link), x));
+const pool = [].concat(
+  take(shuffle(all.filter(rising)), 6),
+  take(shuffle(all.filter(x => x.tier === 'emerging')), 4),
+  take(shuffle(all.filter(x => x.tier === 'niche')), 3),
+  take(shuffle(all.filter(x => x.tier === 'main')), 2));
 const candidates = shuffle(pool.length ? pool : all.slice(0, 12));
-const candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier === 'niche' ? ', niche' : '') + '] ' + x.title + '\n   ' + x.snippet + '\n   LINK: ' + x.link).join('\n\n');
+const candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier !== 'main' ? ', ' + x.tier : '') + (rising(x) ? ', RISING' : '') + '] ' + x.title + '\n   ' + x.snippet + '\n   LINK: ' + x.link).join('\n\n');
 return [{ json: { candidates, candidatesText, feedsRead: ok } }];""")
 
 ps = by_name["Parse Selection"]["parameters"]
@@ -112,16 +133,21 @@ assert ps["jsCode"].count(old) == 1
 ps["jsCode"] = ps["jsCode"].replace(old,
     "const _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\n" + old)
 
-# ---- editor
+# ---- editor: "who's next" fashion
 by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
-    "=You are the editor of 5HU, a trending FASHION news channel on TikTok/Reels for a young, style-obsessed global audience. "
-    "Choose the SINGLE best story from the candidates for a 15-second vertical video.\n\n"
-    "PREFER NICHE: stories marked \"niche\" (streetwear, sneakers, indie designers, menswear craft, denim, subculture, emerging labels, archive fashion) are the channel's identity - pick one of them unless a mainstream story is clearly the biggest fashion news of the day. Insider, specific stories beat generic celebrity gossip.\n"
-    "PICK what people will talk about and share today: viral celebrity looks and red-carpet moments, runway shows and standout collections, "
-    "designer moves (new creative directors, exits, debuts), big collabs and drops, sneaker and streetwear releases, brand deals, "
-    "trend shifts with a clear name, and fashion-business news with a striking number.\n"
-    "AVOID: deaths and obituaries, body-shaming or weight talk, anything about minors' bodies, crime and lawsuits with victims, "
-    "pure shopping lists / sales roundups / affiliate deals, horoscopes, sponsored posts, long essays without news, "
+    "=You are the editor of 5HU, the channel that spots fashion's NEXT big names before everyone else - "
+    "TikTok/Reels/Shorts for a young, style-obsessed global audience. Choose the SINGLE best story from the candidates for a 15-second video.\n\n"
+    "5HU'S IDENTITY - pick in this order:\n"
+    "1. A rising independent label or young designer (roughly the last 10 years) from a scene with buzz - Copenhagen, Stockholm, Oslo, Helsinki, "
+    "London, New York, Paris, Berlin, Tokyo, Seoul, Antwerp, Milan, Lagos, Mexico City... Signals: debut show or first fashion-week slot, "
+    "prize shortlist (LVMH Prize, ANDAM, Woolmark, NEWGEN, Fashion East), first store or big stockist, a celebrity or stylist picking them up, "
+    "a breakout collab, a designer from a small label getting a bigger job.\n"
+    "2. A cult / boutique brand doing something new (drop, collab, archive revival, new direction).\n"
+    "3. A new micro-trend or scene with a clear name and concrete examples.\n"
+    "4. Only if nothing above exists: the most interesting insider story from a big house (not celebrity gossip).\n"
+    "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
+    "AVOID: deaths and obituaries, body or weight talk, anything about minors' bodies, crime/lawsuits with victims, shopping roundups, "
+    "sales/affiliate lists, horoscopes, sponsored posts, celebrity relationship gossip, essays without news, "
     "and anything that can't be told accurately in 15 seconds.\n\n"
     "Output ONLY valid JSON, no markdown, no code fences. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n"
     "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"reason\":\"<max 12 words>\"}\n\n"
@@ -131,7 +157,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
 msg = by_name["Message a model"]["parameters"]["messages"]["values"][0]
 article_expr = msg["content"].split("ARTICLE\n", 1)[1]
 msg["content"] = (
-    "=You are the scriptwriter for 5HU, a trending fashion news channel (TikTok/Reels). Turn ONE fashion news article into a 15-second vertical video plan.\n\n"
+    "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 15-second vertical video plan.\n\n"
     "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. "
     "Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\n"
     "VOICE\n"
@@ -139,7 +165,8 @@ msg["content"] = (
     "Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n"
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
-    "- voiceover: ~35 words max (~15 s). Sentence 1 is the hook: lead with the look, the name or the number.\n"
+    "- voiceover: ~35 words max (~15 s). Sentence 1 is the hook: lead with the NAME and why it matters now (e.g. “Remember this name: ...”, “Copenhagen's newest obsession...”). Say WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
     "- scenes: exactly 3 or 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n"
@@ -153,7 +180,7 @@ msg["content"] = (
     "{\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Brand\",\"wiki\":\"Exact English Wikipedia page title\"} when a fashion house, brand or retailer is the subject "
     "(we fetch its photo/logo from Wikipedia). Whenever a scene is centered on a named brand or public person you MUST use \"entity\". "
     "{\"type\":\"none\"} otherwise. NEVER invent a number.\n"
-    "- hook: max 7 words. hashtags: 4-6, e.g. #fashion #fashionnews #5HU plus the brand/designer.\n\n"
+    "- hook: max 7 words. hashtags: 4-6, e.g. #5HU #emergingdesigners #fashion plus the label/designer and city.\n\n"
     "VISUAL RULES (visual.query, English)\n"
     "- Show what the sentence is about: the garments, fabrics, accessories, shoes, a runway, a backstage rail, a boutique window, a sneaker on a pedestal, "
     "a street-style moment. Fashion-editorial, specific and literal to the sentence.\n"
