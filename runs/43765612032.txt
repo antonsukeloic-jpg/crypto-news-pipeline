@@ -1,0 +1,7 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+21:47:27
+"status": "success"
+Nov 15 21:43:39 srv2107298 bash[1315455]: [21:43:39] watcher started, watching /root/shared/jobs
+Nov 15 21:45:14 srv2107298 bash[1315455]: [21:45:14] job 5hu_job_1794779086797.json -> 5hu_video_1794779086797.mp4
+Nov 15 21:46:23 srv2107298 bash[1315455]: [21:46:23] OK 5hu_video_1794779086797.mp4
+Nov 15 21:46:25 srv2107298 bash[1315455]: [21:46:25] sent to Telegram
