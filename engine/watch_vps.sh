@@ -12,7 +12,10 @@ log() { echo "[$(date '+%H:%M:%S')] $*"; }
 send_telegram() {  # $1 = video path, $2 = caption
   [ -f "$TG_ENV" ] || { log "no $TG_ENV, skipping Telegram"; return; }
   . "$TG_ENV"
+  # tell Telegram the real size, otherwise it may show the 9:16 video squashed / square
+  local wh; wh=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$1" 2>/dev/null)
   curl -sS -m 120 -F chat_id="$TG_CHAT" -F supports_streaming=true \
+    -F width="${wh%%,*}" -F height="${wh##*,}" \
     -F caption="$2" -F video=@"$1" \
     "https://api.telegram.org/bot$TG_TOKEN/sendVideo" | grep -q '"ok":true' \
     && log "sent to Telegram" || log "Telegram send FAILED"
