@@ -1,6 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-Nov 15 22:04:02 srv2107298 bash[1315455]: [22:04:02] OK 5hu_video_1794780168119.mp4
-Nov 15 22:04:07 srv2107298 bash[1315455]: [22:04:07] sent to Telegram
-Nov 15 22:04:12 srv2107298 bash[1315455]: [22:04:12] job 5hu_job_1794780177365.json -> 5hu_video_1794780177365.mp4
-Nov 15 22:04:15 srv2107298 bash[1322983]: props ok channel=5hu scenes=4 btc=None change=None
-(68, '2026-11-15 22:02:39.746', '2026-11-15 22:04:21.892')
