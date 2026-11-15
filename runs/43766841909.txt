@@ -1,0 +1,8 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+4
+               total        used        free      shared  buff/cache   available
+Mem:              15           2           5           0           7          12
+Nov 15 21:54:43 srv2107298 bash[1319392]: props ok channel=5hu scenes=2 btc=None change=None
+Nov 15 21:55:38 srv2107298 bash[1315455]: [21:55:38] OK 5hu_video_1794779480516.mp4
+Nov 15 21:59:40 srv2107298 bash[1315455]: [21:59:40] job 5hu_job_1794779957237.json -> 5hu_video_1794779957237.mp4
+Nov 15 22:00:19 srv2107298 bash[1321118]: props ok channel=5hu scenes=4 btc=None change=None
