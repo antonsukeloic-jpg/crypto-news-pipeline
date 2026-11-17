@@ -306,8 +306,16 @@ w["connections"]["Save Music"] = {"main": [[{"node": "Split Scenes", "type": "ma
 assert by_name["Wait"]["parameters"].get("amount") == 10
 by_name["Wait"]["parameters"]["amount"] = 3
 
+# ---- cost: Soul 2 ($0.0057/img at 1080p) instead of Soul Standard ($0.0938 at 720p)
+_req = by_name["Image - Request"]["parameters"]
+assert _req["url"].endswith("/higgsfield-ai/soul/standard")
+_req["url"] = _req["url"].replace("/soul/standard", "/soul/v2/standard")
+for _p in _req["bodyParameters"]["parameters"]:
+    if _p["name"] == "resolution":
+        _p["value"] = "1080p"
+
 # ---- sanity
-names = [n["name"] for n in w["nodes"]]
+names =[n["name"] for n in w["nodes"]]
 for outs in w["connections"].values():
     for branch in outs.get("main", []):
         for c in branch or []:
