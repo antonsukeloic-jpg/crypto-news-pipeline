@@ -219,9 +219,9 @@ rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'))
 # random Wikipedia image. Auto-spot only multi-word names and ALL-CAPS/CamelCase brands; the script's explicit entities still work.
 rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((m = reSingle.exec(vo)))",
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
-# "5HU" is said "Šū" (owner picked sample F: "[Lithuanian] Šū [English]"), never "five-H-U": the voice + alignment get a phonetic copy,
+# "5HU" is said "Šū" (owner picked sample K: the whole 5HU sentence "[softly] [Lithuanian] … Šū. [English]"), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/\\bShoo\\b/g, '[Lithuanian] Šū [English]').replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
+rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = (data.voiceover_align.match(/[^.!?…]+[.!?…]*/g) || [data.voiceover_align]).map(x => x.trim()).filter(Boolean).map(x => /\\bShoo\\b/.test(x) ? '[softly] [Lithuanian] ' + x.replace(/\\bShoo\\b/g, 'Šū') + ' [English]' : x).join(' [pause] ');\nreturn [{ json: data }];")
 # 20-30 s videos: up to 6 scenes, 25 s script total (the render follows the voice length)
 rep("const TOTAL = 15;", "const TOTAL = 25;")
 rep("data.scenes.slice(0, 4)", "data.scenes.slice(0, 6)")
