@@ -7,7 +7,7 @@ import {buildCaptions, sceneTimeline} from './timing';
 // RGB-split outro. Varies per video (seeded): headline layout, transition order, second accent.
 const BRAND = {lime: '#C8FF2E', pink: '#FF3D9A', cyan: '#2EE6FF', black: '#0A0A0A', white: '#F5F5F2'};
 const OUTRO_SEC = 1.8;
-const MUSIC_VOL = 0.3;    // ducks to 0.16 while a word is spoken, swells in pauses
+const MUSIC_VOL = 0.26;   // ducks to 0.16 while a word is spoken, swells in pauses
 
 const seedOf = (voice) => { const m = String(voice || '').match(/(\d{13})/); return m ? Number(m[1].slice(-6)) : 7; };
 
@@ -328,7 +328,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {
         const ms = (fr / f) * 1000;
         const speaking = caps.some((c) => ms >= c.startMs - 80 && ms <= c.endMs + 120);
-        const bed = speaking ? 0.16 : MUSIC_VOL;
+        const bed = speaking ? 0.14 : MUSIC_VOL;
         const env = interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
         return (fr >= outroFrom ? 0.55 : bed) * env;
       }} />

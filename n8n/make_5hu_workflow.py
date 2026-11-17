@@ -212,7 +212,7 @@ for kind in ("img", "voice", "video", "job"):
 rep('"Lietuvos naujienos"', '"fashion runway editorial"', 2)
 rep('channel:"lt",', 'channel:"5hu",')
 rep('channel:"5hu",', 'channel:"5hu", music:"assets/"+data.musicFile, bpm:data.musicBpm,')
-rep('data.voiceFile = "5hu_voice_"+ts', 'data.musicFile = "5hu_music_"+ts+".mp3";\ndata.musicBpm = [126, 128, 130, 132, 134, 136][Math.floor(Math.random() * 6)];\ndata.voiceFile = "5hu_voice_"+ts')
+rep('data.voiceFile = "5hu_voice_"+ts', 'data.musicFile = "5hu_music_"+ts+".mp3";\ndata.musicBpm = [120, 122, 124, 126, 128][Math.floor(Math.random() * 6)];\ndata.voiceFile = "5hu_voice_"+ts')
 rep("return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en'));", "return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt'));")
 rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'));", "return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt'));")
 # English fashion text: a lone capitalised word ("Dead" from "Brain Dead") is a bad brand guess that pulls a
@@ -258,23 +258,23 @@ tts["additionalOptions"]["voiceSettings"] = json.dumps(
 # ---- fresh techno for every video (never the same track): ElevenLabs Sound Effects, random style + BPM
 MUSIC_JS = r"""
 const STYLES = [
-  'hypnotic acid techno, squelchy TB-303 acid line, driving punchy kick',
-  'minimal techno, clicky micro percussion, deep rolling sub bass, sparse and hypnotic',
-  'hard groove techno, rolling tribal toms, shuffled hats, punchy kick',
-  'industrial techno, distorted kick, metallic noise hits, dark warehouse',
-  'Detroit techno, warm analog chord stabs, soulful pad, steady kick',
-  'melodic techno, arpeggiated synth lead, emotional pads, big kick',
-  'dark Berlin techno, rumbling reverb bass kick, cold synth stabs',
-  'electro techno, robotic synth bass, crisp 909 claps, futuristic',
-  'peak-time techno, big snare rolls, hoover synth, euphoric drive',
-  'dub techno, deep chord echoes, foggy atmosphere, steady pulse',
+  'light minimal techno, soft rounded kick, airy clicky percussion, gentle sub bass',
+  'light melodic techno, warm arpeggio, soft pads, smooth kick',
+  'deep tech house groove, soft kick, shuffled hats, warm bassline',
+  'light Detroit techno, mellow analog chord stabs, soft steady kick',
+  'airy progressive techno, shimmering synth plucks, light kick, open atmosphere',
+  'light dub techno, soft chord echoes, gentle pulse, spacious',
+  'lo-fi minimal techno, muted kick, soft rim shots, dreamy pad',
+  'light electro techno, bouncy synth bass, soft claps, playful',
+  'soft hypnotic techno, gentle acid line low in the mix, light kick',
+  'organic light techno, soft percussion, plucked synth, warm groove',
 ];
 const KEYS = ['A minor', 'F minor', 'D minor', 'G minor', 'C minor', 'E minor'];
-const BPMS = [126, 128, 130, 132, 134, 136];
+const BPMS = [120, 122, 124, 126, 128];
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 const style = pick(STYLES), key = pick(KEYS);
 const bpm = $('Code in JavaScript').first().json.musicBpm || pick(BPMS);
-const text = style + ', ' + bpm + ' BPM, in ' + key + ', four-on-the-floor, instrumental, no vocals, no speech, fashion runway energy, seamless loop';
+const text = style + ', ' + bpm + ' BPM, in ' + key + ', light and airy, soft kick, not aggressive, four-on-the-floor, instrumental, no vocals, no speech, chic fashion runway mood, seamless loop';
 return [{ json: { text, bpm, style } }];
 """
 _cx, _cy = by_name["Save Voice"]["position"]
