@@ -137,7 +137,7 @@ ps["jsCode"] = ps["jsCode"].replace(old,
 # ---- editor: "who's next" fashion
 by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "=You are the editor of 5HU, the channel that spots fashion's NEXT big names before everyone else - "
-    "TikTok/Reels/Shorts for a young, style-obsessed global audience. Choose the SINGLE best story from the candidates for a 15-second video.\n\n"
+    "TikTok/Reels/Shorts for a young, style-obsessed global audience. Choose the SINGLE best story from the candidates for a 20-30 second video.\n\n"
     "5HU'S IDENTITY - pick in this order:\n"
     "1. A rising independent label or young designer (roughly the last 10 years) from a scene with buzz - Copenhagen, Stockholm, Oslo, Helsinki, "
     "London, New York, Paris, Berlin, Tokyo, Seoul, Antwerp, Milan, Lagos, Mexico City... Signals: debut show or first fashion-week slot, "
@@ -158,7 +158,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
 msg = by_name["Message a model"]["parameters"]["messages"]["values"][0]
 article_expr = msg["content"].split("ARTICLE\n", 1)[1]
 msg["content"] = (
-    "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 15-second vertical video plan.\n\n"
+    "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 20-30 second vertical video plan.\n\n"
     "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. "
     "Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\n"
     "VOICE\n"
@@ -166,12 +166,12 @@ msg["content"] = (
     "Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n"
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
-    "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 15 s around it. Never stack names, dates and numbers one after another.\n"
-    "- voiceover: 18-22 words. HARD LIMIT: count the words before answering; if more than 22, rewrite shorter. 4 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 20-30 s around it. Never stack names, dates and numbers one after another.\n"
+    "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
-    "- scenes: exactly 4. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to exactly 15.\n"
+    "- scenes: exactly 5. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to 25 (the video follows the voice, 20-30 s).\n"
     "- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n"
     "- on_screen_text: max ~5 words.\n"
     "- center: per scene, what shows in the MIDDLE of the frame. "
@@ -222,6 +222,9 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
 # "5HU" is said "Šū" (owner picked sample F: "[Lithuanian] Šū [English]"), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
 rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/\\bShoo\\b/g, '[Lithuanian] Šū [English]').replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
+# 20-30 s videos: up to 6 scenes, 25 s script total (the render follows the voice length)
+rep("const TOTAL = 15;", "const TOTAL = 25;")
+rep("data.scenes.slice(0, 4)", "data.scenes.slice(0, 6)")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
 for _n in ("Convert text to speech",):
     _p = by_name[_n]["parameters"]
@@ -282,7 +285,7 @@ w["nodes"] += [
         "method": "POST", "url": "https://api.elevenlabs.io/v1/sound-generation",
         "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
         "sendBody": True, "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ text: $json.text, duration_seconds: 24, prompt_influence: 0.6, loop: true, model_id: 'eleven_text_to_sound_v2' }) }}",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, duration_seconds: 30, prompt_influence: 0.6, loop: true, model_id: 'eleven_text_to_sound_v2' }) }}",
         "options": {"response": {"response": {"responseFormat": "file"}}, "timeout": 90000}},
      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.4, "position": [_cx + 440, _cy],
      "id": str(uuid.uuid4()), "name": "Music - Generate",
