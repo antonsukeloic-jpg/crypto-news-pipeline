@@ -1,9 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-"status": "success"
-VO: The blade sole is back. Rick Owens just revived it... three models, gothic volumes, frunch mesh. 5HU watches so you don't miss the drop.
-music assets/5hu_music_1794946883115.mp3 bpm 130 align 24 / 24
-84983 Nov 17 20:14 /root/shared/assets/5hu_music_1794946445651.mp3
-84983 Nov 17 20:21 /root/shared/assets/5hu_music_1794946883115.mp3
-Nov 17 20:21:51 srv2107298 bash[1315455]: [20:21:51] job 5hu_job_1794946883115.json -> 5hu_video_1794946883115.mp4
-Nov 17 20:22:37 srv2107298 bash[1315455]: [20:22:37] OK 5hu_video_1794946883115.mp4
-Nov 17 20:22:38 srv2107298 bash[1315455]: [20:22:38] sent to Telegram
