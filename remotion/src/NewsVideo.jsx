@@ -67,8 +67,8 @@ const syncedBoundaries = (scenes, caps, durationInFrames, fps) => {
   return b;
 };
 
-export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h, channel, cta}) => {
-  if (channel === '5hu') return <FiveHuVideo scenes={scenes} voice={voice} captions={captions} voiceover={voiceover} fps={fps} />;
+export const NewsVideo = ({scenes, voice, captions, voiceover, ticker, fps, btc_price, btc_change_24h, channel, cta, music, bpm}) => {
+  if (channel === '5hu') return <FiveHuVideo scenes={scenes} voice={voice} captions={captions} voiceover={voiceover} fps={fps} music={music} bpm={bpm} />;
   const ch = channel || 'crypto';
   const {kicker, accent} = CHANNELS[ch] || CHANNELS.crypto;
   const {durationInFrames} = useVideoConfig();

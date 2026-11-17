@@ -211,6 +211,8 @@ for kind in ("img", "voice", "video", "job"):
     rep('"lt_%s_"+ts' % kind, '"5hu_%s_"+ts' % kind)
 rep('"Lietuvos naujienos"', '"fashion runway editorial"', 2)
 rep('channel:"lt",', 'channel:"5hu",')
+rep('channel:"5hu",', 'channel:"5hu", music:"assets/"+data.musicFile, bpm:data.musicBpm,')
+rep('data.voiceFile = "5hu_voice_"+ts', 'data.musicFile = "5hu_music_"+ts+".mp3";\ndata.musicBpm = [126, 128, 130, 132, 134, 136][Math.floor(Math.random() * 6)];\ndata.voiceFile = "5hu_voice_"+ts')
 rep("return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en'));", "return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt'));")
 rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'));", "return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt'));")
 # English fashion text: a lone capitalised word ("Dead" from "Brain Dead") is a bad brand guess that pulls a
@@ -219,7 +221,7 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
 # "5HU" is said "Shoo" (Slavic ШУ), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
+rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/\\bShoo\\b/g, '/ʃuː/').replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
 for _n in ("Convert text to speech",):
     _p = by_name[_n]["parameters"]
@@ -249,6 +251,53 @@ tts["voice"] = {"__rl": True, "mode": "id", "value": VOICE_ID}
 tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
     {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True}, indent=2)
+
+# ---- fresh techno for every video (never the same track): ElevenLabs Sound Effects, random style + BPM
+MUSIC_JS = r"""
+const STYLES = [
+  'hypnotic acid techno, squelchy TB-303 acid line, driving punchy kick',
+  'minimal techno, clicky micro percussion, deep rolling sub bass, sparse and hypnotic',
+  'hard groove techno, rolling tribal toms, shuffled hats, punchy kick',
+  'industrial techno, distorted kick, metallic noise hits, dark warehouse',
+  'Detroit techno, warm analog chord stabs, soulful pad, steady kick',
+  'melodic techno, arpeggiated synth lead, emotional pads, big kick',
+  'dark Berlin techno, rumbling reverb bass kick, cold synth stabs',
+  'electro techno, robotic synth bass, crisp 909 claps, futuristic',
+  'peak-time techno, big snare rolls, hoover synth, euphoric drive',
+  'dub techno, deep chord echoes, foggy atmosphere, steady pulse',
+];
+const KEYS = ['A minor', 'F minor', 'D minor', 'G minor', 'C minor', 'E minor'];
+const BPMS = [126, 128, 130, 132, 134, 136];
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const style = pick(STYLES), key = pick(KEYS);
+const bpm = $('Code in JavaScript').first().json.musicBpm || pick(BPMS);
+const text = style + ', ' + bpm + ' BPM, in ' + key + ', four-on-the-floor, instrumental, no vocals, no speech, fashion runway energy, seamless loop';
+return [{ json: { text, bpm, style } }];
+"""
+_cx, _cy = by_name["Save Voice"]["position"]
+w["nodes"] += [
+    {"parameters": {"jsCode": MUSIC_JS}, "type": "n8n-nodes-base.code", "typeVersion": 2,
+     "position": [_cx + 220, _cy], "id": str(uuid.uuid4()), "name": "Music - Pick Style"},
+    {"parameters": {
+        "method": "POST", "url": "https://api.elevenlabs.io/v1/sound-generation",
+        "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
+        "sendBody": True, "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, duration_seconds: 24, prompt_influence: 0.6, loop: true, model_id: 'eleven_text_to_sound_v2' }) }}",
+        "options": {"response": {"response": {"responseFormat": "file"}}, "timeout": 90000}},
+     "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.4, "position": [_cx + 440, _cy],
+     "id": str(uuid.uuid4()), "name": "Music - Generate",
+     "credentials": by_name["Align"]["credentials"], "onError": "continueRegularOutput",
+     "retryOnFail": True, "maxTries": 2, "waitBetweenTries": 2000},
+    {"parameters": {"operation": "write",
+                    "fileName": "=/data/shared/assets/{{ $('Code in JavaScript').first().json.musicFile }}",
+                    "dataPropertyName": "data", "options": {}},
+     "type": "n8n-nodes-base.readWriteFile", "typeVersion": 1, "position": [_cx + 660, _cy],
+     "id": str(uuid.uuid4()), "name": "Save Music", "onError": "continueRegularOutput"},
+]
+w["connections"]["Save Voice"] = {"main": [[{"node": "Music - Pick Style", "type": "main", "index": 0}]]}
+w["connections"]["Music - Pick Style"] = {"main": [[{"node": "Music - Generate", "type": "main", "index": 0}]]}
+w["connections"]["Music - Generate"] = {"main": [[{"node": "Save Music", "type": "main", "index": 0}]]}
+w["connections"]["Save Music"] = {"main": [[{"node": "Split Scenes", "type": "main", "index": 0}]]}
 
 # ---- speed: poll Higgsfield every 3 s instead of 10 s (images are ready in ~10 s)
 assert by_name["Wait"]["parameters"].get("amount") == 10

@@ -20,7 +20,7 @@
         416,
         0
       ],
-      "id": "cbdec665-7851-40c3-8e6c-f522c67d7666",
+      "id": "747b51c5-a75a-455c-8529-fba5d571255d",
       "name": "HTML",
       "onError": "continueRegularOutput"
     },
@@ -48,7 +48,7 @@
         592,
         0
       ],
-      "id": "1b555fdd-ea04-48ca-bf2f-aab686e2c015",
+      "id": "6c7ff36f-fb9b-4664-989f-0fc3203dbc05",
       "name": "Message a model",
       "credentials": {
         "anthropicApi": {
@@ -59,7 +59,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nconst data = JSON.parse(fixJson(raw.slice(s0, e0 + 1)));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"fashion runway editorial\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"fashion runway editorial\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"5hu_img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.voiceFile = \"5hu_voice_\"+ts+\".mp3\";\ndata.outputFile = \"5hu_video_\"+ts+\".mp4\";\ndata.jobFile = \"5hu_job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = \"\";\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt')); }\n  try {\n    const u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt')); }\n  try {\n    const u1 = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS).concat([\"Sausio\", \"Sausis\", \"Vasario\", \"Vasaris\", \"Kovo\", \"Kovas\", \"Balandžio\", \"Balandis\", \"Gegužės\", \"Gegužė\", \"Birželio\", \"Birželis\", \"Liepos\", \"Liepa\", \"Rugpjūčio\", \"Rugpjūtis\", \"Rugsėjo\", \"Rugsėjis\", \"Spalio\", \"Spalis\", \"Lapkričio\", \"Lapkritis\", \"Gruodžio\", \"Gruodis\", \"Pirmadienį\", \"Pirmadienis\", \"Antradienį\", \"Antradienis\", \"Trečiadienį\", \"Trečiadienis\", \"Ketvirtadienį\", \"Ketvirtadienis\", \"Penktadienį\", \"Penktadienis\", \"Šeštadienį\", \"Šeštadienis\", \"Sekmadienį\", \"Sekmadienis\", \"Lietuva\", \"Lietuvos\", \"Lietuvoje\", \"Lietuvai\", \"Lietuvą\", \"Lietuviai\", \"Lietuvių\", \"Lietuviams\", \"Lietuvis\", \"Lietuvė\", \"Vilnius\", \"Vilniuje\", \"Vilniaus\", \"Vilnių\", \"Kaunas\", \"Kaune\", \"Kauno\", \"Kauną\", \"Klaipėda\", \"Klaipėdoje\", \"Klaipėdos\", \"Šiauliai\", \"Šiauliuose\", \"Panevėžys\", \"Panevėžyje\", \"Europa\", \"Europos\", \"Europoje\", \"Europą\", \"Rusija\", \"Rusijos\", \"Rusijoje\", \"Baltarusija\", \"Baltarusijos\", \"Latvija\", \"Latvijos\", \"Lenkija\", \"Lenkijos\", \"Ukraina\", \"Ukrainos\", \"Ukrainoje\", \"JAV\", \"ES\", \"NATO\", \"Vyriausybė\", \"Vyriausybės\", \"Seimas\", \"Seimo\", \"Seime\", \"Prezidentas\", \"Prezidento\", \"Ministras\", \"Ministrė\", \"Ministerija\", \"Policija\", \"Policijos\", \"Teismas\", \"Teismo\", \"Savivaldybė\", \"Savivaldybės\", \"Euras\", \"Eurų\", \"Eurai\", \"Eurais\", \"Šiandien\", \"Vakar\", \"Rytoj\", \"Šiąnakt\", \"Šįryt\", \"Tačiau\", \"Todėl\", \"Taip\", \"Dabar\", \"Jau\", \"Dar\", \"Bet\", \"Ir\", \"Kai\", \"Nes\", \"Kad\", \"Jis\", \"Ji\", \"Jie\", \"Jos\", \"Mes\", \"Jūs\", \"Tai\", \"Tas\", \"Ta\", \"Tie\", \"Tos\", \"Čia\", \"Ten\", \"Tik\", \"Net\", \"Pagal\", \"Anot\", \"Po\", \"Per\", \"Nuo\", \"Iki\", \"Prie\", \"Apie\", \"Dėl\", \"Su\", \"Be\", \"Už\", \"Ant\", \"Iš\", \"Į\", \"O\", \"Kaip\", \"Kodėl\", \"Kiek\", \"Kur\", \"Kas\", \"Jei\", \"Jeigu\", \"Nors\", \"Milijonas\", \"Milijonai\", \"Milijonų\", \"Milijardas\", \"Milijardų\", \"Tūkstančiai\", \"Tūkstančių\", \"Procentai\", \"Procentų\", \"Naujienos\", \"Delfi\", \"Lrytas\", \"BNS\", \"ELTA\", \"LRT\", \"Lrt\", \"Pranešama\", \"Pranešė\", \"Teigiama\", \"Sako\", \"Teigia\", \"Skelbia\"]));\nconst looksPerson = (n) => /^\\p{Lu}\\p{Ll}+ \\p{Lu}\\p{Ll}+$/u.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo))) { const before = vo.slice(0, m.index).replace(/[\\s„“\"'(]+$/, ''); if (before === '' || /[.!?:;–-]$/.test(before)) continue; add(m[1]); }\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    const enT = (c.wiki_en && c.wiki_en !== 'none') ? c.wiki_en : '';\n    let img = isPerson ? (await wikiImage(title) || (enT ? await wikiImage(enT, 'en') : null) || (c.name && c.name !== title ? await wikiImage(c.name) : null))\n                       : (await resolveNonPerson(title) || (enT ? (await companyLogo(enT, 'en') || await wikiImage(enT, 'en')) : null));\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", channel:\"5hu\", voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nconst _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];"
+        "jsCode": "const raw = $input.first().json.content[0].text;\nconst s0 = raw.indexOf(\"{\"); const e0 = raw.lastIndexOf(\"}\");\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nconst data = JSON.parse(fixJson(raw.slice(s0, e0 + 1)));\nconst TOTAL = 15;\nlet scenes = Array.isArray(data.scenes) ? data.scenes.slice(0, 4) : [];\nif (scenes.length === 0) { scenes = [{ id:1, vo_segment:data.voiceover||\"\", on_screen_text:\"\", visual:{query:(data.meta&&data.meta.title)||\"fashion runway editorial\"}, duration_sec:TOTAL }]; }\nscenes.forEach(function(s,i){ let d=Math.round(Number(s.duration_sec)); if(!(d>0)) d=Math.floor(TOTAL/scenes.length); s.duration_sec=d; s.id=i+1; s.image_prompt=(s.visual&&s.visual.query)?s.visual.query:((data.meta&&data.meta.title)||\"fashion runway editorial\"); });\nconst diff = TOTAL - scenes.reduce(function(a,s){return a+s.duration_sec;},0);\nscenes[scenes.length-1].duration_sec += diff;\nif (scenes[scenes.length-1].duration_sec < 1) scenes[scenes.length-1].duration_sec = 1;\nconst ts = Date.now();\nscenes.forEach(function(s,i){ s.imageFile = \"5hu_img_\"+ts+\"_\"+(i+1)+\".png\"; });\ndata.scenes = scenes;\ndata.musicFile = \"5hu_music_\"+ts+\".mp3\";\ndata.musicBpm = [126, 128, 130, 132, 134, 136][Math.floor(Math.random() * 6)];\ndata.voiceFile = \"5hu_voice_\"+ts+\".mp3\";\ndata.outputFile = \"5hu_video_\"+ts+\".mp4\";\ndata.jobFile = \"5hu_job_\"+ts+\".json\";\nlet btc_price=null, btc_change_24h=null;\nvar VALID_TICKERS = [\"btc\",\"sol\",\"eth\",\"xrp\",\"ada\",\"bnb\",\"usdt\",\"doge\"];\nvar ticker = \"\";\nif (VALID_TICKERS.indexOf(ticker) === -1) ticker = \"\";\nlet _wiki_dbg = [];\nconst UA = { 'User-Agent': 'CryptoNewsFactory/1.0 (news bot; contact@example.com)' };\nconst TICKER_TO_ID = { btc:'bitcoin', eth:'ethereum', sol:'solana', xrp:'ripple', ada:'cardano', bnb:'binancecoin', usdt:'tether', doge:'dogecoin' };\nconst HTTP = (o) => this.helpers.httpRequest(o);\nconst norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');\nconst wikiImage = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt')); }\n  try {\n    const u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=600&titles=' + encodeURIComponent(title);\n    const d = await HTTP({ url: u, json: true, headers: UA });\n    const pages = d && d.query && d.query.pages;\n    if (pages) { for (const k in pages) { const pg = pages[k]; if (pg.thumbnail && pg.thumbnail.source) return pg.thumbnail.source; } }\n  } catch (e) { _wiki_dbg.push('wErr:' + title); }\n  return null;\n};\nconst companyLogo = async (title, lang) => {\n  if (!title) return null;\n  if (!lang) { return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt')); }\n  try {\n    const u1 = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&redirects=1&prop=pageprops&ppprop=wikibase_item&titles=' + encodeURIComponent(title);\n    const d1 = await HTTP({ url: u1, json: true, headers: UA });\n    const pages = d1 && d1.query && d1.query.pages; let qid = null;\n    if (pages) { for (const k in pages) { if (pages[k].pageprops && pages[k].pageprops.wikibase_item) qid = pages[k].pageprops.wikibase_item; } }\n    if (!qid) return null;\n    const u2 = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&property=P154&entity=' + encodeURIComponent(qid);\n    const d2 = await HTTP({ url: u2, json: true, headers: UA });\n    const cl = d2 && d2.claims && d2.claims.P154;\n    if (cl && cl[0] && cl[0].mainsnak && cl[0].mainsnak.datavalue) {\n      const fn = cl[0].mainsnak.datavalue.value;\n      return 'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(fn) + '?width=600';\n    }\n  } catch (e) { _wiki_dbg.push('logoErr:' + title); }\n  return null;\n};\nconst cgEntity = async (name) => {\n  const q = norm(name); if (!q) return null;\n  const ok = (cand) => { const n = norm(cand); return n && (n === q || n.includes(q) || q.includes(n)); };\n  try {\n    const d = await HTTP({ url: 'https://api.coingecko.com/api/v3/search?query=' + encodeURIComponent(name), json: true });\n    if (d && d.coins && d.coins[0] && (ok(d.coins[0].name) || ok(d.coins[0].id)) && d.coins[0].large) return d.coins[0].large;\n    if (d && d.exchanges && d.exchanges[0] && (ok(d.exchanges[0].name) || ok(d.exchanges[0].id))) {\n      const ex = d.exchanges[0];\n      if (ex.large) return ex.large;\n      if (ex.id) { try { const e = await HTTP({ url: 'https://api.coingecko.com/api/v3/exchanges/' + encodeURIComponent(ex.id), json: true }); if (e && e.image) return e.image; } catch (_) {} }\n      if (ex.thumb) return ex.thumb;\n    }\n  } catch (e) { _wiki_dbg.push('cgErr:' + name); }\n  return null;\n};\nconst coinLogo = async (id) => {\n  if (!id) return null;\n  try {\n    const u = 'https://api.coingecko.com/api/v3/coins/' + encodeURIComponent(id) + '?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false';\n    const d = await HTTP({ url: u, json: true });\n    if (d && d.image && (d.image.large || d.image.small)) return d.image.large || d.image.small;\n  } catch (e) { _wiki_dbg.push('coinErr:' + id); }\n  return null;\n};\nconst resolveNonPerson = async (name) => {\n  if (!name) return null;\n  let img = await companyLogo(name);\n  if (!img) img = await wikiImage(name);\n  return img;\n};\nconst MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];\nconst STOP = new Set(['The','A','An','This','That','These','Those','It','Its','They','He','She','We','You','But','And','So','Now','Then','After','Before','Meanwhile','However','Also','India','China','Japan','Korea','America','American','US','USA','UK','EU','Europe','Asia','Africa','Russia','Crypto','Cryptocurrency','Bitcoin','Ethereum','Blockchain','Exchange','Exchanges','Wallet','Wallets','CEO','CFO','CTO','Million','Billion','Trillion','Address','Hack','Token','Tokens','Stablecoin','Coin','Report','Reuters','Bloomberg','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].concat(MONTHS).concat([\"Sausio\", \"Sausis\", \"Vasario\", \"Vasaris\", \"Kovo\", \"Kovas\", \"Balandžio\", \"Balandis\", \"Gegužės\", \"Gegužė\", \"Birželio\", \"Birželis\", \"Liepos\", \"Liepa\", \"Rugpjūčio\", \"Rugpjūtis\", \"Rugsėjo\", \"Rugsėjis\", \"Spalio\", \"Spalis\", \"Lapkričio\", \"Lapkritis\", \"Gruodžio\", \"Gruodis\", \"Pirmadienį\", \"Pirmadienis\", \"Antradienį\", \"Antradienis\", \"Trečiadienį\", \"Trečiadienis\", \"Ketvirtadienį\", \"Ketvirtadienis\", \"Penktadienį\", \"Penktadienis\", \"Šeštadienį\", \"Šeštadienis\", \"Sekmadienį\", \"Sekmadienis\", \"Lietuva\", \"Lietuvos\", \"Lietuvoje\", \"Lietuvai\", \"Lietuvą\", \"Lietuviai\", \"Lietuvių\", \"Lietuviams\", \"Lietuvis\", \"Lietuvė\", \"Vilnius\", \"Vilniuje\", \"Vilniaus\", \"Vilnių\", \"Kaunas\", \"Kaune\", \"Kauno\", \"Kauną\", \"Klaipėda\", \"Klaipėdoje\", \"Klaipėdos\", \"Šiauliai\", \"Šiauliuose\", \"Panevėžys\", \"Panevėžyje\", \"Europa\", \"Europos\", \"Europoje\", \"Europą\", \"Rusija\", \"Rusijos\", \"Rusijoje\", \"Baltarusija\", \"Baltarusijos\", \"Latvija\", \"Latvijos\", \"Lenkija\", \"Lenkijos\", \"Ukraina\", \"Ukrainos\", \"Ukrainoje\", \"JAV\", \"ES\", \"NATO\", \"Vyriausybė\", \"Vyriausybės\", \"Seimas\", \"Seimo\", \"Seime\", \"Prezidentas\", \"Prezidento\", \"Ministras\", \"Ministrė\", \"Ministerija\", \"Policija\", \"Policijos\", \"Teismas\", \"Teismo\", \"Savivaldybė\", \"Savivaldybės\", \"Euras\", \"Eurų\", \"Eurai\", \"Eurais\", \"Šiandien\", \"Vakar\", \"Rytoj\", \"Šiąnakt\", \"Šįryt\", \"Tačiau\", \"Todėl\", \"Taip\", \"Dabar\", \"Jau\", \"Dar\", \"Bet\", \"Ir\", \"Kai\", \"Nes\", \"Kad\", \"Jis\", \"Ji\", \"Jie\", \"Jos\", \"Mes\", \"Jūs\", \"Tai\", \"Tas\", \"Ta\", \"Tie\", \"Tos\", \"Čia\", \"Ten\", \"Tik\", \"Net\", \"Pagal\", \"Anot\", \"Po\", \"Per\", \"Nuo\", \"Iki\", \"Prie\", \"Apie\", \"Dėl\", \"Su\", \"Be\", \"Už\", \"Ant\", \"Iš\", \"Į\", \"O\", \"Kaip\", \"Kodėl\", \"Kiek\", \"Kur\", \"Kas\", \"Jei\", \"Jeigu\", \"Nors\", \"Milijonas\", \"Milijonai\", \"Milijonų\", \"Milijardas\", \"Milijardų\", \"Tūkstančiai\", \"Tūkstančių\", \"Procentai\", \"Procentų\", \"Naujienos\", \"Delfi\", \"Lrytas\", \"BNS\", \"ELTA\", \"LRT\", \"Lrt\", \"Pranešama\", \"Pranešė\", \"Teigiama\", \"Sako\", \"Teigia\", \"Skelbia\"]));\nconst looksPerson = (n) => /^\\p{Lu}\\p{Ll}+ \\p{Lu}\\p{Ll}+$/u.test(n);\nconst extractEntities = (vo) => {\n  if (!vo) return []; const out = []; const seen = new Set();\n  const add = (x) => { x = (x || '').trim(); if (x && x.length > 1 && !seen.has(x) && !STOP.has(x)) { seen.add(x); out.push(x); } };\n  let m; const reBrand = /(?<!\\p{L})(\\p{L}*\\p{Lu}\\p{L}*\\p{Lu}[\\p{L}0-9]*)(?!\\p{L})/gu; while ((m = reBrand.exec(vo))) add(m[1]);\n  const reMulti = /(?<!\\p{L})(\\p{Lu}\\p{Ll}+(?:\\s+\\p{Lu}\\p{Ll}+)+)(?!\\p{L})/gu;\n  while ((m = reMulti.exec(vo))) { let ws = m[1].split(/\\s+/); while (ws.length && STOP.has(ws[0])) ws.shift(); while (ws.length && STOP.has(ws[ws.length - 1])) ws.pop(); if (ws.length > 1) add(ws.join(' ')); }\n  const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo))) { const before = vo.slice(0, m.index).replace(/[\\s„“\"'(]+$/, ''); if (before === '' || /[.!?:;–-]$/.test(before)) continue; add(m[1]); }\n  return out;\n};\nfor (const _s of scenes) {\n  let c = _s.center; if (!c || !c.type) { _s.center = { type: 'none' }; c = _s.center; }\n  if (c.type === 'stat') continue;\n  if (c.type === 'coin') {\n    const id = c.coingecko_id || TICKER_TO_ID[(c.ticker || '').toLowerCase()] || TICKER_TO_ID[(c.symbol || '').toLowerCase()] || '';\n    let lg = id ? await coinLogo(id) : null; if (!lg) lg = await cgEntity(c.name || c.coingecko_id || c.ticker || c.symbol || '');\n    if (lg) { c.logo_url = lg; _wiki_dbg.push('coinIMG:' + (id || c.name)); } else { _wiki_dbg.push('coinNo:' + (id || c.name)); }\n    continue;\n  }\n  if (c.type === 'entity') {\n    const title = (c.wiki && c.wiki !== 'none') ? c.wiki : (c.name || '');\n    const isPerson = c.kind === 'person';\n    _wiki_dbg.push('ent:' + title);\n    const enT = (c.wiki_en && c.wiki_en !== 'none') ? c.wiki_en : '';\n    let img = isPerson ? (await wikiImage(title) || (enT ? await wikiImage(enT, 'en') : null) || (c.name && c.name !== title ? await wikiImage(c.name) : null))\n                       : (await resolveNonPerson(title) || (enT ? (await companyLogo(enT, 'en') || await wikiImage(enT, 'en')) : null));\n    if (!img && !isPerson && c.name && c.name !== title) img = await resolveNonPerson(c.name);\n    if (img) { c.logo_url = img; _wiki_dbg.push('entIMG:' + title); } else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }\n  }\n  if (c.type === 'none') {\n    const cands = extractEntities(_s.vo_segment).slice(0, 6);\n    for (const e of cands) {\n      _wiki_dbg.push('net:' + e);\n      const img = await resolveNonPerson(e);\n      if (img) { _s.center = { type: 'entity', kind: looksPerson(e) ? 'person' : 'company', name: e, wiki: e, logo_url: img }; _wiki_dbg.push('netIMG:' + e); break; }\n    }\n  }\n}\nconst job = { comp:\"main\", channel:\"5hu\", music:\"assets/\"+data.musicFile, bpm:data.musicBpm, voice:\"assets/\"+data.voiceFile, output:\"outputs/\"+data.outputFile, ticker: ticker, voiceover: data.voiceover || \"\", wiki_dbg: _wiki_dbg, scenes: scenes.map(function(s){return {image:\"assets/\"+s.imageFile, duration:s.duration_sec, on_screen_text: s.on_screen_text || \"\", image_prompt: s.image_prompt || \"\", center: s.center || {type:\"none\"}, vo_segment: s.vo_segment || \"\"};}) };\ndata.job_json = JSON.stringify(job);\nconst NL=String.fromCharCode(10), Q=String.fromCharCode(34);\nconst lines = scenes.map(function(s,i){ return (i+1)+\". (\"+s.duration_sec+\"s) \"+s.vo_segment+\"  [img: \"+s.image_prompt+\"]\"; });\ndata.script_text = [\"🎬 \"+((data.meta&&data.meta.title)||\"\"),\"\",Q+(data.voiceover||\"\")+Q,\"\",\"Scenes:\",lines.join(NL),\"\",(data.hashtags||[]).join(\" \")].join(NL);\nconst _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/\\bShoo\\b/g, '/ʃuː/').replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,7 +67,7 @@
         896,
         -16
       ],
-      "id": "475211e9-425a-414e-aa6b-3b11fe50a74a",
+      "id": "303870ee-7ef7-434f-a4d0-67af4bec3935",
       "name": "Code in JavaScript"
     },
     {
@@ -96,7 +96,7 @@
         1488,
         -128
       ],
-      "id": "1a66f220-3df2-49c4-9bce-b7bb9107e233",
+      "id": "76cd5bfe-321b-439c-8930-dae465fd6a9e",
       "name": "Convert text to speech",
       "credentials": {
         "elevenLabsApi": {
@@ -123,9 +123,9 @@
         1088,
         16
       ],
-      "id": "363dfe5f-2adc-4c92-b8f0-f878eb458030",
+      "id": "3f75a33b-6c19-469b-a8e7-3f2429890d8b",
       "name": "Send message and wait for response",
-      "webhookId": "90b99315-b616-4d78-9fb0-db72ce627cee",
+      "webhookId": "9abb5634-da60-4d48-8914-74e6cf77d4ed",
       "credentials": {
         "telegramApi": {
           "id": "MsHdBVyurDnoXcyo",
@@ -146,7 +146,7 @@
         1232,
         288
       ],
-      "id": "cdee4917-3a4f-4559-b009-83bde6760960",
+      "id": "d714eeb3-9176-48fa-be91-b14c8bb64b12",
       "name": "Save Image"
     },
     {
@@ -191,7 +191,7 @@
         400,
         272
       ],
-      "id": "7b68ef98-4cb4-40f6-a755-1e64a51abc6a",
+      "id": "8dee0bdb-6ff0-4537-a0ab-ba955842929c",
       "name": "Image - Request"
     },
     {
@@ -215,7 +215,7 @@
         608,
         288
       ],
-      "id": "bf9f7ca9-7716-43e9-95c0-88bbd359980f",
+      "id": "2b020b02-0e70-4984-b1dd-4b97626a1364",
       "name": "Image - Get"
     },
     {
@@ -235,7 +235,7 @@
         1072,
         288
       ],
-      "id": "a1d74975-610d-4efb-92fa-7002bc8189c7",
+      "id": "d7f037a4-1c97-4c1f-b33b-ecba1858210a",
       "name": "Image - Download"
     },
     {
@@ -266,7 +266,7 @@
         208,
         0
       ],
-      "id": "c4a7902d-49c1-41d8-b3bd-39300e450c11",
+      "id": "efa8cd63-9c66-4dc3-bd38-6ddd77c097ce",
       "name": "Article - Fetch",
       "retryOnFail": true,
       "maxTries": 3,
@@ -286,7 +286,7 @@
         1648,
         -128
       ],
-      "id": "694cbc0e-2ff7-453e-9fbc-dcb2e0489748",
+      "id": "cb2efc17-0b1e-4453-9617-122638926308",
       "name": "Save Voice"
     },
     {
@@ -299,7 +299,7 @@
         1584,
         288
       ],
-      "id": "ca267b6d-7a12-444c-8bbe-1f9dad218b20",
+      "id": "1f670348-83b0-464e-83c3-84fd1c73df6c",
       "name": "Make Job File",
       "executeOnce": true
     },
@@ -334,7 +334,7 @@
         800,
         304
       ],
-      "id": "94b27a65-25f9-45ae-990a-642898b22524",
+      "id": "579bf700-94ef-4a09-b614-d31e161bbf84",
       "name": "If"
     },
     {
@@ -347,9 +347,9 @@
         976,
         432
       ],
-      "id": "240de771-40b9-4ba4-9411-3bc85bc47d77",
+      "id": "5c149e57-78e8-40f2-a004-c6db740d201d",
       "name": "Wait",
-      "webhookId": "bde323ca-001a-4a0e-9bec-c7f09f84e782"
+      "webhookId": "c3bd7b25-fe2f-4728-845d-beee616c2bcc"
     },
     {
       "parameters": {
@@ -382,7 +382,7 @@
         1264,
         32
       ],
-      "id": "bca936f8-c2d5-439e-a906-aaae4a347cb0",
+      "id": "03fad8ac-f6b7-4471-ae16-8a059ca9cd86",
       "name": "Approved?"
     },
     {
@@ -395,7 +395,7 @@
         1360,
         288
       ],
-      "id": "0c5bda10-644b-4a42-99da-f5725c3d05b0",
+      "id": "5137f5b6-89ff-42ed-8009-86891dde8887",
       "name": "Split Scenes"
     },
     {
@@ -421,7 +421,7 @@
         },
         "options": {}
       },
-      "id": "4859cd61-e235-470d-9f6f-e63a851fdd19",
+      "id": "d6bedbb4-a2e7-4a93-abf6-6c3fc3ecaf90",
       "name": "Align",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
@@ -441,7 +441,7 @@
       "parameters": {
         "jsCode": "const align = $('Align').first().json || {};\nconst words = (align.words || []).filter(w => w && typeof w.text === 'string' && w.text.trim().length);\nconst captions = words.map(w => ({ text: w.text.trim().replace(/^shoo(?=[^A-Za-z]*$)/i, '5HU'), startMs: Math.round((Number(w.start)||0)*1000), endMs: Math.round((Number(w.end)||0)*1000) }));\nlet job = null;\ntry { job = JSON.parse($('Code in JavaScript').first().json.job_json); } catch (e) { job = null; }\nconst voWords = ((($('Code in JavaScript').first().json.voiceover) || '').trim().split(/\\s+/).filter(Boolean)).length;\nconst sane = captions.length && Math.abs(captions.length - voWords) <= Math.max(3, Math.round(voWords * 0.35));\nif (job && sane) { job.captions = captions; }\nif (job) { job.align_words = captions.length; job.vo_words = voWords; }\nconst out = Object.assign({}, $('Code in JavaScript').first().json);\nif (job) { out.job_json = JSON.stringify(job); }\nout.caption_count = captions.length;\nconst bin = $('Convert text to speech').first().binary;\nreturn [{ json: out, binary: bin }];"
       },
-      "id": "127ef2bb-87fb-41d4-9689-0b3bd5a92e88",
+      "id": "cec7ee07-85e5-40bc-85b9-fe603bcce144",
       "name": "Add Captions",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -460,7 +460,7 @@
           ]
         }
       },
-      "id": "bff46d88-5fbf-4d69-931d-a3bbd26ba980",
+      "id": "a3776e7f-beed-41f3-86b9-5f273d4282a0",
       "name": "Every Hour",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -474,7 +474,7 @@
       "parameters": {
         "jsCode": "const FEEDS = [[\"Scandinavian MIND\", \"https://www.scandinavianmind.com/feed\", \"emerging\"], [\"BON (Stockholm)\", \"https://bon.se/feed\", \"emerging\"], [\"10 Magazine (London)\", \"https://www.10magazine.com/feed/\", \"emerging\"], [\"Office Magazine (NY)\", \"https://www.officemagazine.net/rss.xml\", \"emerging\"], [\"Kaltblut (Berlin)\", \"https://www.kaltblut-magazine.com/feed/\", \"emerging\"], [\"Highxtar\", \"https://highxtar.com/feed/\", \"emerging\"], [\"Numero\", \"https://www.numero.com/en/rss\", \"niche\"], [\"Interview\", \"https://www.interviewmagazine.com/feed\", \"niche\"], [\"NYLON\", \"https://www.nylon.com/feeds/feed.rss\", \"niche\"], [\"The Fashionisto\", \"https://www.thefashionisto.com/feed/\", \"niche\"], [\"FashionUnited\", \"https://fashionunited.uk/rss-news\", \"main\"], [\"Coveteur\", \"https://coveteur.com/feeds/feed.rss\", \"main\"], [\"Vogue\", \"https://www.vogue.com/feed/rss\", \"main\"], [\"British Vogue\", \"https://www.vogue.co.uk/feed/rss\", \"main\"], [\"WWD\", \"https://wwd.com/feed/\", \"main\"], [\"Harper's Bazaar\", \"https://www.harpersbazaar.com/rss/all.xml/\", \"main\"], [\"Elle\", \"https://www.elle.com/rss/all.xml/\", \"main\"], [\"Fashionista\", \"https://fashionista.com/.rss/excerpt/\", \"main\"], [\"Who What Wear\", \"https://www.whowhatwear.com/rss\", \"main\"], [\"Esquire Style\", \"https://www.esquire.com/rss/style.xml/\", \"main\"], [\"Hypebeast\", \"https://hypebeast.com/feed\", \"niche\"], [\"Hypebae\", \"https://www.hypebae.com/feed\", \"niche\"], [\"Highsnobiety\", \"https://www.highsnobiety.com/feed/\", \"niche\"], [\"Dazed\", \"https://www.dazeddigital.com/rss\", \"niche\"], [\"i-D\", \"https://i-d.co/feed/\", \"niche\"], [\"PAPER\", \"https://www.papermag.com/feeds/feed.rss\", \"niche\"], [\"Refinery29 Fashion\", \"https://www.refinery29.com/en-us/fashion/rss.xml\", \"niche\"], [\"Permanent Style\", \"https://www.permanentstyle.com/feed\", \"niche\"], [\"Put This On\", \"https://www.putthison.com/rss\", \"niche\"], [\"Heddels\", \"https://www.heddels.com/feed/\", \"niche\"], [\"DMARGE\", \"https://www.dmarge.com/feed\", \"niche\"]];\nconst UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';\nconst decode = (s) => String(s || '')\n  .replace(/<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>/g, '$1').replace(/<[^>]+>/g, ' ')\n  .replace(/&#8217;|&rsquo;|&#8216;|&lsquo;|&#039;|&#39;|&apos;/g, \"'\").replace(/&#8220;|&#8221;|&ldquo;|&rdquo;|&quot;/g, '\"')\n  .replace(/&#8211;|&ndash;/g, '-').replace(/&#8212;|&mdash;/g, '-').replace(/&nbsp;|&#160;/g, ' ')\n  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&amp;/g, '&')\n  .replace(/\\s+/g, ' ').trim();\nconst tag = (b, t) => { const m = b.match(new RegExp('<' + t + '(?:\\\\s[^>]*)?>([\\\\s\\\\S]*?)</' + t + '>', 'i')); return m ? m[1] : ''; };\nconst parse = (xml, source, tier) => {\n  const blocks = xml.match(/<item[\\s>][\\s\\S]*?<\\/item>/gi) || xml.match(/<entry[\\s>][\\s\\S]*?<\\/entry>/gi) || [];\n  return blocks.map(b => {\n    let link = decode(tag(b, 'link'));\n    if (!link) { const m = b.match(/<link[^>]*href=\"([^\"]+)\"/i); link = m ? m[1] : ''; }\n    if (!link) link = decode(tag(b, 'guid'));\n    const date = decode(tag(b, 'pubDate') || tag(b, 'published') || tag(b, 'updated') || tag(b, 'dc:date'));\n    const snippet = decode(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content:encoded')).slice(0, 240);\n    return { source, tier, title: decode(tag(b, 'title')), link: link.trim(), snippet, date };\n  }).filter(x => x.title && /^https?:/.test(x.link));\n};\nconst res = await Promise.allSettled(FEEDS.map(([name, url, tier]) =>\n  this.helpers.httpRequest({ url, timeout: 15000, headers: { 'User-Agent': UA, 'Accept': 'application/rss+xml,application/xml,text/xml,*/*' } })\n    .then(body => parse(typeof body === 'string' ? body : String(body), name, tier))));\nlet all = [], ok = 0;\nres.forEach(r => { if (r.status === 'fulfilled' && r.value.length) { ok++; all = all.concat(r.value); } });\n// only new stories: skip links already used (kept in workflow static data) and older than 72 h\nconst _st = $getWorkflowStaticData('global'); const _seen = new Set(_st.seen5hu || []);\nconst age = (x) => Date.now() - (new Date(x.date).getTime() || 0);\nall = all.filter(x => !_seen.has(x.link) && age(x) < (x.tier === 'emerging' ? 120 : 72) * 3600e3);\nif (!all.length) throw new Error('5HU: no new fashion stories (feeds read: ' + ok + ')');\n// newest 2 per source, then a pool with niche sources first: up to 8 niche + 4 mainstream, shuffled\nconst per = {}; all.sort((a, b) => age(a) - age(b));\nall = all.filter(x => (per[x.source] = (per[x.source] || 0) + 1) <= 2);\nconst shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };\nconst RISING = /\\b(emerging|newcomer|debut (collection|show|runway|store|season)|first (collection|show|runway|store)|designers? to (watch|know)|labels? to (watch|know)|rising (star|label|designer|brand)|new (label|brand|designer)|up-and-coming|graduate collection|LVMH Prize|ANDAM|Woolmark|Fashion East|NEWGEN|Copenhagen Fashion Week|Stockholm|Oslo|Helsinki|Scandinavian (label|brand|designer|fashion)|Nordic (label|brand|designer|fashion)|Tokyo Fashion Week|Seoul Fashion Week|independent (label|brand|designer)|indie (label|brand|designer)|young designer|breakout|cult (label|brand|sneaker|favourite|favorite))\\b/i;\nconst rising = (x) => RISING.test(x.title + ' ' + x.snippet);\nconst used = new Set(); const take = (arr, n) => arr.filter(x => !used.has(x.link)).slice(0, n).map(x => (used.add(x.link), x));\nconst pool = [].concat(\n  take(shuffle(all.filter(rising)), 6),\n  take(shuffle(all.filter(x => x.tier === 'emerging')), 4),\n  take(shuffle(all.filter(x => x.tier === 'niche')), 3),\n  take(shuffle(all.filter(x => x.tier === 'main')), 2));\nconst candidates = shuffle(pool.length ? pool : all.slice(0, 12));\nconst candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier !== 'main' ? ', ' + x.tier : '') + (rising(x) ? ', RISING' : '') + '] ' + x.title + '\\n   ' + x.snippet + '\\n   LINK: ' + x.link).join('\\n\\n');\nconst recentHooks = (_st.hooks5hu || []).slice(0, 12).map(h => '- ' + h).join('\\n') || '(none yet)';\nreturn [{ json: { candidates, candidatesText, feedsRead: ok, recentHooks } }];"
       },
-      "id": "3d715eba-5f3e-41ef-892d-2e4551dc7e30",
+      "id": "b4aff34a-dd27-4b5f-a70c-fc28c33f40f0",
       "name": "Combine Feeds",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -502,7 +502,7 @@
         "simplify": false,
         "options": {}
       },
-      "id": "f8b3bd48-ee59-4d84-a68d-77383d7bb65b",
+      "id": "2cbe2bd1-d9c2-438e-9abc-456d2bff2504",
       "name": "Select Story",
       "type": "@n8n/n8n-nodes-langchain.anthropic",
       "typeVersion": 1,
@@ -521,7 +521,7 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json.content[0].text;\nconst fixJson = (t) => {\n  // Lithuanian text uses „…“ quotes but models often close with an ASCII \". Keep a \" only where it is\n  // structural JSON (followed by : } ] end, or by , and then the next JSON token); turn the rest into “.\n  let out = '', inStr = false;\n  for (let i = 0; i < t.length; i++) {\n    const ch = t[i];\n    if (ch === '\\\\' && inStr) { out += ch + (t[i + 1] || ''); i++; continue; }\n    if (ch !== '\"') { out += ch; continue; }\n    if (!inStr) { inStr = true; out += ch; continue; }\n    let j = i + 1; while (j < t.length && /\\s/.test(t[j])) j++;\n    const nx = t[j] || '';\n    let structural = (nx === ':' || nx === '}' || nx === ']' || nx === '');\n    if (nx === ',') { let k = j + 1; while (k < t.length && /\\s/.test(t[k])) k++; structural = /[\"{\\[\\d\\-tfn]/.test(t[k] || ''); }\n    if (structural) { inStr = false; out += ch; } else out += '\\u201c';\n  }\n  return out;\n};\nlet sel = null;\ntry { const s = raw.indexOf('{'); const e = raw.lastIndexOf('}'); sel = JSON.parse(fixJson(raw.slice(s, e + 1))); } catch (err) { sel = null; }\nconst cands = ($('Combine Feeds').first().json.candidates) || [];\nif (!sel || !sel.link) {\n  const m = raw.match(/\"link\"\\s*:\\s*\"([^\"\\s]+)\"/) || raw.match(/https?:\\/\\/[^\\s\"'<>]+/);\n  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n  const link = m[1] || m[0];\n  const rm = raw.match(/\"reason\"\\s*:\\s*\"([^\"]*)\"/);\n  sel = { link, title: '', reason: rm ? rm[1] : '' };\n}\nconst hit = cands.find(c => c.link === sel.link) || cands.find(c => sel.link && c.link && (c.link.indexOf(sel.link) === 0 || sel.link.indexOf(c.link) === 0));\nif (hit && (!sel.title || sel.title.length < 4)) sel.title = hit.title;\nconst _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\nreturn [{ json: { link: sel.link, title: sel.title || '', source_url: sel.link, reason: sel.reason || '', source: hit ? hit.source : '' } }];"
       },
-      "id": "d39ab26e-0c1d-4440-a0f5-b21980565c1c",
+      "id": "84170c20-3fa6-4a9c-8dd1-a9c3876190ce",
       "name": "Parse Selection",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -543,7 +543,7 @@
         1804,
         288
       ],
-      "id": "25bdd656-99f0-4178-853d-add49d16049b",
+      "id": "c3bbc7ef-8c9b-420e-a9f3-278c66512b32",
       "name": "Save Job"
     },
     {
@@ -556,8 +556,75 @@
         -816,
         424
       ],
-      "id": "60769fdc-9f43-43b5-88fc-58d265f9f16d",
+      "id": "d8309084-9646-4000-b92c-ec8fce87b324",
       "name": "Run Now (CLI)"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst STYLES = [\n  'hypnotic acid techno, squelchy TB-303 acid line, driving punchy kick',\n  'minimal techno, clicky micro percussion, deep rolling sub bass, sparse and hypnotic',\n  'hard groove techno, rolling tribal toms, shuffled hats, punchy kick',\n  'industrial techno, distorted kick, metallic noise hits, dark warehouse',\n  'Detroit techno, warm analog chord stabs, soulful pad, steady kick',\n  'melodic techno, arpeggiated synth lead, emotional pads, big kick',\n  'dark Berlin techno, rumbling reverb bass kick, cold synth stabs',\n  'electro techno, robotic synth bass, crisp 909 claps, futuristic',\n  'peak-time techno, big snare rolls, hoover synth, euphoric drive',\n  'dub techno, deep chord echoes, foggy atmosphere, steady pulse',\n];\nconst KEYS = ['A minor', 'F minor', 'D minor', 'G minor', 'C minor', 'E minor'];\nconst BPMS = [126, 128, 130, 132, 134, 136];\nconst pick = (a) => a[Math.floor(Math.random() * a.length)];\nconst style = pick(STYLES), key = pick(KEYS);\nconst bpm = $('Code in JavaScript').first().json.musicBpm || pick(BPMS);\nconst text = style + ', ' + bpm + ' BPM, in ' + key + ', four-on-the-floor, instrumental, no vocals, no speech, fashion runway energy, seamless loop';\nreturn [{ json: { text, bpm, style } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1868,
+        -128
+      ],
+      "id": "d621897d-ac1c-42b3-8c82-5e832d105d35",
+      "name": "Music - Pick Style"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/sound-generation",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, duration_seconds: 24, prompt_influence: 0.6, loop: true, model_id: 'eleven_text_to_sound_v2' }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          },
+          "timeout": 90000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2088,
+        -128
+      ],
+      "id": "01455c45-7c13-491b-b8d9-28ad6b0120b6",
+      "name": "Music - Generate",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Ail8NJx7E0A34ghp",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/data/shared/assets/{{ $('Code in JavaScript').first().json.musicFile }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2308,
+        -128
+      ],
+      "id": "aa6600c4-82f5-4f61-a874-fd452b952de5",
+      "name": "Save Music",
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
@@ -793,7 +860,7 @@
       "main": [
         [
           {
-            "node": "Split Scenes",
+            "node": "Music - Pick Style",
             "type": "main",
             "index": 0
           }
@@ -816,6 +883,39 @@
         [
           {
             "node": "Combine Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Music - Pick Style": {
+      "main": [
+        [
+          {
+            "node": "Music - Generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Music - Generate": {
+      "main": [
+        [
+          {
+            "node": "Save Music",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Music": {
+      "main": [
+        [
+          {
+            "node": "Split Scenes",
             "type": "main",
             "index": 0
           }

@@ -21,7 +21,7 @@ const Grain = () => {
 };
 
 // techno-clip motion: kick pulse on every beat, hard re-frame every bar, glitch on scene cuts
-const BPM = 132;
+let BPM = 132;   // set per video from the job (music tempo)
 const FRAMINGS = [
   {z: 1.0, x: 0, y: 0}, {z: 1.32, x: -60, y: -40}, {z: 1.16, x: 50, y: 60}, {z: 1.45, x: 30, y: -90},
 ];
@@ -122,7 +122,7 @@ const Headline = ({text, layout, accent, from}) => {
   if (!text) return null;
   const words = String(text).split(/\s+/).filter(Boolean);
   const key = words.reduce((b, w, k) => (w.replace(/[^\p{L}\d]/gu, '').length > words[b].replace(/[^\p{L}\d]/gu, '').length ? k : b), 0);
-  const beat = (fps * 60) / 132;
+  const beat = (fps * 60) / BPM;
   const pump = interpolate((from + frame) % beat, [0, 5], [1.03, 1], {extrapolateRight: 'clamp'});
   const L = [
     {top: 250, left: 72, right: 110, font: serif, style: 'italic', size: 138, weight: 400, upper: false, align: 'left'},
@@ -302,7 +302,8 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
   );
 };
 
-export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps}) => {
+export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm}) => {
+  BPM = Number(bpm) || 132;
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
   const seed = seedOf(voice);
@@ -324,7 +325,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps}) => {
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
       <Sequence from={outroFrom}><Outro /></Sequence>
       <Audio src={staticFile(voice)} />
-      <Audio src={staticFile('music/5hu_techno.mp3')} loop volume={(fr) => {
+      <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {
         const ms = (fr / f) * 1000;
         const speaking = caps.some((c) => ms >= c.startMs - 80 && ms <= c.endMs + 120);
         const bed = speaking ? 0.16 : MUSIC_VOL;

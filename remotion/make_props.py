@@ -52,6 +52,12 @@ out_obj = {'scenes': scenes, 'voice': voice_base, 'fps': 30}
 if job.get('ticker'): out_obj['ticker'] = job['ticker']
 if job.get('captions'): out_obj['captions'] = job['captions']
 if job.get('cta'): out_obj['cta'] = job['cta']   # ad end card (vikops)
+# per-video music bed (5HU): copy it next to the voice; if generation failed the renderer uses its fallback track
+if job.get('music') and os.path.exists(os.path.join(root, job['music'])):
+    mb = os.path.basename(job['music'])
+    shutil.copy(os.path.join(root, job['music']), os.path.join(pub, mb))
+    out_obj['music'] = mb
+if job.get('bpm'): out_obj['bpm'] = job['bpm']
 channel = job.get('channel') or 'crypto'
 out_obj['channel'] = channel
 bp = bc = None
