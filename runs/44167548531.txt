@@ -1,8 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-"status": "success"
-VO: The whole watch is a skull. Murakami... stopped collaborating and started his own brand. Smiling flowers spin in the eye sockets. Follow 5HU — we see it first. | words 28
-music assets/5hu_music_1794946445651.mp3 bpm 128
--rw-r--r-- 1 1000 1000 384983 Nov 17 20:14 /root/shared/assets/5hu_music_1794946445651.mp3
-Nov 17 20:14:36 srv2107298 bash[1315455]: [20:14:36] job 5hu_job_1794946445651.json -> 5hu_video_1794946445651.mp4
-Nov 17 20:15:39 srv2107298 bash[1315455]: [20:15:39] OK 5hu_video_1794946445651.mp4
-Nov 17 20:15:41 srv2107298 bash[1315455]: [20:15:41] sent to Telegram
