@@ -1,0 +1,7 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+Note: Changes will not take effect if n8n is running.
+Please restart n8n for changes to take effect if n8n is currently running.
+ Container stack-n8n-1 Restarting 
+ Container stack-n8n-1 Started 
+FIVEHU_PUBLISHED (n8n restarted)
+0
