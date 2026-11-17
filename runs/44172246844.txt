@@ -1,0 +1,10 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+5:python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf_base.json >/dev/null
+6:python3 $REPO/n8n/make_lt_workflow.py $S/wf_base.json $S/wf_lt.json >/dev/null
+7:python3 $REPO/n8n/make_5hu_workflow.py $S/wf_lt.json $S/wf_5hu.json
+8:chown 1000:1000 $S/wf_5hu.json
+9:docker compose exec -T n8n n8n import:workflow --input=/data/shared/wf_5hu.json && echo "FIVEHU_UPDATED $(cat $ST/5hu_wf_id)"
+11:rm -f $S/wf_base.json $S/wf_lt.json $S/wf_5hu.json
+n8n/make_5hu_workflow.py
+/root/stack/n8n_data/database.sqlite
+/root/stack/n8n_data/database.sqlite-wal
