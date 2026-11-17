@@ -219,9 +219,9 @@ rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'))
 # random Wikipedia image. Auto-spot only multi-word names and ALL-CAPS/CamelCase brands; the script's explicit entities still work.
 rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((m = reSingle.exec(vo)))",
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
-# "5HU" is said "Shoo" (Slavic ШУ), never "five-H-U": the voice + alignment get a phonetic copy,
+# "5HU" is said "Šū" (owner picked sample F: "[Lithuanian] Šū [English]"), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/\\bShoo\\b/g, '/ʃuː/').replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
+rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = data.voiceover_align.replace(/\\bShoo\\b/g, '[Lithuanian] Šū [English]').replace(/([.!?…])\\s+(?=\\S)/g, '$1 [pause] ');\nreturn [{ json: data }];")
 by_name["Code in JavaScript"]["parameters"]["jsCode"] = code
 for _n in ("Convert text to speech",):
     _p = by_name[_n]["parameters"]
