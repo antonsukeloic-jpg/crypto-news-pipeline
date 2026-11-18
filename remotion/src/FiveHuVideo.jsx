@@ -34,7 +34,10 @@ const Media = ({scene, dur, i, from}) => {
   const kick = interpolate(sinceKick, [0, 5], [1.045, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
   // hard re-frame every bar (4 beats) inside the scene
   const bar = Math.floor(frame / (beat * 4));
-  const fr = FRAMINGS[(bar + i) % FRAMINGS.length];
+  const f0 = FRAMINGS[(bar + i) % FRAMINGS.length];
+  // real photos: keep the designer / the pieces in frame (softer zoom); wide shots sit on a blurred copy instead of being cropped
+  const fr = scene.real ? {z: 1 + (f0.z - 1) * 0.45, x: f0.x * 0.4, y: f0.y * 0.4} : f0;
+  const wide = scene.real && Number(scene.aspect) > 0.68;
   const punch = interpolate(frame, [0, 7], [1.12, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   const drift = interpolate(frame, [0, dur], [1, 1.05]);
   // glitch on the cut: jitter + RGB-ish ghost for 6 frames
@@ -48,7 +51,14 @@ const Media = ({scene, dur, i, from}) => {
     <AbsoluteFill>
       {scene.video
         ? <OffthreadVideo src={staticFile(scene.video)} muted style={base} />
-        : <Img src={src} style={base} />}
+        : wide
+          ? <>
+              <Img src={src} style={{...base, scale: String(1.35 * kick), translate: '0px 0px', filter: 'blur(38px) brightness(0.55) saturate(1.2)'}} />
+              <Img src={src} style={{...base, objectFit: 'contain'}} />
+            </>
+          : <Img src={src} style={base} />}
+      {scene.credit && <div style={{position: 'absolute', left: 72, top: 222, fontFamily: mono, fontSize: 20, letterSpacing: 3,
+        color: BRAND.white, opacity: 0.75, textTransform: 'uppercase', textShadow: '0 2px 8px rgba(0,0,0,0.8)'}}>photo · {scene.credit}</div>}
       {glitch && src && <Img src={src} style={{...base, translate: (fr.x + jx + 22) + 'px ' + fr.y + 'px', mixBlendMode: 'screen', opacity: 0.55,
         filter: 'hue-rotate(300deg) saturate(3)'}} />}
       {glitch && src && <Img src={src} style={{...base, translate: (fr.x + jx - 22) + 'px ' + fr.y + 'px', mixBlendMode: 'screen', opacity: 0.45,
@@ -295,7 +305,7 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
       <Media scene={s} dur={dur} i={i} from={from} />
       <BarFlash from={from} />
       <Grade />
-      <Center center={s.center} accent={accent} />
+      <Center center={s.real && s.center && s.center.type === 'entity' ? null : s.center} accent={accent} />
       <Headline text={s.on_screen_text} layout={layout} accent={accent} from={from} />
       {i > 0 && <Sequence durationInFrames={14}><Impact kind={kind} accent={accent} /></Sequence>}
     </AbsoluteFill>

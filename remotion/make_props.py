@@ -1,3 +1,4 @@
+import subprocess
 import sys, json, os, shutil, urllib.request
 
 def _get(url, timeout=5):
@@ -46,6 +47,15 @@ for s in job['scenes']:
     else:
         b = os.path.basename(s['image']); shutil.copy(os.path.join(root, s['image']), os.path.join(pub, b)); sc['image'] = b
     if s.get('center'): sc['center'] = s['center']
+    if s.get('real'):
+        sc['real'] = True
+        if s.get('credit'): sc['credit'] = s['credit']
+        try:
+            wh = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
+                                 os.path.join(pub, sc.get('image', ''))], capture_output=True, text=True, timeout=10).stdout.strip().split(',')
+            sc['aspect'] = round(int(wh[0]) / int(wh[1]), 3)
+        except Exception:
+            pass
     if s.get('vo_segment'): sc['vo_segment'] = s['vo_segment']
     scenes.append(sc)
 out_obj = {'scenes': scenes, 'voice': voice_base, 'fps': 30}

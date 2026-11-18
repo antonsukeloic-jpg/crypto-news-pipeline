@@ -8,7 +8,7 @@ Output: a SEPARATE workflow (own id, node ids, webhook ids), English, fashion fe
 
 usage: make_5hu_workflow.py <lt.json> <out_5hu.json>
 """
-import copy, json, sys, uuid
+import copy, json, os, sys, uuid
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else "n8n/workflow_lt.json"
 DST = sys.argv[2] if len(sys.argv) > 2 else "n8n/workflow_5hu.json"
@@ -314,6 +314,71 @@ _req["url"] = _req["url"].replace("/soul/standard", "/soul/v2/standard")
 for _p in _req["bodyParameters"]["parameters"]:
     if _p["name"] == "resolution":
         _p["value"] = "1080p"
+
+# ---- REAL photos: a story about a designer must show the real designer and the real collection.
+# Article Photos pulls og:image + article/figure images from the fetched page; the script assigns them to scenes
+# ("photo": n); scenes without one fall back to a Soul 2 mood shot. A failed download also falls back to Soul 2.
+_photos_js = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "js", "5hu_article_photos.js")).read()
+_h = by_name["HTML"]
+w["nodes"].append({"parameters": {"jsCode": _photos_js}, "type": "n8n-nodes-base.code", "typeVersion": 2,
+    "position": [_h["position"][0] + 110, _h["position"][1] + 160], "id": str(uuid.uuid4()), "name": "Article Photos"})
+w["connections"]["HTML"] = {"main": [[{"node": "Article Photos", "type": "main", "index": 0}]]}
+w["connections"]["Article Photos"] = {"main": [[{"node": "Message a model", "type": "main", "index": 0}]]}
+
+_msgs = by_name["Message a model"]["parameters"]["messages"]["values"]
+_n_art = 0
+for _m in _msgs:
+    c = _m.get("content", "")
+    if "\n\nARTICLE\n{{" in c:
+        c = c.replace("\n\nARTICLE\n{{", "\n\nREAL PHOTOS FROM THE ARTICLE (numbered)\n{{ $json.photosText }}\n\nARTICLE\n{{")
+        _n_art += 1
+    c = c.replace('"visual":{"query":"..."}', '"photo":1,"visual":{"query":"..."}')
+    if '- “One to watch” is the channel' in c:
+        c = c.replace('"- “One to watch” is the channel'.lstrip('"'),
+            "- REAL PHOTOS: this is news about REAL designers and REAL collections - show the real person and the real pieces, never an invented collection. "
+            "For each scene set \"photo\" to the number of the REAL PHOTO that best matches the sentence (the designer's portrait when you introduce them, "
+            "looks / garments / campaign shots when you describe the collection). Use each photo once. Set \"photo\": 0 only when no real photo is left; "
+            "then visual.query must be a mood shot (the city, a studio, fabric close-up, a rail in shadow) - never a full invented outfit or collection.\n"
+            "- “One to watch” is the channel", 1)
+    _m["content"] = c
+assert _n_art == 1, _n_art
+
+_code = by_name["Code in JavaScript"]["parameters"]
+_anchor = 'scenes.forEach(function(s,i){ s.imageFile = '
+assert _code["jsCode"].count(_anchor) == 1
+_code["jsCode"] = _code["jsCode"].replace(_anchor,
+    "const _ph = (() => { try { return $('Article Photos').first().json.photos || []; } catch (e) { return []; } })();\n"
+    "const _used = new Set();\n"
+    "scenes.forEach(s => { const n = parseInt(s.photo, 10); if (n >= 1 && n <= _ph.length && !_used.has(n)) { _used.add(n); s.photo_url = _ph[n - 1].url; } });\n"
+    "scenes.forEach(s => { if (!s.photo_url) { const q = _ph.find(x => !_used.has(x.n)); if (q) { _used.add(q.n); s.photo_url = q.url; } } });\n"
+    "const _src = (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).source || '';\n"
+    + _anchor)
+_old = 'vo_segment: s.vo_segment || ""};'
+assert _code["jsCode"].count(_old) == 1
+_code["jsCode"] = _code["jsCode"].replace(_old, 'vo_segment: s.vo_segment || "", real: !!s.photo_url, credit: s.photo_url ? _src : ""};')
+
+_ir = by_name["Image - Request"]
+for _bp in _ir["parameters"]["bodyParameters"]["parameters"]:
+    if _bp["name"] == "prompt":
+        _bp["value"] = "={{ $('Split Scenes').item.json.image_prompt }}"
+_x, _y = _ir["position"]
+w["nodes"] += [
+    {"parameters": {"conditions": {"options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose", "version": 2},
+        "conditions": [{"id": str(uuid.uuid4()), "leftValue": "={{ $json.photo_url || '' }}", "rightValue": "",
+                        "operator": {"type": "string", "operation": "notEmpty", "singleValue": True}}], "combinator": "and"}, "options": {}},
+     "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [_x - 220, _y], "id": str(uuid.uuid4()), "name": "Real Photo?"},
+    {"parameters": {"url": "={{ $json.photo_url }}", "sendHeaders": True, "headerParameters": {"parameters": [
+        {"name": "User-Agent", "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"},
+        {"name": "Referer", "value": "={{ $('Parse Selection').first().json.link }}"}]},
+        "options": {"timeout": 20000, "response": {"response": {"responseFormat": "file"}}}},
+     "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [_x, _y - 220], "id": str(uuid.uuid4()),
+     "name": "Photo - Download", "onError": "continueErrorOutput"},
+]
+w["connections"]["Split Scenes"] = {"main": [[{"node": "Real Photo?", "type": "main", "index": 0}]]}
+w["connections"]["Real Photo?"] = {"main": [[{"node": "Photo - Download", "type": "main", "index": 0}],
+                                            [{"node": "Image - Request", "type": "main", "index": 0}]]}
+w["connections"]["Photo - Download"] = {"main": [[{"node": "Save Image", "type": "main", "index": 0}],
+                                                 [{"node": "Image - Request", "type": "main", "index": 0}]]}
 
 # ---- sanity
 names =[n["name"] for n in w["nodes"]]
