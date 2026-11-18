@@ -168,7 +168,7 @@ msg["content"] = (
     "RULES\n"
     "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 20-30 s around it. Never stack names, dates and numbers one after another.\n"
     "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
-    "- NEVER say the channel name 5HU anywhere in the voiceover or vo_segment - the sign-off \"Follow 5HU.\" is added automatically at the very end.\n"
+    "- NEVER say the channel name 5HU anywhere in the voiceover or vo_segment - the sign-off \"Follow 5HU. We find them first.\" is added automatically at the very end.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
@@ -222,7 +222,17 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
 # "5HU" is said "Šū" (owner picked sample K: the whole 5HU sentence "[softly] [Lithuanian] … Šū. [English]"), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "const _no5 = t => (String(t || '').match(/[^.!?…]+[.!?…]*/g) || []).map(x => x.trim()).filter(x => x && !/5\\s*HU|\\bShoo\\b|Šū/i.test(x)).join(' ');\ndata.voiceover = (_no5(data.voiceover) + ' Follow 5HU.').trim();\n(data.scenes || []).forEach(sc => { sc.vo_segment = _no5(sc.vo_segment); });\nconst _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = (data.voiceover_align.match(/[^.!?…]+[.!?…]*/g) || [data.voiceover_align]).map(x => x.trim()).filter(Boolean).map(x => /\\bShoo\\b/.test(x) ? '[softly] [Lithuanian] ' + x.replace(/\\bShoo\\b/g, 'Šū') + ' [English]' : x).join(' [pause] ');\nreturn [{ json: data }];")
+# Sign-off: the body never says 5HU; the video always ends "Follow 5HU. We find them first." over the dark outro.
+# SIGNOFF_TTS is what the voice reads (5HU = Lithuanian "Šū"); alignment reads the plain English copy.
+SIGNOFF_TTS = "[softly] Follow [Lithuanian] Šū, [English] we find them first."
+rep("return [{ json: data }];", "const _no5 = t => (String(t || '').match(/[^.!?…]+[.!?…]*/g) || []).map(x => x.trim()).filter(x => x && !/5\\s*HU|\\bShoo\\b|Šū|find them first/i.test(x)).join(' ');\n"
+    "const _body = _no5(data.voiceover);\n"
+    "data.voiceover = (_body + ' Follow 5HU. We find them first.').trim();\n"
+    "(data.scenes || []).forEach(sc => { sc.vo_segment = _no5(sc.vo_segment); });\n"
+    "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\n"
+    "data.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\n"
+    "data.voiceover_tts = (_body.match(/[^.!?…]+[.!?…]*/g) || [_body]).map(x => x.trim()).filter(Boolean).concat([" + json.dumps(SIGNOFF_TTS, ensure_ascii=False) + "]).join(' [pause] ');\n"
+    "return [{ json: data }];")
 # 20-30 s videos: up to 6 scenes, 25 s script total (the render follows the voice length)
 rep("const TOTAL = 15;", "const TOTAL = 25;")
 rep("data.scenes.slice(0, 4)", "data.scenes.slice(0, 6)")
@@ -335,6 +345,9 @@ for _m in _msgs:
     c = c.replace('"visual":{"query":"..."}', '"photo":1,"visual":{"query":"..."}')
     if '- “One to watch” is the channel' in c:
         c = c.replace('"- “One to watch” is the channel'.lstrip('"'),
+            "- THE DESIGNER: one of the first two scenes MUST show the designer as a person - give it the real photo whose caption names or shows them "
+            "(portrait, studio or backstage shot). If no real photo shows them, give that scene center {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"<designer>\",\"wiki\":\"<designer>\"}.\n"
+            "- LOGO: at least one scene MUST have center {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"<label name exactly as written>\",\"wiki\":\"<Wikipedia title, or the label name>\"} for the label the story is about.\n"
             "- REAL PHOTOS: this is news about REAL designers and REAL collections - show the real person and the real pieces, never an invented collection. "
             "For each scene set \"photo\" to the number of the REAL PHOTO that best matches the sentence (the designer's portrait when you introduce them, "
             "looks / garments / campaign shots when you describe the collection). Use each photo once. Set \"photo\": 0 only when no real photo is left; "
@@ -379,6 +392,11 @@ w["connections"]["Real Photo?"] = {"main": [[{"node": "Photo - Download", "type"
                                             [{"node": "Image - Request", "type": "main", "index": 0}]]}
 w["connections"]["Photo - Download"] = {"main": [[{"node": "Save Image", "type": "main", "index": 0}],
                                                  [{"node": "Image - Request", "type": "main", "index": 0}]]}
+
+# no Wikipedia logo for a niche label -> keep the card, the renderer draws the label name as a wordmark
+_old = "else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' }; c = _s.center; }"
+assert _code["jsCode"].count(_old) == 1
+_code["jsCode"] = _code["jsCode"].replace(_old, "else if (!isPerson && c.name) { _wiki_dbg.push('entWORD:' + title); } " + _old)
 
 # ---- sanity
 names =[n["name"] for n in w["nodes"]]

@@ -7,7 +7,7 @@ import {buildCaptions, sceneTimeline} from './timing';
 // RGB-split outro. Varies per video (seeded): headline layout, transition order, second accent.
 const BRAND = {lime: '#C8FF2E', pink: '#FF3D9A', cyan: '#2EE6FF', black: '#0A0A0A', white: '#F5F5F2'};
 const OUTRO_SEC = 1.8;
-const MUSIC_VOL = 0.26;   // ducks to 0.16 while a word is spoken, swells in pauses
+const MUSIC_VOL = 0.42;   // ducks to 0.16 while a word is spoken, swells in pauses
 
 const seedOf = (voice) => { const m = String(voice || '').match(/(\d{13})/); return m ? Number(m[1].slice(-6)) : 7; };
 
@@ -22,6 +22,9 @@ const Grain = () => {
 
 // techno-clip motion: kick pulse on every beat, hard re-frame every bar, glitch on scene cuts
 let BPM = 132;   // set per video from the job (music tempo)
+// organic groove: each beat gets its own strength (seeded, repeatable), so the pulse breathes instead of ticking
+const rnd = (n) => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+const beatAmp = (b) => { const r = rnd(b); return b % 8 === 0 ? 1.4 : r < 0.3 ? 0 : r < 0.6 ? 0.45 : r < 0.85 ? 1 : 1.6; };
 const FRAMINGS = [
   {z: 1.0, x: 0, y: 0}, {z: 1.32, x: -60, y: -40}, {z: 1.16, x: 50, y: 60}, {z: 1.45, x: 30, y: -90},
 ];
@@ -31,7 +34,8 @@ const Media = ({scene, dur, i, from}) => {
   const beat = (fps * 60) / BPM;
   const abs = from + frame;
   const sinceKick = abs % beat;
-  const kick = interpolate(sinceKick, [0, 5], [1.045, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
+  const amp = beatAmp(Math.floor(abs / beat));
+  const kick = 1 + 0.045 * amp * interpolate(sinceKick, [0, 5], [1, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
   // hard re-frame every bar (4 beats) inside the scene
   const bar = Math.floor(frame / (beat * 4));
   const f0 = FRAMINGS[(bar + i) % FRAMINGS.length];
@@ -73,7 +77,7 @@ const BarFlash = ({from}) => {
   const {fps} = useVideoConfig();
   const bar = (fps * 60 / BPM) * 4;
   const t = frame % bar;
-  if (frame < bar) return null;
+  if (frame < bar || rnd(Math.floor((from + frame) / bar) + 7) < 0.6) return null;
   return <AbsoluteFill style={{background: 'white', opacity: interpolate(t, [0, 3], [0.35, 0], {extrapolateRight: 'clamp'})}} />;
 };
 
@@ -133,7 +137,7 @@ const Headline = ({text, layout, accent, from}) => {
   const words = String(text).split(/\s+/).filter(Boolean);
   const key = words.reduce((b, w, k) => (w.replace(/[^\p{L}\d]/gu, '').length > words[b].replace(/[^\p{L}\d]/gu, '').length ? k : b), 0);
   const beat = (fps * 60) / BPM;
-  const pump = interpolate((from + frame) % beat, [0, 5], [1.03, 1], {extrapolateRight: 'clamp'});
+  const pump = 1 + 0.03 * beatAmp(Math.floor((from + frame) / beat)) * interpolate((from + frame) % beat, [0, 5], [1, 0], {extrapolateRight: 'clamp'});
   const L = [
     {top: 250, left: 72, right: 110, font: serif, style: 'italic', size: 138, weight: 400, upper: false, align: 'left'},
     {top: 560, left: 60, right: 60, font: inter, style: 'normal', size: 128, weight: 900, upper: true, align: 'center'},
@@ -187,19 +191,22 @@ const Header = ({stamp, accent}) => {
   );
 };
 
-const Center = ({center, accent}) => {
+const Center = ({center, accent, compact}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   if (!center || !center.type || center.type === 'none') return null;
   const p = spring({frame: frame - 6, fps, config: {damping: 12, mass: 0.8}});
-  if (center.type === 'entity' && center.logo_url) {
-    const isPerson = center.kind === 'person';
+  if (center.type === 'entity' && (center.logo_url || center.name)) {
+    const isPerson = center.kind === 'person' && center.logo_url;
     return (
-      <div style={{position: 'absolute', top: 640, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
+      <div style={compact ? {position: 'absolute', top: 1000, right: 40, scale: '0.58', transformOrigin: 'top right'} : {position: 'absolute', top: 760, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
         <div style={{position: 'relative', background: BRAND.white, padding: '20px 20px 0 20px', boxShadow: '0 30px 70px rgba(0,0,0,0.55)',
           rotate: interpolate(p, [0, 1], [-16, -4]) + 'deg', scale: String(interpolate(p, [0, 1], [0.6, 1])), opacity: p}}>
           <div style={{position: 'absolute', top: -18, left: 120, width: 150, height: 38, background: BRAND.lime, opacity: 0.9, rotate: '3deg'}} />
-          <Img src={center.logo_url} style={{width: 380, height: isPerson ? 440 : 300, objectFit: isPerson ? 'cover' : 'contain', background: 'white', display: 'block'}} />
+          {center.logo_url
+            ? <Img src={center.logo_url} style={{width: 380, height: isPerson ? 440 : 300, objectFit: isPerson ? 'cover' : 'contain', background: 'white', display: 'block'}} />
+            : <div style={{width: 380, height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: BRAND.black, color: BRAND.white,
+                fontFamily: serif, fontStyle: 'italic', fontSize: String(center.name).length > 12 ? 58 : 84, lineHeight: 0.95, textAlign: 'center', padding: 20}}>{center.name}</div>}
           <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 2, color: BRAND.black, textTransform: 'uppercase', padding: '20px 4px 24px', maxWidth: 380}}>
             {center.name || ''} <span style={{color: accent}}>●</span>
           </div>
@@ -305,7 +312,7 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
       <Media scene={s} dur={dur} i={i} from={from} />
       <BarFlash from={from} />
       <Grade />
-      <Center center={s.real && s.center && s.center.type === 'entity' ? null : s.center} accent={accent} />
+      <Center center={s.center} accent={accent} compact={!!s.real} />
       <Headline text={s.on_screen_text} layout={layout} accent={accent} from={from} />
       {i > 0 && <Sequence durationInFrames={14}><Impact kind={kind} accent={accent} /></Sequence>}
     </AbsoluteFill>
@@ -330,7 +337,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       {scenes.map((s, i) => (
         <Sequence key={i} from={tl[i].from} durationInFrames={tl[i].dur}>
           <Scene s={s} i={i} from={tl[i].from} dur={tl[i].dur} accent={accent}
-            layout={(seed + i) % 3} kind={KINDS[(seed + i) % KINDS.length]} />
+            layout={s.center && s.center.type && s.center.type !== 'none' && !(s.real && s.center.type === 'entity') ? 0 : (seed + i) % 3} kind={KINDS[(seed + i) % KINDS.length]} />
         </Sequence>
       ))}
       <Grain />
@@ -341,7 +348,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {
         const ms = (fr / f) * 1000;
         const speaking = caps.some((c) => ms >= c.startMs - 80 && ms <= c.endMs + 120);
-        const bed = speaking ? 0.14 : MUSIC_VOL;
+        const bed = speaking ? 0.24 : MUSIC_VOL;
         const env = interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
         return (fr >= outroFrom ? 0.55 : bed) * env;
       }} />
