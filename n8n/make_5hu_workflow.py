@@ -168,6 +168,7 @@ msg["content"] = (
     "RULES\n"
     "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 20-30 s around it. Never stack names, dates and numbers one after another.\n"
     "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- NEVER say the channel name 5HU anywhere in the voiceover or vo_segment - the sign-off \"Follow 5HU.\" is added automatically at the very end.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
@@ -212,7 +213,7 @@ for kind in ("img", "voice", "video", "job"):
 rep('"Lietuvos naujienos"', '"fashion runway editorial"', 2)
 rep('channel:"lt",', 'channel:"5hu",')
 rep('channel:"5hu",', 'channel:"5hu", music:"assets/"+data.musicFile, bpm:data.musicBpm,')
-rep('data.voiceFile = "5hu_voice_"+ts', 'data.musicFile = "5hu_music_"+ts+".mp3";\ndata.musicBpm = [120, 122, 124, 126, 128][Math.floor(Math.random() * 6)];\ndata.voiceFile = "5hu_voice_"+ts')
+rep('data.voiceFile = "5hu_voice_"+ts', 'data.musicFile = "5hu_music_"+ts+".mp3";\ndata.musicBpm = [120, 122, 124, 126, 128][Math.floor(Math.random() * 5)];\ndata.voiceFile = "5hu_voice_"+ts')
 rep("return (await wikiImage(title, 'lt')) || (await wikiImage(title, 'en'));", "return (await wikiImage(title, 'en')) || (await wikiImage(title, 'lt'));")
 rep("return (await companyLogo(title, 'lt')) || (await companyLogo(title, 'en'));", "return (await companyLogo(title, 'en')) || (await companyLogo(title, 'lt'));")
 # English fashion text: a lone capitalised word ("Dead" from "Brain Dead") is a bad brand guess that pulls a
@@ -221,7 +222,7 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
     "const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while (false && (m = reSingle.exec(vo)))")
 # "5HU" is said "Šū" (owner picked sample K: the whole 5HU sentence "[softly] [Lithuanian] … Šū. [English]"), never "five-H-U": the voice + alignment get a phonetic copy,
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
-rep("return [{ json: data }];", "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = (data.voiceover_align.match(/[^.!?…]+[.!?…]*/g) || [data.voiceover_align]).map(x => x.trim()).filter(Boolean).map(x => /\\bShoo\\b/.test(x) ? '[softly] [Lithuanian] ' + x.replace(/\\bShoo\\b/g, 'Šū') + ' [English]' : x).join(' [pause] ');\nreturn [{ json: data }];")
+rep("return [{ json: data }];", "const _no5 = t => (String(t || '').match(/[^.!?…]+[.!?…]*/g) || []).map(x => x.trim()).filter(x => x && !/5\\s*HU|\\bShoo\\b|Šū/i.test(x)).join(' ');\ndata.voiceover = (_no5(data.voiceover) + ' Follow 5HU.').trim();\n(data.scenes || []).forEach(sc => { sc.vo_segment = _no5(sc.vo_segment); });\nconst _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\ndata.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\ndata.voiceover_tts = (data.voiceover_align.match(/[^.!?…]+[.!?…]*/g) || [data.voiceover_align]).map(x => x.trim()).filter(Boolean).map(x => /\\bShoo\\b/.test(x) ? '[softly] [Lithuanian] ' + x.replace(/\\bShoo\\b/g, 'Šū') + ' [English]' : x).join(' [pause] ');\nreturn [{ json: data }];")
 # 20-30 s videos: up to 6 scenes, 25 s script total (the render follows the voice length)
 rep("const TOTAL = 15;", "const TOTAL = 25;")
 rep("data.scenes.slice(0, 4)", "data.scenes.slice(0, 6)")

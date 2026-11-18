@@ -32,7 +32,7 @@ export const Root = () => {
           let seconds = (props.scenes || []).reduce((a, s) => a + Number(s.duration), 0) || 15;
           try {
             const {slowDurationInSeconds} = await parseMedia({src: staticFile(props.voice), fields: {slowDurationInSeconds: true}, acknowledgeRemotionLicense: true});
-            if (slowDurationInSeconds > 0.1) seconds = slowDurationInSeconds;
+            if (slowDurationInSeconds > 0.1) seconds = slowDurationInSeconds + (props.channel === '5hu' ? 1.2 : 0);
           } catch (e) {}
           return {durationInFrames: Math.max(1, Math.round(seconds * fps)), fps, width: 1080, height: 1920};
         }}
