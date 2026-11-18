@@ -1,0 +1,10 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+bash: line 2: sqlite3: command not found
+bash: line 3: sqlite3: command not found
+bash: line 4: sqlite3: command not found
+Nov 18 08:41:59 srv2107298 bash[1315455]: [08:41:59] waiting for assets (3 missing)
+Nov 18 08:42:02 srv2107298 bash[1315455]: [08:42:02] rendering...
+Nov 18 08:42:02 srv2107298 bash[1953684]: props ok channel=5hu scenes=5 btc=None change=None
+Nov 18 08:45:28 srv2107298 bash[1315455]: [08:45:28] OK 5hu_video_1794991263572.mp4
+Nov 18 08:45:29 srv2107298 bash[1315455]: [08:45:29] Telegram send FAILED
+Nov 18 08:45:34 srv2107298 bash[1315455]: [08:45:34] 5hu_video_1794991263572.mp4 already done, dropping duplicate
