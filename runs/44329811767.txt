@@ -1,0 +1,13 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+archive/5hu_job_1795013101811.json
+VO: Not Paris. Not Milan. Hong Kong. sacai is bringing its SS27 runway to the city this December. The iconic HSBC Main Building — the backdrop. Chitose Abe choosing her stage carefully. This is fashion moving east... and it means everything.
+dbg: ['net:Not Paris', 'net:Not Milan', 'net:Hong Kong', 'netIMG:Hong Kong', 'ent:Sacai', 'entIMG:Sacai', 'net:HSBC', 'netIMG:HSBC', 'ent:Chitose Abe', 'entDROP:Chitose Abe', 'net:Chitose Abe']
+5 real= False  | frame| stream|width=1152|height=2048 | Vertical aerial dusk shot of Hong Kong skyline, glass towers catching 
+5 real= False  | frame| stream|width=1152|height=2048 | Anonymous model from behind in a layered hybrid coat, structured pleat
+5 real= False  | frame| stream|width=1152|height=2048 | Low-angle vertical shot looking up at a dramatic steel and glass archi
+5 real= False  | frame| stream|width=1152|height=2048 | Empty runway space inside a monumental architectural interior, spotlig
+5 real= False  | frame| stream|width=1152|height=2048 | Close-up of layered deconstructed fabric — sheer organza over structur
+LAST CAPS: [('means', 19780, 20080), ('everything.', 20420, 20980), ('Follow', 21600, 21980), ('5HU.', 22640, 22940), ('We', 23500, 23640), ('find', 23680, 23880), ('them', 23920, 24080), ('first.', 24140, 24580)]
+[' @ 0x6233da58a480] silence_start: 21.0166\n[', ' @ 0x6233da58a480] silence_end: 21.537 | silence_duration: 0.520431\n[', ' @ 0x6233da58a480] silence_start: 22.0506\n[', ' @ 0x6233da58a480] silence_end: 22.5031 | silence_duration: 0.452517\n[', ' @ 0x6233da58a480] silence_start: 22.9675\n[', ' @ 0x6233da58a480] silence_end: 23.4947 | silence_duration: 0.527234\n[out#0/null @ 0x6233da589740] video:0kB audio:2136kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: unknown\nsize=N/A time=00:00:24.79 bitrate=N/A speed= 317x    \n']
+24.842449
+
