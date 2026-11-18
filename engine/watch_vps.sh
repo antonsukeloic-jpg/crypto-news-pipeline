@@ -12,6 +12,12 @@ log() { echo "[$(date '+%H:%M:%S')] $*"; }
 send_telegram() {  # $1 = video path, $2 = caption
   [ -f "$TG_ENV" ] || { log "no $TG_ENV, skipping Telegram"; return; }
   . "$TG_ENV"
+  # Telegram bots accept max 50 MB: re-encode anything over 45 MB (busy grain/glitch footage gets big)
+  if [ "$(stat -c %s "$1")" -gt 47185920 ]; then
+    local small="${1%.mp4}_tg.mp4"
+    ffmpeg -loglevel error -y -i "$1" -c:v libx264 -preset veryfast -crf 27 -maxrate 9M -bufsize 18M -c:a aac -b:a 160k -movflags +faststart "$small" \
+      && { log "compressed for Telegram: $(du -m "$1" | cut -f1) MB -> $(du -m "$small" | cut -f1) MB"; set -- "$small" "$2"; }
+  fi
   # tell Telegram the real size, otherwise it may show the 9:16 video squashed / square
   local wh; wh=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$1" 2>/dev/null)
   curl -sS -m 120 -F chat_id="$TG_CHAT" -F supports_streaming=true \
