@@ -1,0 +1,9 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+-rw-r--r-- 1 root root 53431937 Nov 18 08:45 /root/shared/outputs/5hu_video_1794991263572.mp4
+20:    "https://api.telegram.org/bot$TG_TOKEN/sendVideo" | grep -q '"ok":true' \
+21:    && log "sent to Telegram" || log "Telegram send FAILED"
+48:      log "RENDER FAILED $outbase (see remotion/render_error.log)"
+(95, 'success', 'integrated', '2026-11-18 08:40:39.219', '2026-11-18 08:41:59.733')
+(93, 'success', 'integrated', '2026-11-18 08:17:48.154', '2026-11-18 08:19:16.057')
+(91, 'success', 'integrated', '2026-11-18 07:37:14.222', '2026-11-18 07:38:27.077')
+(89, 'success', 'cli', '2026-11-17 20:43:53.430', '2026-11-17 20:45:03.169')
