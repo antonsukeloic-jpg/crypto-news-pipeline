@@ -247,7 +247,7 @@ i1 = ss["jsCode"].index('";', i0) + 2
 ss["jsCode"] = ss["jsCode"][:i0] + (
     'const STYLE=" Style: high-fashion editorial photography, photorealistic, Vogue-style art direction, rich fabric texture, '
     'dramatic studio or runway lighting, bold but tasteful colour, shallow depth of field. Anonymous models only (no recognisable faces), '
-    'no real brand logos. Vertical 9:16. No text, no numbers, no watermark.";') + ss["jsCode"][i1:]
+    'no real brand logos. Tall vertical portrait-orientation photo shot upright: the horizon and floor are horizontal, people and clothes stand upright, never rotated or sideways. Raw urban street energy: flash photography, film grain, concrete, night streets. No text, no numbers, no watermark.";') + ss["jsCode"][i1:]
 
 # ---- voice
 tts = by_name["Convert text to speech"]["parameters"]
