@@ -23,7 +23,7 @@ const Grain = () => {
 // techno-clip motion: kick pulse on every beat, hard re-frame every bar, glitch on scene cuts
 let BPM = 132;   // set per video from the job (music tempo)
 const FRAMINGS = [
-  {z: 1.0, x: 0, y: 0}, {z: 1.1, x: -30, y: -20}, {z: 1.06, x: 25, y: 30}, {z: 1.12, x: 15, y: -40},
+  {z: 1.0, x: 0, y: 0}, {z: 1.32, x: -60, y: -40}, {z: 1.16, x: 50, y: 60}, {z: 1.45, x: 30, y: -90},
 ];
 const Media = ({scene, dur, i, from}) => {
   const frame = useCurrentFrame();
@@ -31,14 +31,14 @@ const Media = ({scene, dur, i, from}) => {
   const beat = (fps * 60) / BPM;
   const abs = from + frame;
   const sinceKick = abs % beat;
-  const kick = interpolate(sinceKick, [0, 6], [1.012, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
+  const kick = interpolate(sinceKick, [0, 5], [1.045, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.quad)});
   // hard re-frame every bar (4 beats) inside the scene
   const bar = Math.floor(frame / (beat * 4));
-  const fr = FRAMINGS[i % FRAMINGS.length];
-  const punch = interpolate(frame, [0, 10], [1.05, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+  const fr = FRAMINGS[(bar + i) % FRAMINGS.length];
+  const punch = interpolate(frame, [0, 7], [1.12, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   const drift = interpolate(frame, [0, dur], [1, 1.05]);
   // glitch on the cut: jitter + RGB-ish ghost for 6 frames
-  const glitch = false;
+  const glitch = frame < 6;
   const jx = glitch ? ((frame * 37) % 7 - 3) * 14 : 0;
   const base = {position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
     scale: String(fr.z * punch * drift * kick), translate: (fr.x + jx) + 'px ' + fr.y + 'px',
@@ -70,8 +70,8 @@ const BarFlash = ({from}) => {
 
 // ---- impact transitions (first ~10 frames of every scene after the first)
 const shakeOf = (frame, kind) => {
-  if (frame > 9 || kind !== 'smash') return '0px 0px';
-  const a = interpolate(frame, [0, 9], [8, 0], {extrapolateRight: 'clamp'});
+  if (frame > 9) return '0px 0px';
+  const a = interpolate(frame, [0, 9], [kind === 'smash' ? 34 : 14, 0], {extrapolateRight: 'clamp'});
   return ((frame * 53) % 3 - 1) * a + 'px ' + ((frame * 31) % 3 - 1) * a + 'px';
 };
 
@@ -104,7 +104,7 @@ const Impact = ({kind, accent}) => {
     </>);
   }
   // smash: white flash + shake (shake applied to the scene) + dot
-  const o = interpolate(frame, [0, 2, 6], [0.55, 0.35, 0], {extrapolateRight: 'clamp'});
+  const o = interpolate(frame, [0, 2, 6], [1, 0.8, 0], {extrapolateRight: 'clamp'});
   return (<><AbsoluteFill style={{background: BRAND.white, opacity: o}} />{dot}</>);
 };
 
@@ -123,7 +123,7 @@ const Headline = ({text, layout, accent, from}) => {
   const words = String(text).split(/\s+/).filter(Boolean);
   const key = words.reduce((b, w, k) => (w.replace(/[^\p{L}\d]/gu, '').length > words[b].replace(/[^\p{L}\d]/gu, '').length ? k : b), 0);
   const beat = (fps * 60) / BPM;
-  const pump = interpolate((from + frame) % beat, [0, 5], [1, 1], {extrapolateRight: 'clamp'});
+  const pump = interpolate((from + frame) % beat, [0, 5], [1.03, 1], {extrapolateRight: 'clamp'});
   const L = [
     {top: 250, left: 72, right: 110, font: serif, style: 'italic', size: 138, weight: 400, upper: false, align: 'left'},
     {top: 560, left: 60, right: 60, font: inter, style: 'normal', size: 128, weight: 900, upper: true, align: 'center'},
@@ -139,8 +139,8 @@ const Headline = ({text, layout, accent, from}) => {
         const fill = interpolate(frame - 6 - k * 3, [0, 6], [0, 100], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
         return (
           <span key={k} style={{display: 'inline-block', marginRight: '0.22em', position: 'relative',
-            scale: String(interpolate(p, [0, 1], [1.4, 1])), opacity: Math.min(1, p * 1.4),
-            filter: 'blur(' + interpolate(p, [0, 1], [6, 0]) + 'px)', rotate: interpolate(p, [0, 1], [k % 2 ? 2 : -2, 0]) + 'deg'}}>
+            scale: String(interpolate(p, [0, 1], [2.1, 1])), opacity: Math.min(1, p * 1.4),
+            filter: 'blur(' + interpolate(p, [0, 1], [14, 0]) + 'px)', rotate: interpolate(p, [0, 1], [k % 2 ? 6 : -6, 0]) + 'deg'}}>
             {isKey && <span style={{position: 'absolute', left: '-0.08em', right: '-0.08em', top: '0.1em', bottom: '0.02em',
               background: BRAND.lime, clipPath: 'inset(0 ' + (100 - fill) + '% 0 0)', zIndex: 0}} />}
             <span style={{position: 'relative', zIndex: 1, color: isKey ? BRAND.black : BRAND.white, textShadow: isKey ? 'none' : undefined}}>{w}</span>
@@ -286,13 +286,14 @@ const stampFrom = (voice) => {
   return p(d.getUTCDate()) + '.' + p(d.getUTCMonth() + 1) + '.' + String(d.getUTCFullYear()).slice(2);
 };
 
-const KINDS = ['wipe', 'smash', 'wipe'];
+const KINDS = ['wipe', 'split', 'smash'];
 
 const Scene = ({s, i, from, dur, layout, kind, accent}) => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{translate: i > 0 ? shakeOf(frame, kind) : '0px 0px'}}>
       <Media scene={s} dur={dur} i={i} from={from} />
+      <BarFlash from={from} />
       <Grade />
       <Center center={s.center} accent={accent} />
       <Headline text={s.on_screen_text} layout={layout} accent={accent} from={from} />
