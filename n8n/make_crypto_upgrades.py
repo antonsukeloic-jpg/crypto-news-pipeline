@@ -85,7 +85,7 @@ msg["content"] = msg["content"].replace("\n\nARTICLE\n{{",
 msg["content"] = msg["content"].replace('"visual":{"query":"..."}', '"photo":0,"visual":{"query":"..."}')
 RULE = ("- photo: per scene, the number of a REAL PHOTO only when it clearly shows the exact person, company, building, product or logo that "
         "sentence is about (e.g. the CEO named, the exchange's logo). Use each photo once. Otherwise 0 - then visual.query makes an AI image. "
-        "Never pick a generic stock photo of coins or charts.\n")
+        "Never pick a generic stock photo of coins or charts, and never a promo banner, poster or graphic with big text on it - real photographs only.\n")
 anchor = "- center: per scene"
 assert msg["content"].count(anchor) == 1
 msg["content"] = msg["content"].replace(anchor, RULE + anchor)
