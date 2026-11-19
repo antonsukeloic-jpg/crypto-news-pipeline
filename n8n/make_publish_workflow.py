@@ -53,10 +53,12 @@ CAPTION_PROMPT = (
     "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n\n"
     "RULES\n- Same language as the voiceover. Native to each platform, never copy-paste the same text.\n"
     "- Hook in the first line (it is all people see). No clickbait the video does not deliver. Facts only from the voiceover/title.\n"
-    "- tiktok.text: 1-2 short lines + 4-5 hashtags (mix 1-2 broad like #fashiontok with niche/designer tags), max 150 characters total.\n"
-    "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then EXACTLY 5 hashtags (Instagram allows max 5): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
-    "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: 1-2 sentences + 3 hashtags; youtube.tags: 5-8 plain keywords.\n"
-    "- facebook.text: 1-3 sentences, conversational, max 2 hashtags.\n\n"
+    "- SEARCH FIRST (2026 best practice: platforms are search engines, hashtags only categorize): put the main searchable keyword (designer / label / trend / coin name) in the first ~80 characters of every text.\n"
+    "- Hashtags = search keywords: specific niche/mid-size tags over giant generic ones; NEVER #fyp #viral #explore #foryou; vary them per video.\n"
+    "- tiktok.text: 1-2 short lines + 3-5 hashtags used as keywords (1 broad category like #fashiontok + niche/designer tags), max 150 characters total.\n"
+    "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-5 hashtags (Instagram hard cap is 5, never more): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
+    "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: keyword-rich 1-2 sentences + 3 hashtags (first 3 show above the title); youtube.tags: 5-8 plain keywords.\n"
+    "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n\n"
     'SCHEMA {"tiktok":{"text":"..."},"instagram":{"text":"..."},"youtube":{"title":"...","description":"...","tags":["..."]},"facebook":{"text":"..."}}'
 )
 
