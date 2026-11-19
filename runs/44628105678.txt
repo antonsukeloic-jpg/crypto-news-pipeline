@@ -1,8 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-cp: warning: behavior of -n is non-portable and may change in future; use --update=none instead
- Container stack-caddy-1 Starting 
- Container stack-caddy-1 Started 
-ok
- <- media route
-n8n UI 200
-MEDIA_READY
