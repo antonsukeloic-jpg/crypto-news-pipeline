@@ -11,7 +11,7 @@ for (const r of web) {
   if ((r.width && r.width < 500) || (r.height && r.height < 500)) continue;
   if (out.some(p => key(p.url) === key(u))) continue;
   const site = (() => { try { return new URL(r.origin_url || u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } })();
-  out.push({ url: u, alt: (r.title || '').slice(0, 120) + (site ? ' [' + site + ']' : ''), from: 'web', w: r.width, h: r.height });
+  out.push({ url: u, alt: (r.title || '').slice(0, 120) + (site ? ' [' + site + ']' : ''), from: 'web', site, w: r.width, h: r.height });
 }
 const photos = out.slice(0, 16).map((p, i) => Object.assign({ n: i + 1 }, p));
 const photosText = photos.length

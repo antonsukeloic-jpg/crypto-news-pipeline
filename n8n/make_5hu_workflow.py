@@ -398,13 +398,13 @@ assert _code["jsCode"].count(_anchor) == 1
 _code["jsCode"] = _code["jsCode"].replace(_anchor,
     "const _ph = (() => { try { return $('Merge Photos').first().json.photos || []; } catch (e) { return []; } })();\n"
     "const _used = new Set();\n"
-    "scenes.forEach(s => { const n = parseInt(s.photo, 10); if (n >= 1 && n <= _ph.length && !_used.has(n)) { _used.add(n); s.photo_url = _ph[n - 1].url; } });\n"
-    "scenes.forEach(s => { if (!s.photo_url) { const q = _ph.find(x => !_used.has(x.n)); if (q) { _used.add(q.n); s.photo_url = q.url; } } });\n"
+    "scenes.forEach(s => { const n = parseInt(s.photo, 10); if (n >= 1 && n <= _ph.length && !_used.has(n)) { _used.add(n); s.photo_url = _ph[n - 1].url; s.photo_site = _ph[n - 1].site || ''; } });\n"
+    "scenes.forEach(s => { if (!s.photo_url) { const q = _ph.find(x => !_used.has(x.n)); if (q) { _used.add(q.n); s.photo_url = q.url; s.photo_site = q.site || ''; } } });\n"
     "const _src = (($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).source || '';\n"
     + _anchor)
 _old = 'vo_segment: s.vo_segment || ""};'
 assert _code["jsCode"].count(_old) == 1
-_code["jsCode"] = _code["jsCode"].replace(_old, 'vo_segment: s.vo_segment || "", real: !!s.photo_url, credit: s.photo_url ? _src : ""};')
+_code["jsCode"] = _code["jsCode"].replace(_old, 'vo_segment: s.vo_segment || "", real: !!s.photo_url, credit: s.photo_url ? (s.photo_site || _src) : ""};')
 
 _ir = by_name["Image - Request"]
 for _bp in _ir["parameters"]["bodyParameters"]["parameters"]:

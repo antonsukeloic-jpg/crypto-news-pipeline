@@ -224,7 +224,7 @@ const Center = ({center, accent, compact}) => {
     return (
       <div style={{position: 'absolute', top: 700, left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: p,
         scale: String(interpolate(p, [0, 1], [1.6, 1]))}}>
-        <div style={{fontFamily: inter, fontWeight: 900, fontSize: 280, lineHeight: 0.85, color: BRAND.lime, letterSpacing: -12, textShadow: '8px 0 0 ' + accent + ', 0 12px 60px rgba(0,0,0,0.5)'}}>{num}</div>
+        <div style={{fontFamily: inter, fontWeight: 900, fontSize: Math.min(280, Math.round(1500 / Math.max(3, String(num).length))), lineHeight: 0.85, color: BRAND.lime, letterSpacing: -8, whiteSpace: 'nowrap', textShadow: '8px 0 0 ' + accent + ', 0 12px 60px rgba(0,0,0,0.5)'}}>{num}</div>
         {center.label ? <div style={{fontFamily: mono, fontSize: 28, letterSpacing: 3, color: BRAND.white, textTransform: 'uppercase', marginTop: 18, textAlign: 'center', maxWidth: 860}}>{center.label}</div> : null}
       </div>
     );
