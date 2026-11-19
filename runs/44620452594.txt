@@ -1,0 +1,22 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+http 200 31265B final https://vikops.lt/
+GA4 gtag (G-): no
+GTM: no
+Meta Pixel fbq: no
+Google Ads AW-: no
+Search Console verify: no
+FB domain verify: no
+Schema JSON-LD: YES
+Cookie consent: no
+WordPress: no
+Shopify: no
+Wix: no
+hreflang: no
+Open Graph: YES
+TITLE: VIKOPS – Kalkakmenio grindų plytelės su fosilijomis | Vilnius
+DESC: Natūralaus kalkakmenio grindų plytelės su matomomis fosilijomis. 2200 m² sandėlyje Magūnuose prie Vilniaus, 63–109 €/m² su PVM. Klojame patys – 20 metų patirtis. +370 664 88588.
+H1: ['Grindysiš jūros dugno.\n        Floorsfrom the sea bed.']
+lang: lt
+robots.txt 200
+sitemap.xml 404
+sitemap_index.xml 404
