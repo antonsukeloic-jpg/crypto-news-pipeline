@@ -177,7 +177,8 @@ msg["content"] = (
     "VOICE\n"
     "- English, spoken, fast and fun: a cool, effortless insider letting you in on a secret - confident, never cringe. Write for a cool, smoky, effortless read: short weighted phrases, suspense pauses, contrast and rhythm (\"Not Paris. Not Milan. Copenhagen.\"). "
     "Short punchy sentences. Fashion vocabulary used correctly (collection, capsule, creative director, drop, silhouette). No made-up slang overload.\n"
-    "- Say names exactly as they are spelled in the article.\n\n"
+    "- Say names exactly as they are spelled in the article.\n"
+    "- SIGNATURE FLAVOUR (owner loves it): English with a little French chic. Keep fashion words, events and names in their original language with their accents so the voice says them natively - Première Vision, haute couture, prêt-à-porter, savoir-faire, atelier, aubergine, maison, défilé, je ne sais quoi, Japanese/Italian/Scandinavian names as written. One or two such words per video, woven naturally into the English, never forced or translated.\n\n"
     "RULES\n"
     "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 20-30 s around it. Never stack names, dates and numbers one after another.\n"
     "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy closing line (the channel sign-off is added after it automatically).\n"
@@ -283,16 +284,16 @@ tts["additionalOptions"]["voiceSettings"] = json.dumps(
 # ---- fresh techno for every video (never the same track): ElevenLabs Sound Effects, random style + BPM
 MUSIC_JS = r"""
 const STYLES = [
-  'light minimal techno, soft rounded kick, airy clicky percussion, gentle sub bass',
-  'light melodic techno, warm arpeggio, soft pads, smooth kick',
-  'deep tech house groove, soft kick, shuffled hats, warm bassline',
-  'light Detroit techno, mellow analog chord stabs, soft steady kick',
-  'airy progressive techno, shimmering synth plucks, light kick, open atmosphere',
-  'light dub techno, soft chord echoes, gentle pulse, spacious',
-  'lo-fi minimal techno, muted kick, soft rim shots, dreamy pad',
-  'light electro techno, bouncy synth bass, soft claps, playful',
-  'soft hypnotic techno, gentle acid line low in the mix, light kick',
-  'organic light techno, soft percussion, plucked synth, warm groove',
+  'groovy minimal techno, rolling bassline, swung hi-hats, soft rounded kick, playful clicks',
+  'groovy deep tech house, bouncy bass, shuffled hats, warm chords, light kick',
+  'groovy Parisian French-touch house techno, filtered disco chords, funky bass, soft four-on-the-floor',
+  'groovy melodic techno, warm arpeggio riding a funky bassline, smooth kick',
+  'groovy minimal house, chopped vocal-free stabs, rubbery bass, light claps',
+  'groovy electro techno, bouncy synth bass, soft claps, cheeky percussion',
+  'groovy Detroit techno, mellow analog chord stabs, swung groove, steady soft kick',
+  'groovy lo-fi house techno, dusty drums, warm bass, dreamy pad',
+  'groovy hypnotic techno, gentle acid line in the groove, light kick, swing',
+  'groovy organic techno, conga percussion, plucked synth, warm rolling bass',
 ];
 const KEYS = ['A minor', 'F minor', 'D minor', 'G minor', 'C minor', 'E minor'];
 const BPMS = [120, 122, 124, 126, 128];
