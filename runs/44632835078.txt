@@ -1,3 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-['active', 'activeVersionId']
-[('5HU Fashion News', 1)]
