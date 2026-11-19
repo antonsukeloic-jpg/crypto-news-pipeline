@@ -442,6 +442,14 @@ for _n in w["nodes"]:
     if _n["name"] in ("Select Story", "Message a model", "Perplexity Photos", "Image - Request", "Image - Get", "Music - Generate"):
         _n.update({"retryOnFail": True, "maxTries": 3, "waitBetweenTries": 3000})
 
+# ---- schedule (owner 2026-11-20): automatic 5HU video twice a day, 09:00 and 19:00 Vilnius time.
+# The watcher then auto-posts it via Social Publish (kill switch: rm /root/stack/autopost_5hu).
+_sch = by_name["Every Hour"]
+_sch.pop("disabled", None)
+_sch["name"] = "Every Hour"  # keep the name: connections reference it
+_sch["parameters"] = {"rule": {"interval": [{"field": "cronExpression", "expression": "0 9,19 * * *"}]}}
+w.setdefault("settings", {})["timezone"] = "Europe/Vilnius"
+
 # ---- sanity
 names =[n["name"] for n in w["nodes"]]
 for outs in w["connections"].values():
