@@ -1,8 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-HTTP/2 200 
-accept-ranges: bytes
-alt-svc: h3=":443"; ma=2592000
-cache-control: public, max-age=86400
-content-type: video/mp4
-etag: "dmzjtuyzpade-a4q1v"
-Thu Nov 19 22:46:56 UTC 2026
