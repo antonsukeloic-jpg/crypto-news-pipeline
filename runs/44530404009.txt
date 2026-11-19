@@ -1,0 +1,14 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+FIVEHU_PUBLISHED (n8n restarted)
+Nov 19 13:10:07 srv2107298 bash[2257442]: props ok channel=5hu scenes=5 btc=None change=None
+Nov 19 13:12:29 srv2107298 bash[1956685]: [13:12:29] OK 5hu_video_1795093752209.mp4
+Nov 19 13:12:34 srv2107298 bash[1956685]: [13:12:34] sent to Telegram
+archive/5hu_job_1795093752209.json
+VO: A masked ball in Venice... that’s where this started. Kristina Romanova met Kim Jones — and knew. He’d stayed at over 30 Aman resorts. He already lived the brand. So she handed him full creative reign
+5 real= False  1536,2048 none 
+5 real= False  1536,2048 entity Kristina Romanova
+5 real= False  1536,2048 stat 
+5 real= False  1536,2048 entity Aman Essentials
+5 real= False  1536,2048 none 
+outputs/5hu_video_1795093752209.mp4
+bash: line 15: unexpected EOF while looking for matching `"'
