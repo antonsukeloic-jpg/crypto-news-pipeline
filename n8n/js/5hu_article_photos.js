@@ -39,8 +39,14 @@ for (const img of body.match(/<img[^>]*>/gi) || []) {
   if (w && w < 400) continue;
   push(best(attr(img, 'srcset') || attr(img, 'data-srcset')) || attr(img, 'data-src') || attr(img, 'data-lazy-src') || attr(img, 'src'), attr(img, 'alt'), 'img');
 }
+// the page may be blocked (bot walls): add the photos and full text that came with the RSS item
+let feedItem = {};
+try { feedItem = (($('Combine Feeds').first().json.candidates) || []).find(c => c.link === link) || {}; } catch (e) {}
+for (const im of (feedItem.images || [])) push(im.url, im.alt, 'feed');
+let articleText = prev.articleText || '';
+if ((!articleText || articleText.length < 300 || /awsWaf|captcha|access denied|just a moment/i.test(articleText)) && feedItem.body && feedItem.body.length > 200) articleText = feedItem.body;
 const photos = found.slice(0, 10).map((f, i) => ({ n: i + 1, url: f.url, alt: f.alt }));
 const photosText = photos.length
   ? photos.map(p => p.n + '. ' + (p.alt || '(no caption)')).join('\n')
   : '(none - the article has no usable photos)';
-return [{ json: Object.assign({}, prev, { photos, photosText }) }];
+return [{ json: Object.assign({}, prev, { articleText, photos, photosText }) }];

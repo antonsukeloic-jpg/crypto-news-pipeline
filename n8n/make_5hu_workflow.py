@@ -98,7 +98,20 @@ const parse = (xml, source, tier) => {
     if (!link) link = decode(tag(b, 'guid'));
     const date = decode(tag(b, 'pubDate') || tag(b, 'published') || tag(b, 'updated') || tag(b, 'dc:date'));
     const snippet = decode(tag(b, 'description') || tag(b, 'summary') || tag(b, 'content:encoded')).slice(0, 240);
-    return { source, tier, title: decode(tag(b, 'title')), link: link.trim(), snippet, date };
+    // photos + full text straight from the feed (many sites block server page fetches, their RSS does not)
+    const images = [];
+    const pushImg = (u, alt) => { u = String(u || '').replace(/&amp;/g, '&').trim(); if (/^https?:\/\//.test(u) && !/(logo|icon|avatar|pixel|feeds\.|\.gif|\.svg|gravatar|share|button)/i.test(u) && !images.some(x => x.url.split('?')[0] === u.split('?')[0])) images.push({ url: u, alt: decode(alt || '').slice(0, 140) }); };
+    for (const m of b.matchAll(/<(?:media:content|media:thumbnail|enclosure)[^>]*url="([^"]+)"[^>]*>/gi)) if (!/type="(?:audio|video)/i.test(m[0])) pushImg(m[1], '');
+    const raw = String(tag(b, 'content:encoded') || tag(b, 'description') || tag(b, 'content')).replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+    for (const m of raw.matchAll(/<img[^>]*>/gi)) {
+      const t = m[0], at = (a) => { const q = t.match(new RegExp('\\s' + a + '\\s*=\\s*["\']([^"\']*)["\']', 'i')); return q ? q[1] : ''; };
+      let src = at('src') || at('data-src'); const ss = at('srcset');
+      if (ss) { let w = 0; for (const part of ss.split(',')) { const [u, d] = part.trim().split(/\s+/); const n = parseFloat(d) || 1; if (u && n >= w) { w = n; src = u; } } }
+      const wd = parseInt(at('width'), 10); if (wd && wd < 300) continue;
+      pushImg(src, at('alt'));
+    }
+    const body = decode(raw).slice(0, 6000);
+    return { source, tier, title: decode(tag(b, 'title')), link: link.trim(), snippet, date, images: images.slice(0, 12), body };
   }).filter(x => x.title && /^https?:/.test(x.link));
 };
 const res = await Promise.allSettled(FEEDS.map(([name, url, tier]) =>
@@ -167,7 +180,7 @@ msg["content"] = (
     "- Say names exactly as they are spelled in the article.\n\n"
     "RULES\n"
     "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 20-30 s around it. Never stack names, dates and numbers one after another.\n"
-    "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy line that makes people want to follow 5HU for the next big name.\n"
+    "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy closing line (the channel sign-off is added after it automatically).\n"
     "- NEVER say the channel name 5HU anywhere in the voiceover or vo_segment - the sign-off \"Follow 5HU. We find them first.\" is added automatically at the very end.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
@@ -224,14 +237,15 @@ rep("const reSingle = /(?<!\\p{L})(\\p{Lu}\\p{Ll}{2,})(?!\\p{L})/gu;\n  while ((
 # captions map the spoken word back to "5HU". Same word count, so scene timing is unchanged.
 # Sign-off: the body never says 5HU; the video always ends "Follow 5HU. We find them first." over the dark outro.
 # SIGNOFF_TTS is what the voice reads (5HU = Lithuanian "Šū"); alignment reads the plain English copy.
-SIGNOFF_TTS = "[softly] Follow [Lithuanian] Šū, [English] we find them first."
+# the sign-off is a fixed recorded clip (remotion/music/5hu_signoff.mp3, owner-picked take), played by the renderer
 rep("return [{ json: data }];", "const _no5 = t => (String(t || '').match(/[^.!?…]+[.!?…]*/g) || []).map(x => x.trim()).filter(x => x && !/5\\s*HU|\\bShoo\\b|Šū|find them first/i.test(x)).join(' ');\n"
     "const _body = _no5(data.voiceover);\n"
-    "data.voiceover = (_body + ' Follow 5HU. We find them first.').trim();\n"
+    "data.voiceover = _body.trim();\n"
     "(data.scenes || []).forEach(sc => { sc.vo_segment = _no5(sc.vo_segment); });\n"
     "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\n"
     "data.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\n"
-    "data.voiceover_tts = (_body.match(/[^.!?…]+[.!?…]*/g) || [_body]).map(x => x.trim()).filter(Boolean).concat([" + json.dumps(SIGNOFF_TTS, ensure_ascii=False) + "]).join(' [pause] ');\n"
+    "data.voiceover_tts = (_body.match(/[^.!?…]+[.!?…]*/g) || [_body]).map(x => x.trim()).filter(Boolean).join(' [pause] ');\n"
+    "try { const _j = JSON.parse(data.job_json); _j.signoff = true; _j.voiceover = data.voiceover; data.job_json = JSON.stringify(_j); } catch (e) {}\n"
     "return [{ json: data }];")
 # 20-30 s videos: up to 6 scenes, 25 s script total (the render follows the voice length)
 rep("const TOTAL = 15;", "const TOTAL = 25;")
@@ -324,6 +338,8 @@ _req["url"] = _req["url"].replace("/soul/standard", "/soul/v2/standard")
 for _p in _req["bodyParameters"]["parameters"]:
     if _p["name"] == "resolution":
         _p["value"] = "1080p"
+    if _p["name"] == "aspect_ratio":
+        _p["value"] = "3:4"
 
 # ---- REAL photos: a story about a designer must show the real designer and the real collection.
 # Article Photos pulls og:image + article/figure images from the fetched page; the script assigns them to scenes

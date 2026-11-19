@@ -70,6 +70,15 @@ if job.get('music') and os.path.exists(os.path.join(root, job['music'])):
 if job.get('bpm'): out_obj['bpm'] = job['bpm']
 channel = job.get('channel') or 'crypto'
 out_obj['channel'] = channel
+# 5HU: fixed brand sign-off ("Follow Šū, we find them first.") played after the voice; render_vps.sh copies music/*.mp3 into public/music
+so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'music', '5hu_signoff.mp3')
+if channel == '5hu' and job.get('signoff') and os.path.exists(so):
+    out_obj['signoff'] = 'music/5hu_signoff.mp3'
+    try:
+        out_obj['signoffSec'] = round(float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', so],
+                                                          capture_output=True, text=True, timeout=10).stdout.strip()), 2)
+    except Exception:
+        out_obj['signoffSec'] = 2.6
 bp = bc = None
 if channel == 'crypto':
     # BTC live at render time (multi-source); fall back to job seed if all fail

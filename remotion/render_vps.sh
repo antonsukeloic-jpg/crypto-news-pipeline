@@ -12,3 +12,7 @@ CH=$(python3 -c "import json;print(json.load(open('$JOB')).get('channel',''))" 2
 [ "$CH" = "5hu" ] && EXTRA="--concurrency=4 --x264-preset=veryfast --scale=0.75"   # 5HU: 810x1440 (integer dims), speed over file size
 npx remotion render src/index.js NewsVideo "$OUT" \
   --props="$PROJ/props.json" --port=3999 $EXTRA --log=error 2>&1 | tee "$PROJ/render_error.log"
+# 5HU: even loudness for phones (-14 LUFS, like TikTok/Reels); video stream is copied untouched
+if [ "$CH" = "5hu" ] && [ -s "$OUT" ]; then
+  ffmpeg -loglevel error -y -i "$OUT" -c:v copy -af "loudnorm=I=-14:TP=-1.5:LRA=11" -c:a aac -b:a 192k -movflags +faststart "${OUT%.mp4}_ln.mp4" && mv -f "${OUT%.mp4}_ln.mp4" "$OUT"
+fi

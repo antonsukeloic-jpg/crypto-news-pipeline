@@ -7,7 +7,7 @@ import {buildCaptions, sceneTimeline} from './timing';
 // RGB-split outro. Varies per video (seeded): headline layout, transition order, second accent.
 const BRAND = {lime: '#C8FF2E', pink: '#FF3D9A', cyan: '#2EE6FF', black: '#0A0A0A', white: '#F5F5F2'};
 const OUTRO_SEC = 1.8;
-const MUSIC_VOL = 0.42;   // ducks to 0.16 while a word is spoken, swells in pauses
+const MUSIC_VOL = 0.6;   // ducks to 0.16 while a word is spoken, swells in pauses
 
 const seedOf = (voice) => { const m = String(voice || '').match(/(\d{13})/); return m ? Number(m[1].slice(-6)) : 7; };
 
@@ -50,17 +50,19 @@ const Media = ({scene, dur, i, from}) => {
   const base = {position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
     scale: String(fr.z * punch * drift * kick), translate: (fr.x + jx) + 'px ' + fr.y + 'px',
     filter: 'contrast(1.14) saturate(0.88) brightness(0.95)'};
+  if (wide) {
+    // landscape photo: fill the frame and pan across it (Ken Burns), direction alternates per scene
+    const pan = interpolate(frame, [0, dur], i % 2 ? [82, 18] : [18, 82], {extrapolateRight: 'clamp', easing: Easing.inOut(Easing.sin)});
+    base.objectPosition = pan + '% 50%';
+    base.scale = String(punch * kick * interpolate(frame, [0, dur], [1.04, 1.12]));
+    base.translate = jx + 'px 0px';
+  }
   const src = scene.video ? null : staticFile(scene.image);
   return (
     <AbsoluteFill>
       {scene.video
         ? <OffthreadVideo src={staticFile(scene.video)} muted style={base} />
-        : wide
-          ? <>
-              <Img src={src} style={{...base, scale: String(1.35 * kick), translate: '0px 0px', filter: 'blur(38px) brightness(0.55) saturate(1.2)'}} />
-              <Img src={src} style={{...base, objectFit: 'contain'}} />
-            </>
-          : <Img src={src} style={base} />}
+        : <Img src={src} style={base} />}
       {scene.credit && <div style={{position: 'absolute', left: 72, top: 222, fontFamily: mono, fontSize: 20, letterSpacing: 3,
         color: BRAND.white, opacity: 0.75, textTransform: 'uppercase', textShadow: '0 2px 8px rgba(0,0,0,0.8)'}}>photo · {scene.credit}</div>}
       {glitch && src && <Img src={src} style={{...base, translate: (fr.x + jx + 22) + 'px ' + fr.y + 'px', mixBlendMode: 'screen', opacity: 0.55,
@@ -319,7 +321,7 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
   );
 };
 
-export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm}) => {
+export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec}) => {
   BPM = Number(bpm) || 132;
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
@@ -328,6 +330,8 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
   const caps = (captions && captions.length) ? captions : buildCaptions(voiceover, durationInFrames, f);
   const tl = sceneTimeline(scenes, caps, durationInFrames, f);
   let outroFrom = Math.max(0, durationInFrames - Math.round(OUTRO_SEC * f));
+  const soFrames = signoff ? Math.round((Number(signoffSec) || 2.6) * f) : 0;
+  if (signoff) outroFrom = Math.max(0, durationInFrames - soFrames - Math.round(0.6 * f));
   for (let k = caps.length - 1; k > 0; k--) {
     if (/^5HU/i.test(caps[k].text) && /^follow/i.test(caps[k - 1].text)) { outroFrom = Math.max(0, Math.round((caps[k - 1].startMs / 1000) * f) - 6); break; }
   }
@@ -345,12 +349,13 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
       <Sequence from={outroFrom}><Outro /></Sequence>
       <Audio src={staticFile(voice)} />
+      {signoff && <Sequence from={outroFrom + 5}><Audio src={staticFile(signoff)} volume={1.15} /></Sequence>}
       <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {
         const ms = (fr / f) * 1000;
         const speaking = caps.some((c) => ms >= c.startMs - 80 && ms <= c.endMs + 120);
-        const bed = speaking ? 0.24 : MUSIC_VOL;
+        const bed = speaking ? 0.36 : MUSIC_VOL;
         const env = interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-        return (fr >= outroFrom ? 0.55 : bed) * env;
+        return (fr >= outroFrom ? (signoff ? 0.42 : 0.55) : bed) * env;
       }} />
     </AbsoluteFill>
   );
