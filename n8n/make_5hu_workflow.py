@@ -433,6 +433,13 @@ _old = "else { _wiki_dbg.push('entDROP:' + title); _s.center = { type: 'none' };
 assert _code["jsCode"].count(_old) == 1
 _code["jsCode"] = _code["jsCode"].replace(_old, "else if (!isPerson && c.name) { _wiki_dbg.push('entWORD:' + title); } " + _old)
 
+# network hiccups must not kill a run: a blocked article page falls back to the RSS text/photos; API calls retry
+by_name["Article - Fetch"].update({"onError": "continueRegularOutput", "alwaysOutputData": True, "retryOnFail": True, "maxTries": 2, "waitBetweenTries": 2000})
+by_name["Article - Fetch"]["parameters"].setdefault("options", {})["timeout"] = 20000
+for _n in w["nodes"]:
+    if _n["name"] in ("Select Story", "Message a model", "Perplexity Photos", "Image - Request", "Image - Get", "Music - Generate"):
+        _n.update({"retryOnFail": True, "maxTries": 3, "waitBetweenTries": 3000})
+
 # ---- sanity
 names =[n["name"] for n in w["nodes"]]
 for outs in w["connections"].values():
