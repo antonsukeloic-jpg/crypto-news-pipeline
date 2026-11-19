@@ -351,10 +351,11 @@ w["nodes"].append({"parameters": {"jsCode": _photos_js}, "type": "n8n-nodes-base
 w["connections"]["HTML"] = {"main": [[{"node": "Article Photos", "type": "main", "index": 0}]]}
 # Perplexity Agent API image_search: real designer portrait + collection looks from the whole web (~$0.005/run).
 # Uses the n8n "Perplexity account" credential (key never in the repo). Failures just leave the article/RSS photos.
-_pq = ("={{ JSON.stringify({ preset: 'fast', input: 'Find real photos for this fashion news story. I need: 1) a portrait of the designer (the person), "
-       "2) runway or lookbook images of the collection or pieces mentioned, 3) the label logo if there is one. Story: ' + "
-       "$('Parse Selection').first().json.title + ' - ' + ((($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet || ''), "
-       "tools: [{ type: 'image_search', max_results: 14, filters: { domain_filter: ['-gettyimages.com', '-shutterstock.com', '-alamy.com', '-pinterest.com', '-istockphoto.com', '-dreamstime.com'], format_filter: ['jpeg', 'png', 'webp'] } }] }) }}")
+_pq = ("={{ JSON.stringify({ preset: 'fast', input: 'Use the image_search tool now - call it and do not answer from memory. Find: "
+       "1) a portrait photo of the designer / founder / creative director (the person), 2) runway, lookbook or campaign photos of the collection or pieces, "
+       "3) the label logo. Story: ' + $('Parse Selection').first().json.title + ' - ' + "
+       "((($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet || '').slice(0, 300) + ' Reply only with done.', "
+       "tools: [{ type: 'image_search', max_results: 16, filters: { domain_filter: ['-gettyimages.com', '-shutterstock.com', '-alamy.com', '-pinterest.com', '-istockphoto.com', '-dreamstime.com'], format_filter: ['jpeg', 'png', 'webp'] } }] }) }}")
 _ap = by_name["HTML"]["position"]
 w["nodes"] += [
     {"parameters": {"method": "POST", "url": "https://api.perplexity.ai/v1/agent", "authentication": "predefinedCredentialType",
