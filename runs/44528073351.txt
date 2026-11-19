@@ -1,0 +1,31 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+          }
+        ]
+      },
+      "lastNodeExecuted": "Shape"
+    },
+    "executionData": {
+      "contextData": {},
+      "nodeExecutionStack": [],
+      "metadata": {},
+      "waitingExecution": {},
+      "waitingExecutionSource": {},
+      "runtimeData": {
+        "version": 1,
+        "establishedAt": 1795092813342,
+        "source": "cli",
+        "triggerNode": {
+          "name": "Start",
+          "type": "n8n-nodes-base.executeWorkflowTrigger"
+        }
+      }
+    },
+    "resumeToken": "e908075a5848c5491351a228b1bad33ed78387d63a10b82e546636c941b2bae9"
+  },
+  "mode": "cli",
+  "startedAt": "2026-11-19T12:53:33.336Z",
+  "stoppedAt": "2026-11-19T12:53:34.356Z",
+  "storedAt": "db",
+  "status": "success",
+  "finished": true
+}
