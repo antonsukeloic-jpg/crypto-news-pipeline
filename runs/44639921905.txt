@@ -1,0 +1,5 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+DIR=1523573c65ad473b1762a80c
+J=5hu_job_1795127903680.json
+F=/root/shared/archive/5hu_job_1795127903680.json
+{"title": null, "voiceover": "Plum. Aubergine. Violet. Not an accent... a neutral. Barbara Hulanicki built Biba on exactly this — tonal head-to-toe purple, decades before the runways caught up. Now Première Vision says dark purple replaces black for pre-fall 2027. The timing is no coincidence... inflation makes versatile colour a smart buy. This shade was always the one.", "hashtags": null, "channel": "5hu"}
