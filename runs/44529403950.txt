@@ -1,0 +1,15 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+-- No entries --
+VO: The H&M Design Award is back... and it just changed one designer's life. Macy Grimshaw. Central Saint Martins. Winner. Her graduate collection lands in H&M stores worldwide next fall. The jury said it simply: you get intrigued... and you want more.
+signoff True
+6 real= False 1536,2048 entity H&M
+5 real= False 1536,2048 entity Central Saint Martins
+5 real= False 1536,2048 stat 
+5 real= False 1536,2048 none 
+4 real= False 1536,2048 none 
+outputs/5hu_video_1795092568159.mp4
+B64S
+bash: line 14: i: command not found
+base64: /tmp/sh.jpg: No such file or directory
+
+B64E
