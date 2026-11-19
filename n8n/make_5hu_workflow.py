@@ -349,7 +349,26 @@ _h = by_name["HTML"]
 w["nodes"].append({"parameters": {"jsCode": _photos_js}, "type": "n8n-nodes-base.code", "typeVersion": 2,
     "position": [_h["position"][0] + 110, _h["position"][1] + 160], "id": str(uuid.uuid4()), "name": "Article Photos"})
 w["connections"]["HTML"] = {"main": [[{"node": "Article Photos", "type": "main", "index": 0}]]}
-w["connections"]["Article Photos"] = {"main": [[{"node": "Message a model", "type": "main", "index": 0}]]}
+# Perplexity Agent API image_search: real designer portrait + collection looks from the whole web (~$0.005/run).
+# Uses the n8n "Perplexity account" credential (key never in the repo). Failures just leave the article/RSS photos.
+_pq = ("={{ JSON.stringify({ preset: 'fast', input: 'Find real photos for this fashion news story. I need: 1) a portrait of the designer (the person), "
+       "2) runway or lookbook images of the collection or pieces mentioned, 3) the label logo if there is one. Story: ' + "
+       "$('Parse Selection').first().json.title + ' - ' + ((($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet || ''), "
+       "tools: [{ type: 'image_search', max_results: 14, filters: { domain_filter: ['-gettyimages.com', '-shutterstock.com', '-alamy.com', '-pinterest.com', '-istockphoto.com', '-dreamstime.com'], format_filter: ['jpeg', 'png', 'webp'] } }] }) }}")
+_ap = by_name["HTML"]["position"]
+w["nodes"] += [
+    {"parameters": {"method": "POST", "url": "https://api.perplexity.ai/v1/agent", "authentication": "predefinedCredentialType",
+                    "nodeCredentialType": "perplexityApi", "sendBody": True, "specifyBody": "json", "jsonBody": _pq,
+                    "options": {"timeout": 60000, "response": {"response": {"neverError": True}}}},
+     "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [_ap[0] + 330, _ap[1] + 160], "id": str(uuid.uuid4()),
+     "name": "Perplexity Photos", "onError": "continueRegularOutput", "alwaysOutputData": True,
+     "credentials": {"perplexityApi": {"id": "0F59WAwddf4rDMK4", "name": "Perplexity account"}}},
+    {"parameters": {"jsCode": open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "js", "5hu_merge_photos.js")).read()},
+     "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [_ap[0] + 550, _ap[1] + 160], "id": str(uuid.uuid4()), "name": "Merge Photos"},
+]
+w["connections"]["Article Photos"] = {"main": [[{"node": "Perplexity Photos", "type": "main", "index": 0}]]}
+w["connections"]["Perplexity Photos"] = {"main": [[{"node": "Merge Photos", "type": "main", "index": 0}]]}
+w["connections"]["Merge Photos"] = {"main": [[{"node": "Message a model", "type": "main", "index": 0}]]}
 
 _msgs = by_name["Message a model"]["parameters"]["messages"]["values"]
 _n_art = 0
@@ -376,7 +395,7 @@ _code = by_name["Code in JavaScript"]["parameters"]
 _anchor = 'scenes.forEach(function(s,i){ s.imageFile = '
 assert _code["jsCode"].count(_anchor) == 1
 _code["jsCode"] = _code["jsCode"].replace(_anchor,
-    "const _ph = (() => { try { return $('Article Photos').first().json.photos || []; } catch (e) { return []; } })();\n"
+    "const _ph = (() => { try { return $('Merge Photos').first().json.photos || []; } catch (e) { return []; } })();\n"
     "const _used = new Set();\n"
     "scenes.forEach(s => { const n = parseInt(s.photo, 10); if (n >= 1 && n <= _ph.length && !_used.has(n)) { _used.add(n); s.photo_url = _ph[n - 1].url; } });\n"
     "scenes.forEach(s => { if (!s.photo_url) { const q = _ph.find(x => !_used.has(x.n)); if (q) { _used.add(q.n); s.photo_url = q.url; } } });\n"
@@ -398,7 +417,7 @@ w["nodes"] += [
      "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [_x - 220, _y], "id": str(uuid.uuid4()), "name": "Real Photo?"},
     {"parameters": {"url": "={{ $json.photo_url }}", "sendHeaders": True, "headerParameters": {"parameters": [
         {"name": "User-Agent", "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"},
-        {"name": "Referer", "value": "={{ $('Parse Selection').first().json.link }}"}]},
+        {"name": "Accept", "value": "image/avif,image/webp,image/png,image/jpeg,*/*"}]},
         "options": {"timeout": 20000, "response": {"response": {"responseFormat": "file"}}}},
      "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [_x, _y - 220], "id": str(uuid.uuid4()),
      "name": "Photo - Download", "onError": "continueErrorOutput"},
