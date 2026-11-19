@@ -1,5 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-ls: cannot access '/tmp/px3.out': No such file or directory
-grep: /tmp/px3.out: No such file or directory
-grep: /tmp/px3.out: No such file or directory
-tail: cannot open '/tmp/px3.out' for reading: No such file or directory
