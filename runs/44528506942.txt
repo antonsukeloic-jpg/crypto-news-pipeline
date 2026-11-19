@@ -1,0 +1,4 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+
+
+{"status": 403, "err": "{\"message\":\"Sonar is now the Agent API. Use /v1/responses instead of /v1/sonar. Migrate here: https://docs.perplexity.ai/docs/agent-api/migrate-from-sonar/overview\",\"type\":\"chat_completions_not_available\",\"code\":403}", "images": 0, "img0": null}
