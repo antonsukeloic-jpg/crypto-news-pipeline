@@ -1,5 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-tOGl1tIRFxUJZJKA
- Container stack-n8n-1 Restarting 
- Container stack-n8n-1 Started 
-CRYPTO_PUBLISHED (n8n restarted)
