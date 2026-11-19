@@ -27,6 +27,43 @@ send_telegram() {  # $1 = video path, $2 = caption
     && log "sent to Telegram" || log "Telegram send FAILED"
 }
 
+tg_text() {  # $1 = text
+  [ -f "$TG_ENV" ] || return; . "$TG_ENV"
+  curl -sS -m 30 --data-urlencode chat_id="$TG_CHAT" --data-urlencode text="$1" --data-urlencode disable_web_page_preview=true \
+    "https://api.telegram.org/bot$TG_TOKEN/sendMessage" >/dev/null 2>&1
+}
+
+publish() {  # $1 = job json, $2 = video path. Only when /root/stack/autopost_<channel> exists (kill switch: delete the file).
+  local ch; ch=$(python3 -c "import json;print(json.load(open('$1')).get('channel',''))" 2>/dev/null)
+  [ -n "$ch" ] && [ -f "/root/stack/autopost_$ch" ] || return 0
+  local key; key=$(head -c 12 /dev/urandom | od -An -tx1 | tr -d ' \n')
+  local dir="$ROOT/public/$key"; mkdir -p "$dir"
+  local f; f="$dir/$(basename "$2")"
+  # platform copy: same look, smaller file (grain/glitch footage gets huge)
+  ffmpeg -loglevel error -y -i "$2" -c:v libx264 -preset veryfast -crf 21 -maxrate 12M -bufsize 24M -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart "$f" || cp "$2" "$f"
+  chmod -R a+rX "$dir"
+  local url="https://n8n.visualforma.cloud/m/$key/$(basename "$2")"
+  local payload; payload=$(python3 - "$1" "$url" <<'P'
+import json,sys
+j=json.load(open(sys.argv[1]))
+print(json.dumps({"job":__import__('os').path.basename(sys.argv[1]),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
+  "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[])}))
+P
+)
+  log "publishing $ch -> Metricool ($url)"
+  local resp; resp=$(curl -sS -m 180 -H 'Content-Type: application/json' -d "$payload" https://n8n.visualforma.cloud/webhook/social-publish 2>&1)
+  log "publish response: ${resp:0:400}"
+  local msg; msg=$(python3 -c "
+import json,sys
+try: r=json.loads(sys.argv[1])
+except Exception: print('⚠️ Publish: no answer from n8n'); sys.exit()
+if r.get('skipped'): print('⏭ Publish skipped: '+str(r.get('reason')))
+else: print('\n'.join(('✅ ' if p.get('ok') else '❌ ')+p.get('network','?')+(' scheduled (live in ~3 min) '+p.get('plannerUrl','') if p.get('ok') else ': '+p.get('error','')) for p in r.get('posts',[])) or '⚠️ Publish: empty answer')
+" "$resp")
+  tg_text "$ch: $msg"
+  find "$ROOT/public" -mindepth 1 -maxdepth 1 -type d -mtime +5 -exec rm -rf {} + 2>/dev/null
+}
+
 log "watcher started, watching $JOBS"
 while true; do
   jobfile=$(find "$JOBS" -maxdepth 1 -name '*.json' 2>/dev/null | head -n1)
@@ -50,6 +87,7 @@ while true; do
       touch "$ARCH/.done_$outbase"; log "OK $outbase"
       cap=$(python3 -c "import json;j=json.load(open('$dest'));print({'lt':'🇱🇹 ','vikops':'🪨 VIKOPS · ','5hu':'👗 5HU · '}.get(j.get('channel'),'')+j.get('voiceover','')[:900])" 2>/dev/null)
       send_telegram "$ROOT/$outp" "$cap"
+      publish "$dest" "$ROOT/$outp"
     else
       log "RENDER FAILED $outbase (see remotion/render_error.log)"
     fi
