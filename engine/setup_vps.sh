@@ -53,6 +53,7 @@ rm -f $S/wf_base.json $S/wf_lt.json $S/wf_vikops.json
 
 # 3a) build the local-disk crypto workflow (+ /lt router) and overwrite the existing one (same id)
 python3 $REPO/n8n/make_vps_workflow.py $REPO/n8n/workflow.json $S/wf.json "$LT_ID" "$VIKOPS_ID" "$FIVEHU_ID"
+python3 $REPO/n8n/make_crypto_upgrades.py $S/wf.json $S/wf.json
 $NX export:workflow --all --output=/data/shared/all_wf.json
 python3 - <<'EOF'
 import json
