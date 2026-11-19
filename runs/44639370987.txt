@@ -1,0 +1,15 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+OK -> /root/shared/wf_pub.json
+[license SDK] Skipping renewal on init: renewOnInit is disabled in config
+[license SDK] Skipping renewal on init: license cert is not initialized
+Importing 1 workflows...
+Deactivating workflow "Social Publish (Metricool)".
+Successfully imported 1 workflow.
+PUBLISH_WF_IMPORTED cred=j3bALWkdkrcA3vGT
+Publishing workflow with ID: SocialPublish001 (current version)
+Note: Changes will not take effect if n8n is running.
+Please restart n8n for changes to take effect if n8n is currently running.
+ Container stack-n8n-1 Restarting 
+ Container stack-n8n-1 Started 
+PUBLISH_WF_LIVE (n8n restarted)
+DEPLOY_DONE
