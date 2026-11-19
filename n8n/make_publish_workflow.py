@@ -6,7 +6,7 @@ caption per platform, and the post goes to that brand in Metricool (publishes ~3
 
 Webhook: POST https://n8n.visualforma.cloud/webhook/social-publish
   {"job": "5hu_job_123.json", "channel": "5hu", "videoUrl": "https://n8n.visualforma.cloud/m/<rand>/x.mp4",
-   "voiceover": "...", "title": "...", "hashtags": [...]}
+   "voiceover": "...", "title": "...", "hashtags": [...], "only": ["instagram"] (optional: post to just these networks)}
 Responds with {"ok": bool, "posts": [{network, ok, plannerUrl|error}]} so the watcher can report to Telegram.
 
 Which networks each channel posts to is CHANNELS below (add a network only after it is connected in Metricool).
@@ -30,12 +30,17 @@ const CH = __CHANNELS__;
 const b = $input.first().json.body || $input.first().json;
 const ch = CH[String(b.channel || '')];
 if (!ch || !ch.blogId || !(ch.networks || []).length) return [{ json: { skip: true, reason: 'channel not set up for publishing: ' + b.channel } }];
+// optional "only": ["instagram"] = post an already-published video to just these (newly added) networks
+const only = Array.isArray(b.only) ? b.only.map(String) : null;
+const nets = only ? ch.networks.filter(n => only.includes(n)) : ch.networks;
+if (!nets.length) return [{ json: { skip: true, reason: 'no matching networks for ' + b.channel } }];
+const key = only ? String(b.job) + '@' + nets.join(',') : b.job;
 if (!/^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.mp4$/.test(String(b.videoUrl || ''))) return [{ json: { skip: true, reason: 'bad videoUrl' } }];
 const sd = $getWorkflowStaticData('global');
 sd.published = sd.published || [];
-if (sd.published.includes(b.job)) return [{ json: { skip: true, reason: 'already published ' + b.job } }];
-sd.published = [b.job].concat(sd.published).slice(0, 300);
-return [{ json: { skip: false, job: b.job, channel: b.channel, blogId: ch.blogId, networks: ch.networks, style: ch.style,
+if (sd.published.includes(key)) return [{ json: { skip: true, reason: 'already published ' + key } }];
+sd.published = [key].concat(sd.published).slice(0, 300);
+return [{ json: { skip: false, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
   videoUrl: b.videoUrl, voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
   hashtags: (b.hashtags || []).slice(0, 10) } }];
 """.replace("__CHANNELS__", json.dumps({k: {"blogId": v["blogId"], "networks": v["networks"], "style": v["style"]} for k, v in CHANNELS.items()}))
@@ -48,8 +53,8 @@ CAPTION_PROMPT = (
     "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n\n"
     "RULES\n- Same language as the voiceover. Native to each platform, never copy-paste the same text.\n"
     "- Hook in the first line (it is all people see). No clickbait the video does not deliver. Facts only from the voiceover/title.\n"
-    "- tiktok.text: 1-2 short lines + 3-5 hashtags, max 150 characters total.\n"
-    "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-6 hashtags.\n"
+    "- tiktok.text: 1-2 short lines + 4-5 hashtags (mix 1-2 broad like #fashiontok with niche/designer tags), max 150 characters total.\n"
+    "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then EXACTLY 5 hashtags (Instagram allows max 5): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
     "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: 1-2 sentences + 3 hashtags; youtube.tags: 5-8 plain keywords.\n"
     "- facebook.text: 1-3 sentences, conversational, max 2 hashtags.\n\n"
     'SCHEMA {"tiktok":{"text":"..."},"instagram":{"text":"..."},"youtube":{"title":"...","description":"...","tags":["..."]},"facebook":{"text":"..."}}'
