@@ -1,7 +1,6 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame, useVideoConfig, interpolate, Easing} from 'remotion';
 import {FiveHuCarousel, carouselSlides} from './FiveHuCarousel';
-import {inter, mono} from './fonts';
 
 // TikTok version of the 5HU carousel: the same 4:5 slides as a 9:16 video over the run's own light techno
 // (TikTok photo posts can't carry our track). Slide sits inside the safe area (clear of the top bar,
@@ -44,10 +43,6 @@ export const FiveHuSlideshow = (props) => {
   const cur = Math.max(0, tl.findIndex((t) => frame >= t.from && frame < t.from + t.dur));
   return (
     <AbsoluteFill style={{backgroundColor: '#0A0A0A'}}>
-      <div style={{position: 'absolute', top: 150, left: X, right: X, display: 'flex', justifyContent: 'space-between', fontFamily: mono, fontSize: 22,
-        letterSpacing: 4, color: '#F5F5F2', opacity: 0.7}}>
-        <span>5HU · WHO'S NEXT</span><span>{String(cur + 1).padStart(2, '0')}/{String(tl.length).padStart(2, '0')}</span>
-      </div>
       {tl.map((t) => (
         <Sequence key={t.i} from={t.from} durationInFrames={t.dur}><Slide props={props} i={t.i} dur={t.dur} /></Sequence>
       ))}
