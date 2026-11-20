@@ -1,0 +1,15 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+now 16:30 UTC
+]: [16:21:06] job 5hu_job_1795191634488.json -> 5hu_video_1795191634488.mp4
+]: [16:21:06] rendering...
+]: props ok channel=5hu scenes=5 btc=None change=None
+]: [16:23:28] OK 5hu_video_1795191634488.mp4
+]: curl: (28) Operation timed out after 120001 milliseconds with 0 bytes received
+]: [16:27:39] Telegram send FAILED:
+]: [16:27:39] approval 9adb1a3a8514 requested (auto at 16:53)
+/root/shared/processing:
+drwxr-xr-x 2 1000 1000 4096 16:27 .
+drwxr-xr-x 9 1000 1000 4096 14:55 ..
+-rw-r--r-- 1 1000 1000 4039 21:38 5hu_job_1794778709254.json
+render procs: 0
+FiveHuFashion001|5HU Fashion News
