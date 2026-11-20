@@ -54,6 +54,7 @@ CAPTION_PROMPT = (
     "RULES\n- Same language as the voiceover. Native to each platform, never copy-paste the same text.\n"
     "- Hook in the first line (it is all people see). No clickbait the video does not deliver. Facts only from the voiceover/title.\n"
     "- SEARCH FIRST (2026 best practice: platforms are search engines, hashtags only categorize): put the main searchable keyword (designer / label / trend / coin name) in the first ~80 characters of every text.\n"
+    "- KEEP PEOPLE ON THE PLATFORM: never mention, tag or link any other social network or app (no TikTok / Instagram / Reels / YouTube / Shorts / Facebook / link-in-bio / follow us elsewhere). Each text is native to its own platform only.\n"
     "- Hashtags = search keywords: specific niche/mid-size tags over giant generic ones; NEVER #fyp #viral #explore #foryou; vary them per video.\n"
     "- tiktok.text: 1-2 short lines + 3-5 hashtags used as keywords (1 broad category like #fashiontok + niche/designer tags), max 150 characters total.\n"
     "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-5 hashtags (Instagram hard cap is 5, never more): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"

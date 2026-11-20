@@ -112,7 +112,7 @@ def render(W, H, safe, kicker=None, headline=None, seed=7):
     for ln in lines:
         draw_tracked(d, (x0 - int(hf.size * 0.04), y - hf.getbbox(ln)[1] + int(hf.size * 0.1)), ln, hf, WHITE, ht)
         y += line_h
-    sub = "Before everyone else." if not headline else "Watch it on TikTok · Reels · Shorts"
+    sub = "Before everyone else." if not headline else "We find them first."
     sf = font("Inter-Medium.otf", max(20, int(sh * 0.07)))
     d.text((x0, y + int(sh * 0.04)), sub, font=sf, fill=GREY)
     return grain(img)
