@@ -4,7 +4,7 @@ import {FiveHuCarousel, carouselSlides} from './FiveHuCarousel';
 
 // TikTok version of the 5HU carousel: the same 4:5 slides as a 9:16 video over the run's own light techno
 // (TikTok photo posts can't carry our track). Slide sits inside the safe area (clear of the top bar,
-// the caption at the bottom and the buttons on the right); slow push-in, quick fade between slides.
+// the caption at the bottom and the buttons on the right); the photo slowly pushes in inside its frame, quick fade between slides.
 const FPS = 30;
 const SCALE = 0.8;                       // 1080x1350 slide -> 864x1080
 const X = 108, Y = 190;
@@ -25,12 +25,12 @@ const Slide = ({props, i, dur}) => {
   const f = useCurrentFrame();
   const inP = interpolate(f, [0, 8], [0, 1], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   const outP = interpolate(f, [dur - 6, dur], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-  const push = interpolate(f, [0, dur], [1, 1.035]);
+  const push = interpolate(f, [0, dur], [1, 1.07]);   // only the photo inside the frame zooms; frame + text stay still
   return (
     <div style={{position: 'absolute', left: X, top: Y, width: 1080 * SCALE, height: 1350 * SCALE, overflow: 'hidden', borderRadius: 18,
-      opacity: Math.min(inP, outP), transform: `translateY(${(1 - inP) * 40}px)`}}>
-      <div style={{width: 1080, height: 1350, transform: `scale(${SCALE * push})`, transformOrigin: 'top left'}}>
-        <FiveHuCarousel {...props} slideIndex={i} />
+      opacity: Math.min(inP, outP)}}>
+      <div style={{width: 1080, height: 1350, transform: `scale(${SCALE})`, transformOrigin: 'top left'}}>
+        <FiveHuCarousel {...props} slideIndex={i} photoZoom={push} />
       </div>
     </div>
   );

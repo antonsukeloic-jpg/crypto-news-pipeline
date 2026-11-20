@@ -47,7 +47,13 @@ const Hook = ({text, size}) => {
   );
 };
 
-const Photo = ({p, w = W, h = H, pos = '50% 30%'}) => (p && p.image ? <Img src={staticFile(p.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPos(p, w, h, pos)}} /> : null);
+// zoom: slow push-in of the PHOTO only (TikTok slideshow); the frame, text and layout stay still
+const Photo = ({p, w = W, h = H, pos = '50% 30%', zoom = 1}) => {
+  if (!(p && p.image)) return null;
+  const op = focusPos(p, w, h, pos);
+  return <Img src={staticFile(p.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: op,
+    transform: zoom !== 1 ? `scale(${zoom})` : undefined, transformOrigin: op}} />;
+};
 
 export const FiveHuCarousel = (props) => {
   const cf = useCurrentFrame();
@@ -65,7 +71,7 @@ export const FiveHuCarousel = (props) => {
     const p = photos[0];
     return (
       <AbsoluteFill style={{backgroundColor: B.black}}>
-        <Photo p={p} />
+        <Photo p={p} zoom={props.photoZoom || 1} />
         <AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.9) 88%, rgba(0,0,0,0.95) 100%)'}} />
         <div style={{position: 'absolute', top: 72, left: PAD, right: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <Mark />
@@ -90,7 +96,7 @@ export const FiveHuCarousel = (props) => {
     if (p) {
       return (
         <AbsoluteFill style={{backgroundColor: B.black}}>
-          <div style={{position: 'absolute', top: 0, left: 0, width: W, height: 700, overflow: 'hidden'}}><Photo p={p} w={W} h={700} pos="50% 25%" /></div>
+          <div style={{position: 'absolute', top: 0, left: 0, width: W, height: 700, overflow: 'hidden'}}><Photo p={p} w={W} h={700} pos="50% 25%" zoom={props.photoZoom || 1} /></div>
           <div style={{position: 'absolute', top: 0, left: 0, width: W, height: 200, background: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0))'}} />
           <div style={{position: 'absolute', top: 64, left: PAD, right: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <Mark size={36} /><Pager i={frame} n={n} />
