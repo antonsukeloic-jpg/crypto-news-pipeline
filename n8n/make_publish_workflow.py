@@ -42,7 +42,12 @@ if (sd.published.includes(key)) return [{ json: { skip: true, reason: 'already p
 sd.published = [key].concat(sd.published).slice(0, 300);
 return [{ json: { skip: false, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
   videoUrl: b.videoUrl, voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
-  hashtags: (b.hashtags || []).slice(0, 10) } }];
+  hashtags: (b.hashtags || []).slice(0, 10),
+  thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
+  creators: (Array.isArray(b.creators) ? b.creators : []).slice(0, 2).map(c => ({ name: String(c.name || '').slice(0, 60),
+    instagram: /^[A-Za-z0-9._]{2,30}$/.test(c.instagram || '') ? c.instagram : '', tiktok: /^[A-Za-z0-9._]{2,30}$/.test(c.tiktok || '') ? c.tiktok : '',
+    website: /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(c.website || '') ? c.website : '' })).filter(c => c.name),
+  credits: (Array.isArray(b.credits) ? b.credits : []).slice(0, 4).map(x => String(x).slice(0, 40)) } }];
 """.replace("__CHANNELS__", json.dumps({k: {"blogId": v["blogId"], "networks": v["networks"], "style": v["style"]} for k, v in CHANNELS.items()}))
 
 CAPTION_PROMPT = (
@@ -50,7 +55,8 @@ CAPTION_PROMPT = (
     "CHANNEL STYLE: {{ $json.style }}\n"
     "VIDEO VOICEOVER: {{ $json.voiceover }}\n"
     "STORY TITLE: {{ $json.title }}\n"
-    "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n\n"
+    "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n"
+    "CREATORS (verified accounts; empty = none found): {{ JSON.stringify($json.creators || []) }}\n\n"
     "RULES\n- Same language as the voiceover. Native to each platform, never copy-paste the same text.\n"
     "- Hook in the first line (it is all people see). No clickbait the video does not deliver. Facts only from the voiceover/title.\n"
     "- SEARCH FIRST (2026 best practice: platforms are search engines, hashtags only categorize): put the main searchable keyword (designer / label / trend / coin name) in the first ~80 characters of every text.\n"
@@ -59,7 +65,9 @@ CAPTION_PROMPT = (
     "- tiktok.text: 1-2 short lines + 3-5 hashtags used as keywords (1 broad category like #fashiontok + niche/designer tags), max 150 characters total.\n"
     "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-5 hashtags (Instagram hard cap is 5, never more): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
     "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: keyword-rich 1-2 sentences + 3 hashtags (first 3 show above the title); youtube.tags: 5-8 plain keywords.\n"
-    "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n\n"
+    "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n"
+    "- CREDIT THE CREATOR FIRST: in instagram.text tag the designer/label once with their exact @instagram handle from CREATORS; in tiktok.text use their exact @tiktok handle; "
+    "in youtube.description and facebook.text you may add their website URL from CREATORS (never a social-media link). Use ONLY handles/URLs given in CREATORS - never invent or guess one; if none is given, write the plain name.\n\n"
     'SCHEMA {"tiktok":{"text":"..."},"instagram":{"text":"..."},"youtube":{"title":"...","description":"...","tags":["..."]},"facebook":{"text":"..."}}'
 )
 
@@ -71,6 +79,10 @@ const fallback = (p.title || p.voiceover.split(/[.!?]/)[0] || '').slice(0, 120) 
 const when = new Date(Date.now() + 3 * 60 * 1000).toLocaleString('sv-SE', { timeZone: 'Europe/Vilnius' }).replace(' ', 'T').slice(0, 19);
 const base = { publicationDate: { dateTime: when, timezone: 'Europe/Vilnius' }, autoPublish: true, draft: false, descendants: [],
   firstCommentText: '', hasNotReadNotes: false, media: [p.videoUrl], mediaAltText: [], shortener: false, smartLinkData: { ids: [] } };
+const cr = p.creators || [];
+const credits = (p.credits || []).length ? '\n📸 ' + p.credits.join(' · ') : '';
+const igComment = cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') + credits : (credits ? credits.trim() : '');
+const fbComment = cr.some(c => c.website) ? '📍 ' + cr.filter(c => c.website).map(c => c.name + ' — ' + c.website).join(' · ') + credits : (credits ? credits.trim() : '');
 const out = [];
 for (const net of p.networks) {
   const post = Object.assign({}, base, { providers: [{ network: net }] });
@@ -78,11 +90,15 @@ for (const net of p.networks) {
     post.tiktokData = { privacyOption: 'PUBLIC_TO_EVERYONE', disableComment: false, disableDuet: false, disableStitch: false,
       commercialContentThirdParty: false, commercialContentOwnBrand: false, autoAddMusic: false, isAigc: true, title: '' }; }
   if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback;
-    post.instagramData = { type: 'REEL', showReelOnFeed: true, isAiGenerated: true }; }
+    post.instagramData = { type: 'REEL', showReelOnFeed: true, isAiGenerated: true };
+    if (p.thumbnailUrl) post.videoThumbnailUrl = p.thumbnailUrl;
+    post.firstCommentText = igComment; }
   if (net === 'youtube') { const y = cap.youtube || {}; post.text = y.description || fallback;
     post.youtubeData = { title: (y.title || fallback).slice(0, 100), type: 'short', privacy: 'public', tags: (y.tags || []).slice(0, 10),
       madeForKids: false, isAiGeneratedContent: true }; }
-  if (net === 'facebook') { post.text = (cap.facebook && cap.facebook.text) || fallback; post.facebookData = { type: 'REEL' }; }
+  if (net === 'facebook') { post.text = (cap.facebook && cap.facebook.text) || fallback; post.facebookData = { type: 'REEL' };
+    if (p.thumbnailUrl) post.videoThumbnailUrl = p.thumbnailUrl;
+    post.firstCommentText = fbComment; }
   out.push({ json: { network: net, blogId: p.blogId, body: post } });
 }
 return out;

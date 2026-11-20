@@ -3,6 +3,7 @@ import {Composition, staticFile} from 'remotion';
 import {parseMedia} from '@remotion/media-parser';
 import {NewsVideo} from './NewsVideo';
 import {DataScene} from './DataScene';
+import {FiveHuCover} from './FiveHuCover';
 
 export const Root = () => {
   return (
@@ -36,6 +37,15 @@ export const Root = () => {
           } catch (e) {}
           return {durationInFrames: Math.max(1, Math.round(seconds * fps)), fps, width: 1080, height: 1920};
         }}
+      />
+      <Composition
+        id="FiveHuCover"
+        component={FiveHuCover}
+        durationInFrames={1}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{scenes: []}}
       />
       <Composition
         id="DataDemo"

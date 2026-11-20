@@ -333,6 +333,36 @@ w["connections"]["Music - Pick Style"] = {"main": [[{"node": "Music - Generate",
 w["connections"]["Music - Generate"] = {"main": [[{"node": "Save Music", "type": "main", "index": 0}]]}
 w["connections"]["Save Music"] = {"main": [[{"node": "Split Scenes", "type": "main", "index": 0}]]}
 
+# ---- creators: the designer's / label's own accounts (Instagram, TikTok, website) for @-tags, first comment and links.
+# Perplexity web search; a handle is kept only when its profile URL is in the retrieved results (n8n/js/5hu_creators.js).
+_cq = ("={{ JSON.stringify({ preset: 'fast', input: 'Use web search now. This fashion story is about one or two designers / labels. '"
+       " + 'Find their OFFICIAL accounts. Story: ' + $('Parse Selection').first().json.title + '. Script: ' + "
+       "String((() => { try { return JSON.parse($('Add Captions').first().json.job_json).voiceover; } catch (e) { return ''; } })()).slice(0, 600) + "
+       "' Reply ONLY with JSON: {\"creators\":[{\"name\":\"\",\"role\":\"designer|label\",\"instagram\":\"handle\",\"tiktok\":\"handle\",\"website\":\"https://...\"}]}. '"
+       " + 'Only accounts you actually saw in the search results (the official site linking to it, or the profile page itself). If unsure, leave the field empty. Never guess.' }) }}")
+_sm = by_name["Save Music"]["position"] if "Save Music" in by_name else [0, 0]
+w["nodes"] += [
+    {"parameters": {"method": "POST", "url": "https://api.perplexity.ai/v1/agent", "authentication": "predefinedCredentialType",
+                    "nodeCredentialType": "perplexityApi", "sendBody": True, "specifyBody": "json", "jsonBody": _cq,
+                    "options": {"timeout": 60000, "response": {"response": {"neverError": True}}}},
+     "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [_sm[0] + 110, _sm[1] + 180], "id": str(uuid.uuid4()),
+     "name": "Creator Lookup", "onError": "continueRegularOutput", "alwaysOutputData": True, "executeOnce": True,
+     "credentials": {"perplexityApi": {"id": "0F59WAwddf4rDMK4", "name": "Perplexity account"}}},
+    {"parameters": {"jsCode": open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "js", "5hu_creators.js")).read()},
+     "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [_sm[0] + 330, _sm[1] + 180], "id": str(uuid.uuid4()),
+     "name": "Creators", "onError": "continueRegularOutput", "alwaysOutputData": True},
+]
+w["connections"]["Save Music"] = {"main": [[{"node": "Creator Lookup", "type": "main", "index": 0}]]}
+w["connections"]["Creator Lookup"] = {"main": [[{"node": "Creators", "type": "main", "index": 0}]]}
+w["connections"]["Creators"] = {"main": [[{"node": "Split Scenes", "type": "main", "index": 0}]]}
+# the job file carries the creators to the render watcher -> publish
+by_name["Make Job File"]["parameters"]["jsCode"] = (
+    "let txt = $('Add Captions').first().json.job_json;\n"
+    "try { const j = JSON.parse(txt); const cr = ($('Creators').first().json.creators) || []; if (cr.length) { j.creators = cr; txt = JSON.stringify(j); } } catch (e) {}\n"
+    "const name = $('Code in JavaScript').first().json.jobFile;\n"
+    "const bin = await this.helpers.prepareBinaryData(Buffer.from(txt, 'utf8'), name, 'application/json');\n"
+    "return [{ json: { jobFile: name }, binary: { data: bin } }];")
+
 # ---- speed: poll Higgsfield every 3 s instead of 10 s (images are ready in ~10 s)
 assert by_name["Wait"]["parameters"].get("amount") == 10
 by_name["Wait"]["parameters"]["amount"] = 3

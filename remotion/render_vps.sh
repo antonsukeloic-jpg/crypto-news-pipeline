@@ -16,3 +16,8 @@ npx remotion render src/index.js NewsVideo "$OUT" \
 if [ "$CH" != "lt" ] && [ "$CH" != "vikops" ] && [ -s "$OUT" ]; then
   ffmpeg -loglevel error -y -i "$OUT" -c:v copy -af "loudnorm=I=-14:TP=-1.5:LRA=11" -c:a aac -b:a 192k -movflags +faststart "${OUT%.mp4}_ln.mp4" && mv -f "${OUT%.mp4}_ln.mp4" "$OUT"
 fi
+# 5HU: Reel/Short cover from the real photo + hook (used as the Instagram / Facebook thumbnail)
+if [ "$CH" = "5hu" ] && [ -s "$OUT" ]; then
+  npx remotion still src/index.js FiveHuCover "${OUT%.mp4}_cover.jpg" --props="$PROJ/props.json" --port=3999 \
+    --image-format=jpeg --jpeg-quality=88 --log=error >> "$PROJ/render_error.log" 2>&1 || rm -f "${OUT%.mp4}_cover.jpg"
+fi

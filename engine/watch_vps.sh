@@ -56,16 +56,24 @@ prepare_public() {  # $1 = video path -> prints the public URL of a platform cop
   local f; f="$dir/$(basename "$1")"
   # platform copy: same look, smaller file (grain/glitch footage gets huge)
   ffmpeg -loglevel error -y -i "$1" -c:v libx264 -preset veryfast -crf 21 -maxrate 12M -bufsize 24M -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart "$f" </dev/null || cp "$1" "$f"
+  [ -s "${1%.mp4}_cover.jpg" ] && cp "${1%.mp4}_cover.jpg" "$dir/"
   chmod -R a+rX "$dir"
   echo "https://n8n.visualforma.cloud/m/$key/$(basename "$1")"
 }
 
 do_publish() {  # $1 = job json, $2 = public video URL
   local ch; ch=$(job_channel "$1"); local url="$2"
-  local payload; payload=$(python3 - "$1" "$url" <<'P'
+  local thumb=""; local tf="$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)_cover.jpg"
+  [ -s "$tf" ] && thumb="$(dirname "$url")/$(basename "$url" .mp4)_cover.jpg"
+  local payload; payload=$(python3 - "$1" "$url" "$thumb" <<'P'
 import json,sys,os,re
 j=json.load(open(sys.argv[1]))
+credits=[]
+for s in j.get("scenes",[]):
+    c=str(s.get("credit") or "").strip()
+    if s.get("real") and c and c not in credits: credits.append(c)
 print(json.dumps({"job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
+  "thumbnailUrl":sys.argv[3],"creators":j.get("creators",[]),"credits":credits[:4],
   "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[])}))
 P
 )
