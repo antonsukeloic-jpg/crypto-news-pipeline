@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-17:12:26
-]: [17:10:03] approval 9adb1a3a8514 -> auto
-]: [17:10:23] publishing 5hu -> Metricool (https://n8n.visualforma.cloud/m/3464960a2ab87c79d4105d58/5hu_video_1795191634488.mp4)
-]: [17:10:32] publish response: {"ok":true,"posts":[{"network":"tiktok","ok":true,"plannerUrl":"","id":435842182,"error":""},{"network":"instagram","ok":true,"plannerUrl":"","id":435842183,"error":""},{"network":"youtube","ok":true,"plannerUrl":"","id":435842184,"error":""},{"network":"facebook","ok":true,"plannerUrl":"","id":435842185,"error":""}]}
-]: [17:11:12] carousel publish response: {"ok":true,"posts":[{"network":"instagram","ok":true,"plannerUrl":"","id":435842896,"error":""},{"network":"facebook","ok":true,"plannerUrl":"","id":435842895,"error":""}]}
-0
