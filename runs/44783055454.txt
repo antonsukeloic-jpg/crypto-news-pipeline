@@ -1,0 +1,17 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+routes left: 0
+/root/shared/tg_outbox/1795195129291830341.video
+/root/shared/outputs/video_1795194929714.mp4
+BlackRock's Bitcoin ETF just saw a record $541 million single-day outflow. A brutal U.S. tech selloff spread to Asia, hammering South Korea's Kospi more th
+]: [17:16:09] rendering...
+]: props ok channel=crypto scenes=3 btc=59298 change=-4.9
+]: [17:16:48] OK video_1795194929714.mp4
+]: curl: (28) Operation timed out after 120001 milliseconds with 0 bytes received
+]: [17:18:49] Telegram send FAILED:
+]: [17:18:49] Telegram video queued (outbox)
+]: [17:19:49] Telegram reachable again
+]: curl: (28) Operation timed out after 120000 milliseconds with 0 bytes received
+]: [17:21:49] Telegram send FAILED:
+]: [17:22:50] Telegram reachable again
+]: curl: (28) Operation timed out after 120000 milliseconds with 0 bytes received
+]: [17:24:50] Telegram send FAILED:
