@@ -1,0 +1,15 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+cnf-watcher.service: Deactivated successfully.
+Stopped cnf-watcher.service - CryptoNewsFactory render watcher.
+cnf-watcher.service: Consumed 19min 16.226s CPU time, 2.1G memory peak, 0B memory swap peak.
+Started cnf-watcher.service - CryptoNewsFactory render watcher.
+]: [07:22:56] watcher started, watching /root/shared/jobs
+]: [07:24:21] job 5hu_job_1795159439373.json -> 5hu_video_1795159439373.mp4
+]: [07:24:22] rendering...
+]: props ok channel=5hu scenes=5 btc=None change=None
+]: [07:27:13] OK 5hu_video_1795159439373.mp4
+]: [07:27:54] compressed for Telegram: 82 MB -> 8 MB
+]: [07:27:56] sent to Telegram
+]: [07:27:56] approval a6618942398c requested (auto at 07:57)
+a6618942398c.pending
+a6618942398c__5hu_job_1795159439373.json
