@@ -1,3 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-6fe08e6 Watcher: back off 10 min after a stalled Telegram video upload (small calls can work while uploads hang)
-active
