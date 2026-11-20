@@ -1,4 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-gw4=76.13.251.254 gw6=2a02:4780:c::1 dev=eth0
-getMe: http=000 t=15.001074s ip=149.154.166.110
-getMe v4: http=000 t=15.001105s
