@@ -1,0 +1,6 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+Python 3.12.3
+ModuleNotFoundError: No module named 'numpy'
+ModuleNotFoundError: No module named 'cv2'
+/tmp/x.sh: line 2: pip3: command not found
+/dev/sda1       193G  9.1G  184G   5% /

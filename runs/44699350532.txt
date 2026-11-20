@@ -1,8 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-closed test approval d311f70e9d1a
-flags now: approve_5hu autopost_5hu 
-0
-]: [07:52:53] compressed for Telegram: 57 MB -> 6 MB
-]: [07:52:55] sent to Telegram
-]: [07:52:55] approval d311f70e9d1a requested (auto at 08:22)
-]: [07:57:37] approval a6618942398c -> auto
