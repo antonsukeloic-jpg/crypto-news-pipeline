@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-v4 getMe http=000 t=15.002642s
-v6 getMe http=000 t=15.002688s
-v4 upload300k http=000 t=60.002571s
-149.154.167.220 via 76.13.251.254 dev eth0 src 76.13.251.134 uid 0 
-      8 mtu 1500
-      1 mtu 65536
