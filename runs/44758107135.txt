@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-f79cf2e 5HU carousel: Instagram + Facebook only for now (TikTok photo posts can't carry our own track)
-PUBLISH_WF_LIVE (n8n restarted)
-tOGl1tIRFxUJZJKA|Crypto Video Pipeline
-FiveHuFashion001|5HU Fashion News
-SocialPublish001|Social Publish (Metricool)
-tg updates: ['message', 'callback_query'] err: None
