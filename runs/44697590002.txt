@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-f64f6da 5HU: photo carousel (Claude copy from the article, 4:5 Remotion slides, IG/TikTok/FB post 3 h after the Reel, preview in the Telegram approval)
-render_running=0 flags: approval_dryrun approve_5hu autopost_5hu 
-FIVEHU_PUBLISHED (n8n restarted)
-PUBLISH_WF_LIVE (n8n restarted)
-active
-started
