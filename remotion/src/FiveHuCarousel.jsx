@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile, useCurrentFrame} from 'remotion';
 import {inter, mono} from './fonts';
+import {focusPos} from './focusCrop';
 
 // 5HU photo carousel, 1080x1350 (4:5) JPEG per frame: frame n = slide n.
 // cover (photo + hook) -> 3-4 deeper fact slides -> who's behind it -> save / follow.
@@ -46,7 +47,7 @@ const Hook = ({text, size}) => {
   );
 };
 
-const Photo = ({p, pos = '50% 30%'}) => (p && p.image ? <Img src={staticFile(p.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: pos}} /> : null);
+const Photo = ({p, w = W, h = H, pos = '50% 30%'}) => (p && p.image ? <Img src={staticFile(p.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPos(p, w, h, pos)}} /> : null);
 
 export const FiveHuCarousel = (props) => {
   const frame = useCurrentFrame();
@@ -88,7 +89,7 @@ export const FiveHuCarousel = (props) => {
     if (p) {
       return (
         <AbsoluteFill style={{backgroundColor: B.black}}>
-          <div style={{position: 'absolute', top: 0, left: 0, width: W, height: 700, overflow: 'hidden'}}><Photo p={p} pos="50% 25%" /></div>
+          <div style={{position: 'absolute', top: 0, left: 0, width: W, height: 700, overflow: 'hidden'}}><Photo p={p} w={W} h={700} pos="50% 25%" /></div>
           <div style={{position: 'absolute', top: 0, left: 0, width: W, height: 200, background: 'linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0))'}} />
           <div style={{position: 'absolute', top: 64, left: PAD, right: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <Mark size={36} /><Pager i={frame} n={n} />

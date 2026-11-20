@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {inter, mono} from './fonts';
+import {focusPos} from './focusCrop';
 
 // 5HU Reel / Short cover, 1080x1920 JPEG. The real photo carries it: who / what the story is about,
 // a 2-6 word hook, the 5HU mark small in the corner.
@@ -18,7 +19,7 @@ export const FiveHuCover = ({scenes = [], coverHook}) => {
   return (
     <AbsoluteFill style={{backgroundColor: B.black}}>
       {pick.image ? (
-        <Img src={staticFile(pick.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 28%'}} />
+        <Img src={staticFile(pick.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPos(pick, 1080, 1920, '50% 28%')}} />
       ) : null}
       <AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 26%, rgba(0,0,0,0) 46%, rgba(0,0,0,0.88) 84%, rgba(0,0,0,0.95) 100%)'}} />
       <div style={{position: 'absolute', top: 290, left: 80, right: 80, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>

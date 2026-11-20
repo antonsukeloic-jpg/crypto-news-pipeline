@@ -58,6 +58,18 @@ for s in job['scenes']:
             pass
     if s.get('vo_segment'): sc['vo_segment'] = s['vo_segment']
     scenes.append(sc)
+# where the person / main object is in each real photo (covers + carousel crop around it); optional, fail-safe
+_fp = '/opt/focus/bin/python'
+_imgs = [os.path.join(pub, sc['image']) for sc in scenes if sc.get('real') and sc.get('image')]
+if _imgs and os.path.exists(_fp):
+    try:
+        _f = json.loads(subprocess.run([_fp, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'focus.py')] + _imgs,
+                                       capture_output=True, text=True, timeout=60).stdout or '{}')
+        for sc in scenes:
+            if sc.get('image') and os.path.join(pub, sc['image']) in _f:
+                sc['focus'] = _f[os.path.join(pub, sc['image'])]
+    except Exception:
+        pass
 out_obj = {'scenes': scenes, 'voice': voice_base, 'fps': 30}
 if job.get('ticker'): out_obj['ticker'] = job['ticker']
 if job.get('captions'): out_obj['captions'] = job['captions']
