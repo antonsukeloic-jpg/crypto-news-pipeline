@@ -1,0 +1,10 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+16:56
+ 16:56:45 up 22 days, 10:28,  3 users,  load average: 2.00, 2.01, 2.15
+9adb1a3a8514.pending
+a6618942398c.done
+d311f70e9d1a.done
+]: [16:23:28] OK 5hu_video_1795191634488.mp4
+]: curl: (28) Operation timed out after 120001 milliseconds with 0 bytes received
+]: [16:27:39] Telegram send FAILED:
+]: [16:27:39] approval 9adb1a3a8514 requested (auto at 16:53)
