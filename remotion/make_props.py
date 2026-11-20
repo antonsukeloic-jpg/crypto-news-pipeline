@@ -69,6 +69,9 @@ if job.get('music') and os.path.exists(os.path.join(root, job['music'])):
     out_obj['music'] = mb
 if job.get('bpm'): out_obj['bpm'] = job['bpm']
 channel = job.get('channel') or 'crypto'
+# 5HU photo carousel copy + designer accounts (FiveHuCarousel)
+if job.get('carousel'): out_obj['carousel'] = job['carousel']
+if job.get('creators'): out_obj['creators'] = job['creators']
 out_obj['channel'] = channel
 # 5HU: fixed brand sign-off ("Follow Šū, we find them first.") played after the voice; render_vps.sh copies music/*.mp3 into public/music
 so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'music', '5hu_signoff.mp3')

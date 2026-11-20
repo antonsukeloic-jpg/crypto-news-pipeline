@@ -354,11 +354,36 @@ w["nodes"] += [
 ]
 w["connections"]["Save Music"] = {"main": [[{"node": "Creator Lookup", "type": "main", "index": 0}]]}
 w["connections"]["Creator Lookup"] = {"main": [[{"node": "Creators", "type": "main", "index": 0}]]}
-w["connections"]["Creators"] = {"main": [[{"node": "Split Scenes", "type": "main", "index": 0}]]}
+# ---- photo carousel copy (posted ~3 h after the Reel): goes deeper than the video, facts only from the article
+_CAR_PROMPT = (
+    "=You write the slides of a 5HU photo carousel (Instagram / TikTok / Facebook) that goes DEEPER than our short video about the same story. "
+    "5HU spots fashion's next big names first: cool, effortless insider voice, English with a little French chic, never cringe.\n\n"
+    "Output ONLY valid JSON, no markdown: {\"cover\":\"...\",\"slides\":[{\"title\":\"...\",\"body\":\"...\"}]}\n\n"
+    "RULES\n- cover: 2-6 word hook for the first slide (different from the video's opening line).\n"
+    "- slides: 3 or 4 slides, each ONE thing the video had no time for: who the designer / label is (background, city, training), "
+    "what exactly the collection / project is (materials, silhouettes, details), why it matters now, where and when to see or buy it.\n"
+    "- title max 7 words; body max 30 words, plain and specific (names, places, materials, dates exactly as in the article).\n"
+    "- FACTS ONLY FROM THE ARTICLE below. If it is thin, write 3 slides and stay general rather than invent anything.\n"
+    "- No hashtags, no emojis, no @handles, no URLs, never mention any social network or app.\n\n"
+    "VIDEO SCRIPT (do not repeat it): {{ (() => { try { return JSON.parse($('Add Captions').first().json.job_json).voiceover; } catch (e) { return ''; } })() }}\n\n"
+    "ARTICLE\n{{ (($('Merge Photos').first().json.articleText || '').length > 300 ? $('Merge Photos').first().json.articleText : ('HEADLINE: ' + $('Parse Selection').first().json.title + '\\nSUMMARY: ' + ((($('Combine Feeds').first().json.candidates || []).find(c => c.link === $('Parse Selection').first().json.link) || {}).snippet || ''))).slice(0, 9000) }}"
+)
+_cr = [n for n in w["nodes"] if n["name"] == "Creators"][0]["position"]
+w["nodes"].append({"parameters": {"modelId": {"__rl": True, "value": "claude-sonnet-4-6", "mode": "list", "cachedResultName": "claude-sonnet-4-6"},
+                                  "messages": {"values": [{"content": _CAR_PROMPT}]}, "options": {"maxTokens": 1200}},
+                   "type": "@n8n/n8n-nodes-langchain.anthropic", "typeVersion": 1, "position": [_cr[0] + 220, _cr[1]], "id": str(uuid.uuid4()),
+                   "name": "Carousel Copy", "onError": "continueRegularOutput", "alwaysOutputData": True, "executeOnce": True,
+                   "credentials": {"anthropicApi": {"id": "3pYNdkLM3jdNYjyM", "name": "Anthropic account"}}})
+w["connections"]["Creators"] = {"main": [[{"node": "Carousel Copy", "type": "main", "index": 0}]]}
+w["connections"]["Carousel Copy"] = {"main": [[{"node": "Split Scenes", "type": "main", "index": 0}]]}
 # the job file carries the creators to the render watcher -> publish
 by_name["Make Job File"]["parameters"]["jsCode"] = (
     "let txt = $('Add Captions').first().json.job_json;\n"
     "try { const j = JSON.parse(txt); const cr = ($('Creators').first().json.creators) || []; if (cr.length) { j.creators = cr; txt = JSON.stringify(j); } } catch (e) {}\n"
+    "try { const raw = $('Carousel Copy').first().json.content[0].text; const c = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));\n"
+    "  const t = (x, n) => String(x || '').replace(/\\s+/g, ' ').trim().slice(0, n);\n"
+    "  const slides = (Array.isArray(c.slides) ? c.slides : []).map(s => ({ title: t(s.title, 60), body: t(s.body, 240) })).filter(s => s.title && s.body).slice(0, 4);\n"
+    "  if (slides.length >= 3) { const j = JSON.parse(txt); j.carousel = { cover: t(c.cover, 50), slides }; txt = JSON.stringify(j); } } catch (e) {}\n"
     "const name = $('Code in JavaScript').first().json.jobFile;\n"
     "const bin = await this.helpers.prepareBinaryData(Buffer.from(txt, 'utf8'), name, 'application/json');\n"
     "return [{ json: { jobFile: name }, binary: { data: bin } }];")

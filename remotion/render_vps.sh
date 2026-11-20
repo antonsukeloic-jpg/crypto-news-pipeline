@@ -21,3 +21,12 @@ if [ "$CH" = "5hu" ] && [ -s "$OUT" ]; then
   npx remotion still src/index.js FiveHuCover "${OUT%.mp4}_cover.jpg" --props="$PROJ/props.json" --port=3999 \
     --image-format=jpeg --jpeg-quality=88 --log=error >> "$PROJ/render_error.log" 2>&1 || rm -f "${OUT%.mp4}_cover.jpg"
 fi
+# 5HU: photo carousel (4:5 slides) when the job has carousel copy -> <video>_car/slide_01.jpg ... (posted ~3 h after the Reel)
+if [ "$CH" = "5hu" ] && [ -s "$OUT" ] && python3 -c "import json,sys;sys.exit(0 if json.load(open('$PROJ/props.json')).get('carousel',{}).get('slides') else 1)" 2>/dev/null; then
+  CAR="${OUT%.mp4}_car"; rm -rf "$CAR"; mkdir -p "$CAR"
+  npx remotion render src/index.js FiveHuCarousel "$CAR" --sequence --image-format=jpeg --jpeg-quality=90 --props="$PROJ/props.json" \
+    --port=3999 --log=error >> "$PROJ/render_error.log" 2>&1
+  i=0; for f in $(ls -v "$CAR" | grep -Ei '\.jpe?g$'); do i=$((i+1)); mv "$CAR/$f" "$CAR/s$(printf %02d $i).tmp"; done
+  for f in "$CAR"/s*.tmp; do [ -e "$f" ] && mv "$f" "$CAR/slide_$(basename "$f" .tmp | tr -d s).jpg"; done
+  [ "$i" -ge 3 ] || rm -rf "$CAR"
+fi

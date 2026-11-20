@@ -12,5 +12,5 @@ import {loadFont as loadInter} from '@remotion/google-fonts/Inter';
 import {loadFont as loadSpaceMono} from '@remotion/google-fonts/SpaceMono';
 loadInstrumentSerif('italic', {weights: ['400'], subsets: SUBSETS});
 export const serif = loadInstrumentSerif('normal', {weights: ['400'], subsets: SUBSETS}).fontFamily;
-export const inter = loadInter('normal', {weights: ['800', '900'], subsets: SUBSETS}).fontFamily;
+export const inter = loadInter('normal', {weights: ['500', '800', '900'], subsets: SUBSETS}).fontFamily;
 export const mono = loadSpaceMono('normal', {weights: ['400'], subsets: SUBSETS}).fontFamily;

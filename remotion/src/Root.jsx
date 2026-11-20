@@ -4,6 +4,7 @@ import {parseMedia} from '@remotion/media-parser';
 import {NewsVideo} from './NewsVideo';
 import {DataScene} from './DataScene';
 import {FiveHuCover} from './FiveHuCover';
+import {FiveHuCarousel, carouselSlides} from './FiveHuCarousel';
 
 export const Root = () => {
   return (
@@ -46,6 +47,16 @@ export const Root = () => {
         width={1080}
         height={1920}
         defaultProps={{scenes: []}}
+      />
+      <Composition
+        id="FiveHuCarousel"
+        component={FiveHuCarousel}
+        durationInFrames={6}
+        fps={1}
+        width={1080}
+        height={1350}
+        defaultProps={{scenes: [], carousel: {cover: '', slides: []}, creators: []}}
+        calculateMetadata={({props}) => ({durationInFrames: carouselSlides(props).length})}
       />
       <Composition
         id="DataDemo"

@@ -17,8 +17,8 @@ cred_id, dst = sys.argv[1], sys.argv[2]
 USER_ID = "6373812"
 CHANNELS = {
     # channel: Metricool blogId, networks to post to, caption style
-    "5hu": {"blogId": "8237757", "networks": ["tiktok", "instagram", "youtube", "facebook"],
-            "style": "5HU - fashion's next big names first. Cool, effortless, insider. Lowercase-friendly. Hashtags: niche fashion + designer/label name + city, e.g. #emergingdesigners #fashiontok #copenhagenfashion."},
+    "5hu": {"blogId": "8237757", "networks": ["tiktok", "instagram", "youtube", "facebook"], "carousel": ["instagram", "tiktok", "facebook"],
+            "style": "5HU - fashion's next big names first. Cool, effortless, insider. Lowercase-friendly. Hashtags: niche fashion + designer/label name + city, e.g. #newdesigners #fashiontok #copenhagenfashion (vary them)."},
     "crypto": {"blogId": "", "networks": [],
                "style": "Fast crypto news. Lead with the number or the stakes. Always end with 'Not financial advice.' Hashtags: #crypto #bitcoin + coin/company names."},
     "vikops": {"blogId": "8107269", "networks": [],
@@ -32,28 +32,38 @@ const ch = CH[String(b.channel || '')];
 if (!ch || !ch.blogId || !(ch.networks || []).length) return [{ json: { skip: true, reason: 'channel not set up for publishing: ' + b.channel } }];
 // optional "only": ["instagram"] = post an already-published video to just these (newly added) networks
 const only = Array.isArray(b.only) ? b.only.map(String) : null;
-const nets = only ? ch.networks.filter(n => only.includes(n)) : ch.networks;
-if (!nets.length) return [{ json: { skip: true, reason: 'no matching networks for ' + b.channel } }];
-const key = only ? String(b.job) + '@' + nets.join(',') : b.job;
-if (!/^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.mp4$/.test(String(b.videoUrl || ''))) return [{ json: { skip: true, reason: 'bad videoUrl' } }];
+// kind "carousel": photo slides (Instagram carousel, TikTok photo post, Facebook multi-photo), scheduled delayMin later
+const kind = b.kind === 'carousel' ? 'carousel' : 'video';
+const pool = kind === 'carousel' ? (ch.carousel || []) : ch.networks;
+const nets = only ? pool.filter(n => only.includes(n)) : pool;
+if (!nets.length) return [{ json: { skip: true, reason: 'no matching networks for ' + b.channel + ' ' + kind } }];
+const key = (kind === 'carousel' ? String(b.job) + '#carousel' : String(b.job)) + (only ? '@' + nets.join(',') : '');
+const MEDIA = /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(mp4|jpg)$/;
+const images = kind === 'carousel' ? (Array.isArray(b.images) ? b.images : []).map(String).filter(u => MEDIA.test(u) && u.endsWith('.jpg')).slice(0, 10) : [];
+if (kind === 'carousel' && images.length < 3) return [{ json: { skip: true, reason: 'carousel needs 3+ slide images' } }];
+if (kind === 'video' && !/^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.mp4$/.test(String(b.videoUrl || ''))) return [{ json: { skip: true, reason: 'bad videoUrl' } }];
+const delayMin = Math.min(Math.max(parseInt(b.delayMin, 10) || 3, 3), 24 * 60);
 const sd = $getWorkflowStaticData('global');
 sd.published = sd.published || [];
 if (sd.published.includes(key)) return [{ json: { skip: true, reason: 'already published ' + key } }];
 sd.published = [key].concat(sd.published).slice(0, 300);
-return [{ json: { skip: false, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
-  videoUrl: b.videoUrl, voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
+return [{ json: { skip: false, kind, images, delayMin, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
+  slidesText: kind === 'carousel' ? String(b.slidesText || '').slice(0, 2000) : '',
+  videoUrl: kind === 'video' ? b.videoUrl : '', voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
   hashtags: (b.hashtags || []).slice(0, 10),
   thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
   creators: (Array.isArray(b.creators) ? b.creators : []).slice(0, 2).map(c => ({ name: String(c.name || '').slice(0, 60),
     instagram: /^[A-Za-z0-9._]{2,30}$/.test(c.instagram || '') ? c.instagram : '', tiktok: /^[A-Za-z0-9._]{2,30}$/.test(c.tiktok || '') ? c.tiktok : '',
     website: /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(c.website || '') ? c.website : '' })).filter(c => c.name),
   credits: (Array.isArray(b.credits) ? b.credits : []).slice(0, 4).map(x => String(x).slice(0, 40)) } }];
-""".replace("__CHANNELS__", json.dumps({k: {"blogId": v["blogId"], "networks": v["networks"], "style": v["style"]} for k, v in CHANNELS.items()}))
+""".replace("__CHANNELS__", json.dumps({k: {"blogId": v["blogId"], "networks": v["networks"], "carousel": v.get("carousel", []), "style": v["style"]}
+                                      for k, v in CHANNELS.items()}))
 
 CAPTION_PROMPT = (
-    "=You write social media captions for a short vertical video. Output ONLY valid JSON, no markdown.\n\n"
+    "=You write social media captions for {{ $json.kind === 'carousel' ? 'a swipeable photo carousel (Instagram carousel, TikTok photo post, Facebook multi-photo post); it goes deeper than our earlier video on the same story, so the hook must work on its own and invite people to swipe and save' : 'a short vertical video' }}. Output ONLY valid JSON, no markdown.\n\n"
     "CHANNEL STYLE: {{ $json.style }}\n"
     "VIDEO VOICEOVER: {{ $json.voiceover }}\n"
+    "{{ $json.kind === 'carousel' ? 'CAROUSEL SLIDES (this is what the post shows): ' + $json.slidesText + '\\n' : '' }}"
     "STORY TITLE: {{ $json.title }}\n"
     "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n"
     "CREATORS (verified accounts; empty = none found): {{ JSON.stringify($json.creators || []) }}\n\n"
@@ -76,9 +86,9 @@ const p = $('Prepare').first().json;
 let cap = {};
 try { const raw = $input.first().json.content[0].text; cap = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1)); } catch (e) {}
 const fallback = (p.title || p.voiceover.split(/[.!?]/)[0] || '').slice(0, 120) + ' ' + (p.hashtags || []).slice(0, 4).join(' ');
-const when = new Date(Date.now() + 3 * 60 * 1000).toLocaleString('sv-SE', { timeZone: 'Europe/Vilnius' }).replace(' ', 'T').slice(0, 19);
+const when = new Date(Date.now() + (p.delayMin || 3) * 60 * 1000).toLocaleString('sv-SE', { timeZone: 'Europe/Vilnius' }).replace(' ', 'T').slice(0, 19);
 const base = { publicationDate: { dateTime: when, timezone: 'Europe/Vilnius' }, autoPublish: true, draft: false, descendants: [],
-  firstCommentText: '', hasNotReadNotes: false, media: [p.videoUrl], mediaAltText: [], shortener: false, smartLinkData: { ids: [] } };
+  firstCommentText: '', hasNotReadNotes: false, media: p.kind === 'carousel' ? p.images : [p.videoUrl], mediaAltText: [], shortener: false, smartLinkData: { ids: [] } };
 const cr = p.creators || [];
 const credits = (p.credits || []).length ? '\n📸 ' + p.credits.join(' · ') : '';
 const igComment = cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') + credits : (credits ? credits.trim() : '');
@@ -86,6 +96,17 @@ const fbComment = cr.some(c => c.website) ? '📍 ' + cr.filter(c => c.website).
 const out = [];
 for (const net of p.networks) {
   const post = Object.assign({}, base, { providers: [{ network: net }] });
+  if (p.kind === 'carousel') {
+    if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback; post.instagramData = { type: 'POST', isAiGenerated: false }; post.firstCommentText = igComment; }
+    if (net === 'facebook') { post.text = (cap.facebook && cap.facebook.text) || fallback; post.facebookData = { type: 'POST' }; post.firstCommentText = fbComment; }
+    if (net === 'tiktok') { const t = (cap.tiktok && cap.tiktok.text) || fallback;
+      // photo post: TikTok can't carry our own audio track on photos, so no music is added
+      post.text = t; post.tiktokData = { privacyOption: 'PUBLIC_TO_EVERYONE', disableComment: false, disableDuet: false, disableStitch: false,
+        commercialContentThirdParty: false, commercialContentOwnBrand: false, autoAddMusic: false, photoCoverIndex: 0,
+        title: t.split('\n')[0].replace(/#\S+/g, '').trim().slice(0, 90) }; }
+    if (post.text) out.push({ json: { network: net, blogId: p.blogId, body: post } });
+    continue;
+  }
   if (net === 'tiktok') { post.text = (cap.tiktok && cap.tiktok.text) || fallback;
     post.tiktokData = { privacyOption: 'PUBLIC_TO_EVERYONE', disableComment: false, disableDuet: false, disableStitch: false,
       commercialContentThirdParty: false, commercialContentOwnBrand: false, autoAddMusic: false, isAigc: true, title: '' }; }
