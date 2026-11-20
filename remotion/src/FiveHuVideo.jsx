@@ -63,7 +63,7 @@ const Media = ({scene, dur, i, from}) => {
       {scene.video
         ? <OffthreadVideo src={staticFile(scene.video)} muted style={base} />
         : <Img src={src} style={base} />}
-      {scene.credit && <div style={{position: 'absolute', left: 72, top: 222, fontFamily: mono, fontSize: 20, letterSpacing: 3,
+      {scene.credit && <div style={{position: 'absolute', left: 72, top: 262, fontFamily: mono, fontSize: 20, letterSpacing: 3,
         color: BRAND.white, opacity: 0.75, textTransform: 'uppercase', textShadow: '0 2px 8px rgba(0,0,0,0.8)'}}>photo · {scene.credit}</div>}
       {glitch && src && <Img src={src} style={{...base, translate: (fr.x + jx + 22) + 'px ' + fr.y + 'px', mixBlendMode: 'screen', opacity: 0.55,
         filter: 'hue-rotate(300deg) saturate(3)'}} />}
@@ -141,9 +141,9 @@ const Headline = ({text, layout, accent, from}) => {
   const beat = (fps * 60) / BPM;
   const pump = 1 + 0.03 * beatAmp(Math.floor((from + frame) / beat)) * interpolate((from + frame) % beat, [0, 5], [1, 0], {extrapolateRight: 'clamp'});
   const L = [
-    {top: 250, left: 72, right: 110, font: serif, style: 'italic', size: 138, weight: 400, upper: false, align: 'left'},
-    {top: 560, left: 60, right: 60, font: inter, style: 'normal', size: 128, weight: 900, upper: true, align: 'center'},
-    {top: 1080, left: 72, right: 90, font: inter, style: 'normal', size: 112, weight: 900, upper: true, align: 'left'},
+    {top: 300, left: 72, right: 200, font: serif, style: 'italic', size: 138, weight: 400, upper: false, align: 'left'},
+    {top: 600, left: 60, right: 180, font: inter, style: 'normal', size: 128, weight: 900, upper: true, align: 'center'},
+    {top: 860, left: 72, right: 200, font: inter, style: 'normal', size: 112, weight: 900, upper: true, align: 'left'},
   ][layout];
   return (
     <div style={{position: 'absolute', top: L.top, left: L.left, right: L.right, textAlign: L.align, fontFamily: L.font, fontStyle: L.style,
@@ -174,7 +174,7 @@ const Header = ({stamp, accent}) => {
   const intro = spring({frame, fps, config: {damping: 16}});
   return (
     <>
-      <div style={{position: 'absolute', top: 110, left: 72, right: 72, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      <div style={{position: 'absolute', top: 150, left: 72, right: 72, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         translate: '0px ' + interpolate(intro, [0, 1], [-60, 0]) + 'px', opacity: intro}}>
         <div style={{fontFamily: inter, fontWeight: 900, fontSize: 60, letterSpacing: -3, color: BRAND.white, display: 'flex', alignItems: 'baseline'}}>
           5HU<span style={{display: 'inline-block', width: 16, height: 16, borderRadius: 8, background: BRAND.lime, marginLeft: 5}} />
@@ -183,10 +183,10 @@ const Header = ({stamp, accent}) => {
           WHO'S NEXT <span style={{color: accent}}>●</span> {stamp}
         </div>
       </div>
-      <div style={{position: 'absolute', top: 196, left: 72, right: 72, height: 4, background: 'rgba(255,255,255,0.22)'}}>
+      <div style={{position: 'absolute', top: 236, left: 72, right: 72, height: 4, background: 'rgba(255,255,255,0.22)'}}>
         <div style={{width: (prog * 100) + '%', height: '100%', background: BRAND.lime}} />
       </div>
-      <div style={{position: 'absolute', top: 960, right: -168, rotate: '90deg', fontFamily: mono, fontSize: 21, letterSpacing: 6, color: accent, opacity: 0.85, whiteSpace: 'nowrap'}}>
+      <div style={{position: 'absolute', top: 960, left: -380, rotate: '-90deg', fontFamily: mono, fontSize: 21, letterSpacing: 6, color: accent, opacity: 0.85, whiteSpace: 'nowrap'}}>
         WE FIND THEM FIRST — 5HU — WE FIND THEM FIRST
       </div>
     </>
@@ -201,7 +201,7 @@ const Center = ({center, accent, compact}) => {
   if (center.type === 'entity' && (center.logo_url || center.name)) {
     const isPerson = center.kind === 'person' && center.logo_url;
     return (
-      <div style={compact ? {position: 'absolute', top: 1000, right: 40, scale: '0.58', transformOrigin: 'top right'} : {position: 'absolute', top: 760, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
+      <div style={compact ? {position: 'absolute', top: 310, left: 72, scale: '0.52', transformOrigin: 'top left'} : {position: 'absolute', top: 760, left: 0, right: 0, display: 'flex', justifyContent: 'center'}}>
         <div style={{position: 'relative', background: BRAND.white, padding: '20px 20px 0 20px', boxShadow: '0 30px 70px rgba(0,0,0,0.55)',
           rotate: interpolate(p, [0, 1], [-16, -4]) + 'deg', scale: String(interpolate(p, [0, 1], [0.6, 1])), opacity: p}}>
           <div style={{position: 'absolute', top: -18, left: 120, width: 150, height: 38, background: BRAND.lime, opacity: 0.9, rotate: '3deg'}} />
@@ -251,7 +251,7 @@ const Subs = ({caps}) => {
   for (const p of phrases) if (ms >= p[0].startMs) ph = p;
   if (!ph) return null;
   return (
-    <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 360, paddingLeft: 80, paddingRight: 80}}>
+    <AbsoluteFill style={{justifyContent: 'flex-end', alignItems: 'center', paddingBottom: 540, paddingLeft: 80, paddingRight: 200}}>
       <div style={{fontFamily: inter, fontWeight: 800, fontSize: 62, lineHeight: 1.3, letterSpacing: -1, color: BRAND.white, textAlign: 'center',
         textShadow: '0 4px 22px rgba(0,0,0,0.85)'}}>
         {ph.map((w, k) => {
@@ -341,7 +341,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       {scenes.map((s, i) => (
         <Sequence key={i} from={tl[i].from} durationInFrames={tl[i].dur}>
           <Scene s={s} i={i} from={tl[i].from} dur={tl[i].dur} accent={accent}
-            layout={s.center && s.center.type && s.center.type !== 'none' && !(s.real && s.center.type === 'entity') ? 0 : (seed + i) % 3} kind={KINDS[(seed + i) % KINDS.length]} />
+            layout={s.center && s.center.type && s.center.type !== 'none' && !(s.real && s.center.type === 'entity') ? 0 : (s.real && s.center && s.center.type === 'entity') ? 1 + (seed + i) % 2 : (seed + i) % 3} kind={KINDS[(seed + i) % KINDS.length]} />
         </Sequence>
       ))}
       <Grain />
