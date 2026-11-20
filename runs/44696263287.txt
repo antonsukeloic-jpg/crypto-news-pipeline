@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-4dc4919 5HU: Reel cover from the real photo (IG/FB thumbnail), designer accounts via Perplexity -> @tags, links and first comment with photo credits
-render_running=0
-FIVEHU_PUBLISHED (n8n restarted)
-PUBLISH_WF_LIVE (n8n restarted)
-active
--rw-r--r-- 1 root root 197067 Nov 20 07:38 cover_test.jpg
