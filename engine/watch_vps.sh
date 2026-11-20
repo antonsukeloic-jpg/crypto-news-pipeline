@@ -37,12 +37,14 @@ tg_queue_video() {  # $1 = video path, $2 = caption -> outbox
   printf '%s\n%s' "$1" "$2" > "$TG_OUT/$(date +%s%N).video"; log "Telegram video queued (outbox)"
 }
 
-TG_LAST_MSG=""
+TG_LAST_MSG=""; TG_VID_FAIL_AT=0
 send_telegram() {  # $1 = video path, $2 = caption, $3 = optional reply_markup JSON (buttons)
   [ -f "$TG_ENV" ] || { log "no $TG_ENV, skipping Telegram"; return; }
   . "$TG_ENV"
   TG_LAST_MSG=""
   tg_up || { log "Telegram unreachable, video not sent"; return; }
+  # video uploads can stall while small calls still work: after a failed upload wait 10 min before the next try
+  [ $(( $(date +%s) - TG_VID_FAIL_AT )) -ge 600 ] || { log "Telegram video uploads failing, next try later"; return; }
   # Telegram bots accept max 50 MB: re-encode anything over 45 MB (busy grain/glitch footage gets big)
   if [ "$(stat -c %s "$1")" -gt 47185920 ]; then
     local small="${1%.mp4}_tg.mp4"
@@ -59,7 +61,7 @@ send_telegram() {  # $1 = video path, $2 = caption, $3 = optional reply_markup J
   TG_LAST_MSG=$(printf '%s' "$resp" | python3 -c "import json,sys
 try: print(json.load(sys.stdin)['result']['message_id'])
 except Exception: print('')" 2>/dev/null)
-  [ -n "$TG_LAST_MSG" ] && log "sent to Telegram" || { log "Telegram send FAILED: ${resp:0:200}"; tg_down; }
+  [ -n "$TG_LAST_MSG" ] && log "sent to Telegram" || { log "Telegram send FAILED: ${resp:0:200}"; tg_down; TG_VID_FAIL_AT=$(date +%s); }
 }
 
 tg_mark() {  # $1 = message id (buttons get removed), $2 = reply text
