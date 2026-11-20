@@ -1,0 +1,8 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+1826637  2-20:05:55 ffmpeg -loglevel error -y -i /tmp/a.png -i /tmp/b.png -filter_complex [0]scale=300:534[x];[1]scale=300:534[y];[x][y]hstack -q:v 6 /tmp/cmp.jpg
+1827950  2-19:58:57 ffmpeg -loglevel error -y -i /tmp/a.png -i /tmp/b.png -filter_complex [0]scale=360:640[x];[1]scale=360:640[y];[x][y]hstack -q:v 6 /tmp/cmp.jpg
+ping DF size 1200: ok
+ping DF size 1372: fail
+ping DF size 1472: fail
+ping 1.1.1.1 ok
+openssl exit=0
