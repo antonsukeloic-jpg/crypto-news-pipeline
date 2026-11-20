@@ -1,0 +1,13 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+7e5abe1 Captions: spell names exactly (prompt rule + safety net fixing near-miss name hashtags like #WillyCharvarria)
+PUBLISH_WF_LIVE (n8n restarted)
+tOGl1tIRFxUJZJKA|Crypto Video Pipeline
+FiveHuFashion001|5HU Fashion News
+SocialPublish001|Social Publish (Metricool)
+webhook set: True updates: ['message', 'callback_query'] pending: 0 last_error: None
+active
+]: [17:19:49] Telegram reachable again
+]: curl: (28) Operation timed out after 120000 milliseconds with 0 bytes received
+]: [17:21:49] Telegram send FAILED:
+]: [17:22:50] Telegram reachable again
+1
