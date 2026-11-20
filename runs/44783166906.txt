@@ -1,0 +1,4 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+video bytes 11047219
+upload5MB http=200 t=0.892757s speed=5600866B/s
+google upload5MB http=405 t=0.214414s speed=4890426B/s
