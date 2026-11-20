@@ -84,6 +84,7 @@ CAPTION_PROMPT = (
     "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-5 hashtags (Instagram hard cap is 5, never more): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
     "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: keyword-rich 1-2 sentences + 3 hashtags (first 3 show above the title); youtube.tags: 5-8 plain keywords.\n"
     "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n"
+    "- SPELL EVERY NAME EXACTLY as in the voiceover / title (designers, labels, places) - also inside hashtags: #WillyChavarria, never a near-miss.\n"
     "- CREDIT THE CREATOR FIRST: in instagram.text tag the designer/label once with their exact @instagram handle from CREATORS; in tiktok.text use their exact @tiktok handle; "
     "in youtube.description and facebook.text you may add their website URL from CREATORS (never a social-media link). Use ONLY handles/URLs given in CREATORS - never invent or guess one; if none is given, write the plain name.\n\n"
     'SCHEMA {"tiktok":{"text":"..."},"instagram":{"text":"..."},"youtube":{"title":"...","description":"...","tags":["..."]},"facebook":{"text":"..."}}'
@@ -101,6 +102,29 @@ const cr = p.creators || [];
 const credits = (p.credits || []).length ? '\n📸 ' + p.credits.join(' · ') : '';
 const igComment = cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') + credits : (credits ? credits.trim() : '');
 const fbComment = cr.some(c => c.website) ? '📍 ' + cr.filter(c => c.website).map(c => c.name + ' — ' + c.website).join(' · ') + credits : (credits ? credits.trim() : '');
+// learned 2026-11-20: captions had #WillyCharvarria / #WillyCharravia. Fix near-miss hashtags against the names
+// that really appear in the voiceover / title (1-3 consecutive words joined, small edit distance, same first letters).
+const srcWords = (String(p.voiceover || '') + ' ' + String(p.title || '') + ' ' + String(p.slidesText || '')).match(/[\p{L}\p{N}]+/gu) || [];
+const plain = (x) => String(x).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const cand = new Map();   // only proper names: 2-3 consecutive Capitalised words (Willy Chavarria, W Slouch, Première Vision)
+for (let i = 0; i < srcWords.length; i++) for (let n = 2; n <= 3 && i + n <= srcWords.length; n++) {
+  const ws = srcWords.slice(i, i + n).map(plain); if (!ws.every(w => /^\p{Lu}/u.test(w))) continue;
+  const k = ws.join('').toLowerCase();
+  if (k.length >= 6 && !cand.has(k)) cand.set(k, ws);
+}
+const lev = (a, b) => { const d = Array.from({length: a.length + 1}, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+  return d[a.length][b.length]; };
+const fixTags = (t) => String(t || '').replace(/#([\p{L}\p{N}_]{6,})/gu, (m, tag) => {
+  const low = plain(tag).toLowerCase(); if (cand.has(low)) return m;
+  const lim = low.length >= 12 ? 4 : low.length >= 9 ? 3 : 2;   // ~30% of a long name, same first 3 letters
+  let best = null, bd = lim + 1;
+  for (const [k, ws] of cand) { if (Math.abs(k.length - low.length) > 2 || k.slice(0, 3) !== low.slice(0, 3)) continue; const dd = lev(low, k); if (dd < bd) { bd = dd; best = ws; } }
+  if (!best || bd > lim) return m;
+  const lowerStyle = tag === low;
+  return '#' + (lowerStyle ? best.join('').toLowerCase() : best.map(w => w[0].toUpperCase() + w.slice(1)).join(''));
+});
+for (const k of Object.keys(cap)) { const c = cap[k]; if (c && typeof c === 'object') for (const f of ['text', 'title', 'description']) if (typeof c[f] === 'string') c[f] = fixTags(c[f]); }
 const out = [];
 for (const net of p.networks) {
   const post = Object.assign({}, base, { providers: [{ network: net }] });
