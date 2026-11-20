@@ -17,7 +17,7 @@ cred_id, dst = sys.argv[1], sys.argv[2]
 USER_ID = "6373812"
 CHANNELS = {
     # channel: Metricool blogId, networks to post to, caption style
-    "5hu": {"blogId": "8237757", "networks": ["tiktok", "instagram"],
+    "5hu": {"blogId": "8237757", "networks": ["tiktok", "instagram", "youtube"],
             "style": "5HU - fashion's next big names first. Cool, effortless, insider. Lowercase-friendly. Hashtags: niche fashion + designer/label name + city, e.g. #emergingdesigners #fashiontok #copenhagenfashion."},
     "crypto": {"blogId": "", "networks": [],
                "style": "Fast crypto news. Lead with the number or the stakes. Always end with 'Not financial advice.' Hashtags: #crypto #bitcoin + coin/company names."},
