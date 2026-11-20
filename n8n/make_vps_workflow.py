@@ -116,7 +116,7 @@ sched["disabled"] = True
 x, y = sched["position"]
 w["nodes"] += [
     {
-        "parameters": {"updates": ["message"], "additionalFields": {}},
+        "parameters": {"updates": ["message", "callback_query"], "additionalFields": {}},
         "type": "n8n-nodes-base.telegramTrigger", "typeVersion": 1.2,
         "position": [x - 440, y + 420], "id": str(uuid.uuid4()),
         "name": "Telegram Command", "webhookId": str(uuid.uuid4()),
@@ -325,6 +325,63 @@ if LT_ID and VIKOPS_ID and FIVEHU_ID:
     w["connections"]["Is /run vikops from me?"]["main"][1] = [{"node": "Is /run 5hu from me?", "type": "main", "index": 0}]
     w["connections"]["Is /run 5hu from me?"] = {"main": [[{"node": "Reply: starting 5HU", "type": "main", "index": 0}], []]}
     w["connections"]["Reply: starting 5HU"] = {"main": [[{"node": "Start 5HU Pipeline", "type": "main", "index": 0}]]}
+
+# 5e) Approval buttons (✅ Post / 🔄 Another story / ❌ Skip) under the videos the render watcher sends.
+#     A tap arrives here as a callback_query: write the decision to /data/shared/approvals/<id>.decision
+#     (= /root/shared/approvals on the host); the watcher picks it up within seconds and acts.
+#     Runs in parallel to the /run gates (those only look at messages, this only at taps).
+w["nodes"] += [
+    {
+        "parameters": {
+            "conditions": {
+                "options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose", "version": 2},
+                "conditions": [
+                    {"id": str(uuid.uuid4()),
+                     "leftValue": "={{ String($json.callback_query?.from?.id ?? '') }}",
+                     "rightValue": OWNER_CHAT,
+                     "operator": {"type": "string", "operation": "equals"}},
+                    {"id": str(uuid.uuid4()),
+                     "leftValue": "={{ /^ap:[a-f0-9]{8,24}:(post|alt|skip)$/.test(String($json.callback_query?.data ?? '')) }}",
+                     "rightValue": "",
+                     "operator": {"type": "boolean", "operation": "true", "singleValue": True}},
+                ],
+                "combinator": "and",
+            },
+            "options": {},
+        },
+        "type": "n8n-nodes-base.if", "typeVersion": 2.2,
+        "position": [x - 220, y + 1420], "id": str(uuid.uuid4()), "name": "Is approval tap?",
+    },
+    {
+        "parameters": {"jsCode":
+            "const q = $('Telegram Command').first().json.callback_query;\n"
+            "const [, id, action] = String(q.data).split(':');\n"
+            "const bin = await this.helpers.prepareBinaryData(Buffer.from(action + '\\n', 'utf8'), id + '.decision', 'text/plain');\n"
+            "const label = {post: '✅ Posting now', alt: '🔄 Finding another story…', skip: '❌ Skipped'}[action];\n"
+            "return [{ json: { id, action, queryId: q.id, label }, binary: { data: bin } }];"},
+        "type": "n8n-nodes-base.code", "typeVersion": 2,
+        "position": [x, y + 1420], "id": str(uuid.uuid4()), "name": "Approval Decision",
+    },
+    {
+        "parameters": {"operation": "write", "fileName": "=/data/shared/approvals/{{ $json.id }}.decision",
+                       "dataPropertyName": "data", "options": {}},
+        "type": "n8n-nodes-base.readWriteFile", "typeVersion": 1,
+        "position": [x + 220, y + 1420], "id": str(uuid.uuid4()), "name": "Write Decision",
+        "onError": "continueRegularOutput",
+    },
+    {
+        "parameters": {"resource": "callback", "operation": "answerQuery",
+                       "queryId": "={{ $('Approval Decision').first().json.queryId }}",
+                       "additionalFields": {"text": "={{ $('Approval Decision').first().json.label }}"}},
+        "type": "n8n-nodes-base.telegram", "typeVersion": 1.2,
+        "position": [x + 440, y + 1420], "id": str(uuid.uuid4()), "name": "Answer Tap",
+        "credentials": TG_CRED, "onError": "continueRegularOutput",
+    },
+]
+w["connections"]["Telegram Command"]["main"][0].append({"node": "Is approval tap?", "type": "main", "index": 0})
+w["connections"]["Is approval tap?"] = {"main": [[{"node": "Approval Decision", "type": "main", "index": 0}], []]}
+w["connections"]["Approval Decision"] = {"main": [[{"node": "Write Decision", "type": "main", "index": 0}]]}
+w["connections"]["Write Decision"] = {"main": [[{"node": "Answer Tap", "type": "main", "index": 0}]]}
 
 # 6) Article fetch: browser-like request, retries, and never crash the run.
 #    If the site still refuses, the script is written from the RSS headline + summary.

@@ -6,25 +6,40 @@ ROOT=/root/shared
 JOBS=$ROOT/jobs; PROC=$ROOT/processing; ARCH=$ROOT/archive
 RENDER="$(cd "$(dirname "$0")/.." && pwd)/remotion/render_vps.sh"
 TG_ENV=/root/stack/telegram.env
-mkdir -p "$JOBS" "$PROC" "$ARCH" "$ROOT/outputs"
+APPR=$ROOT/approvals; APPROVE_SEC=1800
+mkdir -p "$JOBS" "$PROC" "$ARCH" "$ROOT/outputs" "$APPR"; chmod 777 "$APPR"
 log() { echo "[$(date '+%H:%M:%S')] $*"; }
 
-send_telegram() {  # $1 = video path, $2 = caption
+TG_LAST_MSG=""
+send_telegram() {  # $1 = video path, $2 = caption, $3 = optional reply_markup JSON (buttons)
   [ -f "$TG_ENV" ] || { log "no $TG_ENV, skipping Telegram"; return; }
   . "$TG_ENV"
   # Telegram bots accept max 50 MB: re-encode anything over 45 MB (busy grain/glitch footage gets big)
   if [ "$(stat -c %s "$1")" -gt 47185920 ]; then
     local small="${1%.mp4}_tg.mp4"
     ffmpeg -loglevel error -y -i "$1" -c:v libx264 -preset veryfast -crf 27 -maxrate 9M -bufsize 18M -c:a aac -b:a 160k -movflags +faststart "$small" \
-      && { log "compressed for Telegram: $(du -m "$1" | cut -f1) MB -> $(du -m "$small" | cut -f1) MB"; set -- "$small" "$2"; }
+      && { log "compressed for Telegram: $(du -m "$1" | cut -f1) MB -> $(du -m "$small" | cut -f1) MB"; set -- "$small" "$2" "$3"; }
   fi
   # tell Telegram the real size, otherwise it may show the 9:16 video squashed / square
   local wh; wh=$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 "$1" 2>/dev/null)
-  curl -sS -m 120 -F chat_id="$TG_CHAT" -F supports_streaming=true \
+  local extra=(); [ -n "$3" ] && extra=(--form-string reply_markup="$3")
+  local resp; resp=$(curl -sS -m 120 --form-string chat_id="$TG_CHAT" -F supports_streaming=true \
     -F width="${wh%%,*}" -F height="${wh##*,}" \
-    -F caption="$2" -F video=@"$1" \
-    "https://api.telegram.org/bot$TG_TOKEN/sendVideo" | grep -q '"ok":true' \
-    && log "sent to Telegram" || log "Telegram send FAILED"
+    --form-string caption="$2" "${extra[@]}" -F video=@"$1" \
+    "https://api.telegram.org/bot$TG_TOKEN/sendVideo")
+  TG_LAST_MSG=$(printf '%s' "$resp" | python3 -c "import json,sys
+try: print(json.load(sys.stdin)['result']['message_id'])
+except Exception: print('')" 2>/dev/null)
+  [ -n "$TG_LAST_MSG" ] && log "sent to Telegram" || log "Telegram send FAILED: ${resp:0:200}"
+}
+
+tg_mark() {  # $1 = message id (buttons get removed), $2 = reply text
+  [ -f "$TG_ENV" ] || return; . "$TG_ENV"
+  [ -n "$1" ] && curl -sS -m 20 --data-urlencode chat_id="$TG_CHAT" --data-urlencode message_id="$1" \
+    --data-urlencode reply_markup='{"inline_keyboard":[]}' "https://api.telegram.org/bot$TG_TOKEN/editMessageReplyMarkup" >/dev/null 2>&1
+  local r=(); [ -n "$1" ] && r=(--data-urlencode reply_to_message_id="$1")
+  curl -sS -m 20 --data-urlencode chat_id="$TG_CHAT" --data-urlencode text="$2" "${r[@]}" \
+    "https://api.telegram.org/bot$TG_TOKEN/sendMessage" >/dev/null 2>&1
 }
 
 tg_text() {  # $1 = text
@@ -33,20 +48,24 @@ tg_text() {  # $1 = text
     "https://api.telegram.org/bot$TG_TOKEN/sendMessage" >/dev/null 2>&1
 }
 
-publish() {  # $1 = job json, $2 = video path. Only when /root/stack/autopost_<channel> exists (kill switch: delete the file).
-  local ch; ch=$(python3 -c "import json;print(json.load(open('$1')).get('channel',''))" 2>/dev/null)
-  [ -n "$ch" ] && [ -f "/root/stack/autopost_$ch" ] || return 0
+job_channel() { python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('channel',''))" "$1" 2>/dev/null; }
+
+prepare_public() {  # $1 = video path -> prints the public URL of a platform copy
   local key; key=$(head -c 12 /dev/urandom | od -An -tx1 | tr -d ' \n')
   local dir="$ROOT/public/$key"; mkdir -p "$dir"
-  local f; f="$dir/$(basename "$2")"
+  local f; f="$dir/$(basename "$1")"
   # platform copy: same look, smaller file (grain/glitch footage gets huge)
-  ffmpeg -loglevel error -y -i "$2" -c:v libx264 -preset veryfast -crf 21 -maxrate 12M -bufsize 24M -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart "$f" || cp "$2" "$f"
+  ffmpeg -loglevel error -y -i "$1" -c:v libx264 -preset veryfast -crf 21 -maxrate 12M -bufsize 24M -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart "$f" </dev/null || cp "$1" "$f"
   chmod -R a+rX "$dir"
-  local url="https://n8n.visualforma.cloud/m/$key/$(basename "$2")"
+  echo "https://n8n.visualforma.cloud/m/$key/$(basename "$1")"
+}
+
+do_publish() {  # $1 = job json, $2 = public video URL
+  local ch; ch=$(job_channel "$1"); local url="$2"
   local payload; payload=$(python3 - "$1" "$url" <<'P'
-import json,sys
+import json,sys,os,re
 j=json.load(open(sys.argv[1]))
-print(json.dumps({"job":__import__('os').path.basename(sys.argv[1]),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
+print(json.dumps({"job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
   "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[])}))
 P
 )
@@ -64,8 +83,68 @@ else: print('\n'.join(('✅ ' if p.get('ok') else '❌ ')+p.get('network','?')+(
   find "$ROOT/public" -mindepth 1 -maxdepth 1 -type d -mtime +5 -exec rm -rf {} + 2>/dev/null
 }
 
+publish() {  # $1 = job json, $2 = video path. Only when /root/stack/autopost_<channel> exists (kill switch: delete the file).
+  local ch; ch=$(job_channel "$1")
+  [ -n "$ch" ] && [ -f "/root/stack/autopost_$ch" ] || return 0
+  do_publish "$1" "$(prepare_public "$2")"
+}
+
+# ---- approval: with /root/stack/approve_<channel>, the video comes to Telegram with buttons.
+#      ✅ Post -> publish now · 🔄 Another story -> new run (max 2 per 90 min) · ❌ Skip -> nothing.
+#      No answer in APPROVE_SEC -> publish anyway. /root/stack/approval_dryrun = test mode (never publishes).
+alt_count() { [ -f "$APPR/.alt" ] || { echo 0; return; }; awk -v t=$(( $(date +%s) - 5400 )) '$1>t' "$APPR/.alt" | wc -l; }
+start_run() {  # $1 = channel (only 5hu has a re-run path)
+  [ "$1" = "5hu" ] || return 1
+  ( cd /root/stack && docker compose exec -T -e N8N_RUNNERS_BROKER_PORT=5684 n8n \
+      n8n execute --id="$(cat /root/stack/5hu_wf_id)" >> /root/exec_5hu.log 2>&1 </dev/null & )
+}
+
+request_approval() {  # $1 = job json, $2 = video path, $3 = caption
+  local id; id=$(head -c 6 /dev/urandom | od -An -tx1 | tr -d ' \n')
+  local url; url=$(prepare_public "$2")
+  cp "$1" "$APPR/${id}__$(basename "$1")"
+  local due=$(( $(date +%s) + APPROVE_SEC ))
+  local test=""; [ -f /root/stack/approval_dryrun ] && test="🧪 TEST — nothing will be posted"$'\n'
+  local body; body=$(python3 -c "import sys;print(sys.argv[1].encode('utf-8','surrogateescape').decode('utf-8','ignore')[:800])" "$3")
+  local cap="${test}${body}"$'\n\n'"🕒 Auto-posts at $(TZ=Europe/Vilnius date -d @$due +%H:%M) if you don't choose."
+  local kb='{"inline_keyboard":[[{"text":"✅ Post","callback_data":"ap:'$id':post"},{"text":"🔄 Another story","callback_data":"ap:'$id':alt"},{"text":"❌ Skip","callback_data":"ap:'$id':skip"}]]}'
+  send_telegram "$2" "$cap" "$kb"
+  printf '%s\n' "url=$url" "due=$due" "msg=$TG_LAST_MSG" "job=$APPR/${id}__$(basename "$1")" > "$APPR/$id.pending"
+  log "approval $id requested (auto at $(date -d @$due +%H:%M))"
+}
+
+check_approvals() {
+  local p
+  for p in "$APPR"/*.pending; do
+    [ -e "$p" ] || continue
+    local id url due msg job act now
+    id=$(basename "$p" .pending)
+    url=$(sed -n 's/^url=//p' "$p"); due=$(sed -n 's/^due=//p' "$p"); msg=$(sed -n 's/^msg=//p' "$p"); job=$(sed -n 's/^job=//p' "$p")
+    act=""; [ -f "$APPR/$id.decision" ] && act=$(head -n1 "$APPR/$id.decision" | tr -dc 'a-z')
+    now=$(date +%s)
+    [ -z "$act" ] && [ "$now" -lt "${due:-0}" ] && continue
+    [ -z "$act" ] && act=auto
+    mv "$p" "$APPR/$id.done" 2>/dev/null || continue   # claim it once
+    log "approval $id -> $act"
+    case "$act" in
+      post|auto)
+        tg_mark "$msg" "$([ "$act" = auto ] && echo '⏱ No answer in 30 min — posting now.' || echo '✅ Approved — posting now.')"
+        if [ -f /root/stack/approval_dryrun ]; then tg_text "🧪 TEST mode: this is where it would publish to TikTok, Instagram, YouTube and Facebook."
+        else do_publish "$job" "$url"; fi ;;
+      skip) tg_mark "$msg" "❌ Skipped — nothing posted." ;;
+      alt)
+        if [ "$(alt_count)" -ge 2 ]; then tg_mark "$msg" "🔄 Already tried 2 other stories — nothing posted this time."
+        else date +%s >> "$APPR/.alt"; tg_mark "$msg" "🔄 OK — picking another story. New video in about 8 min."
+             start_run "$(job_channel "$job")" || tg_text "⚠️ Can't start a new run for this channel."; fi ;;
+      *) tg_mark "$msg" "⚠️ Unknown choice — nothing posted." ;;
+    esac
+  done
+  find "$APPR" -maxdepth 1 -type f -mtime +7 -delete 2>/dev/null
+}
+
 log "watcher started, watching $JOBS"
 while true; do
+  check_approvals
   jobfile=$(find "$JOBS" -maxdepth 1 -name '*.json' 2>/dev/null | head -n1)
   if [ -n "$jobfile" ]; then
     name=$(basename "$jobfile")
@@ -86,8 +165,13 @@ while true; do
     if [ -f "$ROOT/$outp" ]; then
       touch "$ARCH/.done_$outbase"; log "OK $outbase"
       cap=$(python3 -c "import json;j=json.load(open('$dest'));print({'lt':'🇱🇹 ','vikops':'🪨 VIKOPS · ','5hu':'👗 5HU · '}.get(j.get('channel'),'')+j.get('voiceover','')[:900])" 2>/dev/null)
-      send_telegram "$ROOT/$outp" "$cap"
-      publish "$dest" "$ROOT/$outp"
+      ch=$(job_channel "$dest")
+      if [ -n "$ch" ] && [ -f "/root/stack/autopost_$ch" ] && [ -f "/root/stack/approve_$ch" ]; then
+        request_approval "$dest" "$ROOT/$outp" "$cap"
+      else
+        send_telegram "$ROOT/$outp" "$cap"
+        publish "$dest" "$ROOT/$outp"
+      fi
     else
       log "RENDER FAILED $outbase (see remotion/render_error.log)"
     fi

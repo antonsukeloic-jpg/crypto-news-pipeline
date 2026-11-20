@@ -130,12 +130,16 @@ all = all.filter(x => (per[x.source] = (per[x.source] || 0) + 1) <= 2);
 const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };
 const RISING = /\b(emerging|newcomer|debut (collection|show|runway|store|season)|first (collection|show|runway|store)|designers? to (watch|know)|labels? to (watch|know)|rising (star|label|designer|brand)|new (label|brand|designer)|up-and-coming|graduate collection|LVMH Prize|ANDAM|Woolmark|Fashion East|NEWGEN|Copenhagen Fashion Week|Stockholm|Oslo|Helsinki|Scandinavian (label|brand|designer|fashion)|Nordic (label|brand|designer|fashion)|Tokyo Fashion Week|Seoul Fashion Week|independent (label|brand|designer)|indie (label|brand|designer)|young designer|breakout|cult (label|brand|sneaker|favourite|favorite))\b/i;
 const rising = (x) => RISING.test(x.title + ' ' + x.snippet);
+// 5HU = the NEXT names: drop big houses, mass retail and celebrity headlines unless the item is about a new name / prize / debut
+const BIG = /\b(armani|chanel|dior|louis vuitton|vuitton|gucci|prada|herm[eè]s|saint laurent|ysl|balenciaga|valentino|versace|fendi|burberry|givenchy|bottega veneta|loewe|c[eé]line|miu miu|dolce ?(&|and) ?gabbana|moncler|kering|lvmh|richemont|tiffany|cartier|rolex|ralph lauren|calvin klein|tommy hilfiger|michael kors|alexander mcqueen|zara|h&m|uniqlo|shein|kardashian|skims|beyonc[eé]|rihanna|taylor swift|hailey bieber|kylie jenner|zendaya|met gala|vogue world)\b/i;
+all = all.filter(x => !BIG.test(x.title) || rising(x));
+if (!all.length) throw new Error('5HU: no fresh niche stories this slot (big names filtered out)');
 const used = new Set(); const take = (arr, n) => arr.filter(x => !used.has(x.link)).slice(0, n).map(x => (used.add(x.link), x));
 const pool = [].concat(
   take(shuffle(all.filter(rising)), 6),
   take(shuffle(all.filter(x => x.tier === 'emerging')), 4),
   take(shuffle(all.filter(x => x.tier === 'niche')), 3),
-  take(shuffle(all.filter(x => x.tier === 'main')), 2));
+  take(shuffle(all.filter(x => x.tier === 'main' && rising(x))), 2));
 const candidates = shuffle(pool.length ? pool : all.slice(0, 12));
 const candidatesText = candidates.map((x, i) => (i + 1) + '. [' + x.source + (x.tier !== 'main' ? ', ' + x.tier : '') + (rising(x) ? ', RISING' : '') + '] ' + x.title + '\n   ' + x.snippet + '\n   LINK: ' + x.link).join('\n\n');
 const recentHooks = (_st.hooks5hu || []).slice(0, 12).map(h => '- ' + h).join('\n') || '(none yet)';
@@ -158,7 +162,8 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "a breakout collab, a designer from a small label getting a bigger job.\n"
     "2. A cult / boutique brand doing something new (drop, collab, archive revival, new direction).\n"
     "3. A new micro-trend or scene with a clear name and concrete examples.\n"
-    "4. If nothing above exists: a smaller independent or streetwear brand story from a niche source. A big luxury house (Louis Vuitton, Chanel, Dior, Gucci...) only as the very last resort, and only for an insider angle - never celebrity gossip.\n"
+    "4. If nothing above exists: a smaller independent or streetwear brand story from a niche source.\n"
+    "NEVER pick a big luxury house or conglomerate (Louis Vuitton, Chanel, Dior, Gucci, Armani, Prada, LVMH, Kering...), a mass retailer, or a celebrity story - 5HU is about the next names, not the established ones. A famous house is OK only when the story is really about a NEW young designer (e.g. a debut as creative director).\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
     "AVOID: deaths and obituaries, body or weight talk, anything about minors' bodies, crime/lawsuits with victims, shopping roundups, "
     "sales/affiliate lists, horoscopes, sponsored posts, celebrity relationship gossip, essays without news, "
@@ -447,7 +452,7 @@ for _n in w["nodes"]:
 _sch = by_name["Every Hour"]
 _sch.pop("disabled", None)
 _sch["name"] = "Every Hour"  # keep the name: connections reference it
-_sch["parameters"] = {"rule": {"interval": [{"field": "cronExpression", "expression": "0 9,19 * * *"}]}}
+_sch["parameters"] = {"rule": {"interval": [{"field": "cronExpression", "expression": "20 8,18 * * *"}]}}
 w.setdefault("settings", {})["timezone"] = "Europe/Vilnius"
 
 # ---- sanity
