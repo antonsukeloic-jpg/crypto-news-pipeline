@@ -1,0 +1,5 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+music: 5hu_music_1795160969464.mp3 slides: 4
+render secs: 35
+video,810,1440 audio 22.900000 4362334
+telegram ok: True
