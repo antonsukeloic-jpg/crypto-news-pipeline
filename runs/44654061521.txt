@@ -1,0 +1,5 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+missing assets: []
+-rw-r--r-- 1 root root 36632347 Nov 20 01:33 /root/shared/outputs/TEST_safezone_aubergine.mp4
+props ok channel=5hu scenes=5 btc=None change=None
+"ok":true
