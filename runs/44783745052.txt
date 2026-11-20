@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-17:29:23
-]: [17:25:50] Telegram reachable again
-]: curl: (28) Operation timed out after 120001 milliseconds with 0 bytes received
-]: [17:27:51] Telegram send FAILED:
-]: [17:28:51] Telegram reachable again
-1
