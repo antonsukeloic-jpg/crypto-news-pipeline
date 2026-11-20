@@ -158,7 +158,7 @@ request_approval() {  # $1 = job json, $2 = video path, $3 = caption
   local body; body=$(python3 -c "import sys;print(sys.argv[1].encode('utf-8','surrogateescape').decode('utf-8','ignore')[:800])" "$3")
   local cap="${test}${body}"$'\n\n'"🕒 Auto-posts at $(TZ=Europe/Vilnius date -d @$due +%H:%M) if you don't choose."
   local kb='{"inline_keyboard":[[{"text":"✅ Post","callback_data":"ap:'$id':post"},{"text":"🔄 Another story","callback_data":"ap:'$id':alt"},{"text":"❌ Skip","callback_data":"ap:'$id':skip"}]]}'
-  [ -d "${2%.mp4}_car" ] && tg_album "${2%.mp4}_car" "🖼 Carousel for this story — posts ~3 h after the video on Instagram + Facebook; TikTok gets it as a slideshow video with our music (same buttons below)."
+  [ -d "${2%.mp4}_car" ] && tg_album "${2%.mp4}_car" "🖼 Carousel for this story — posts ~3 h after the video on Instagram, Facebook and TikTok (TikTok alternates: photo carousel with TikTok music / slideshow with our music). Same buttons below."
   send_telegram "$2" "$cap" "$kb"
   printf '%s\n' "url=$url" "due=$due" "msg=$TG_LAST_MSG" "job=$APPR/${id}__$(basename "$1")" > "$APPR/$id.pending"
   log "approval $id requested (auto at $(date -d @$due +%H:%M))"
