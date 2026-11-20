@@ -1,0 +1,10 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+
+No VM guests are running outdated hypervisor (qemu) binaries on this host.
+FOCUS_OK 4.14.0 yunet
+5hu_img_1795160969464_1.png 0.667 {'x': 0.405, 'y': 0.438, 'face': True}
+5hu_img_1795160969464_2.png 0.667 {'x': 0.371, 'y': 0.523, 'face': True}
+5hu_img_1795160969464_3.png 0.667 {'x': 0.469, 'y': 0.806, 'face': False}
+5hu_img_1795160969464_4.png 0.667 {'x': 0.488, 'y': 0.295, 'face': True}
+5hu_img_1795160969464_5.png 0.667 {'x': 0.39, 'y': 0.554, 'face': True}
+element-0.jpeg element-1.jpeg element-2.jpeg element-3.jpeg element-4.jpeg element-5.jpeg zcover.jpeg 
