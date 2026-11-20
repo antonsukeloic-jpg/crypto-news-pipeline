@@ -50,7 +50,8 @@ const Hook = ({text, size}) => {
 const Photo = ({p, w = W, h = H, pos = '50% 30%'}) => (p && p.image ? <Img src={staticFile(p.image)} style={{width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPos(p, w, h, pos)}} /> : null);
 
 export const FiveHuCarousel = (props) => {
-  const frame = useCurrentFrame();
+  const cf = useCurrentFrame();
+  const frame = props.slideIndex ?? cf;   // the TikTok slideshow (FiveHuSlideshow) picks the slide itself
   const slides = carouselSlides(props);
   const s = slides[Math.min(frame, slides.length - 1)];
   const n = slides.length;
@@ -76,7 +77,7 @@ export const FiveHuCarousel = (props) => {
         <div style={{position: 'absolute', left: PAD, right: PAD, bottom: 72, display: 'flex', justifyContent: 'space-between', fontFamily: mono, fontSize: 22,
           letterSpacing: 3, color: B.white, textTransform: 'uppercase'}}>
           <span style={{opacity: 0.65}}>{p && p.credit ? 'photo · ' + String(p.credit).slice(0, 36) : ''}</span>
-          <span>swipe →</span>
+          <span>{props.slideIndex == null ? 'swipe →' : ''}</span>
         </div>
       </AbsoluteFill>
     );

@@ -17,7 +17,7 @@ cred_id, dst = sys.argv[1], sys.argv[2]
 USER_ID = "6373812"
 CHANNELS = {
     # channel: Metricool blogId, networks to post to, caption style
-    "5hu": {"blogId": "8237757", "networks": ["tiktok", "instagram", "youtube", "facebook"], "carousel": ["instagram", "facebook"],  # TikTok gets a slideshow video with our music instead (photo posts can't carry our track)
+    "5hu": {"blogId": "8237757", "networks": ["tiktok", "instagram", "youtube", "facebook"], "carousel": ["instagram", "tiktok", "facebook"],  # TikTok: slideshow video with our music (photo posts can't carry our track)
             "style": "5HU - fashion's next big names first. Cool, effortless, insider. Lowercase-friendly. Hashtags: niche fashion + designer/label name + city, e.g. #newdesigners #fashiontok #copenhagenfashion (vary them)."},
     "crypto": {"blogId": "", "networks": [],
                "style": "Fast crypto news. Lead with the number or the stakes. Always end with 'Not financial advice.' Hashtags: #crypto #bitcoin + coin/company names."},
@@ -34,7 +34,9 @@ if (!ch || !ch.blogId || !(ch.networks || []).length) return [{ json: { skip: tr
 const only = Array.isArray(b.only) ? b.only.map(String) : null;
 // kind "carousel": photo slides (Instagram carousel, TikTok photo post, Facebook multi-photo), scheduled delayMin later
 const kind = b.kind === 'carousel' ? 'carousel' : 'video';
-const pool = kind === 'carousel' ? (ch.carousel || []) : ch.networks;
+const slideshowUrl = kind === 'carousel' && /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.mp4$/.test(String(b.slideshowUrl || '')) ? b.slideshowUrl : '';
+// TikTok only takes the carousel as the slideshow video (with our music); no video -> no TikTok carousel
+const pool = kind === 'carousel' ? (ch.carousel || []).filter(n => n !== 'tiktok' || slideshowUrl) : ch.networks;
 const nets = only ? pool.filter(n => only.includes(n)) : pool;
 if (!nets.length) return [{ json: { skip: true, reason: 'no matching networks for ' + b.channel + ' ' + kind } }];
 const key = (kind === 'carousel' ? String(b.job) + '#carousel' : String(b.job)) + (only ? '@' + nets.join(',') : '');
@@ -47,7 +49,7 @@ const sd = $getWorkflowStaticData('global');
 sd.published = sd.published || [];
 if (sd.published.includes(key)) return [{ json: { skip: true, reason: 'already published ' + key } }];
 sd.published = [key].concat(sd.published).slice(0, 300);
-return [{ json: { skip: false, kind, images, delayMin, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
+return [{ json: { skip: false, kind, images, slideshowUrl, delayMin, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
   slidesText: kind === 'carousel' ? String(b.slidesText || '').slice(0, 2000) : '',
   videoUrl: kind === 'video' ? b.videoUrl : '', voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
   hashtags: (b.hashtags || []).slice(0, 10),
@@ -60,7 +62,7 @@ return [{ json: { skip: false, kind, images, delayMin, job: b.job, channel: b.ch
                                       for k, v in CHANNELS.items()}))
 
 CAPTION_PROMPT = (
-    "=You write social media captions for {{ $json.kind === 'carousel' ? 'a swipeable photo carousel (Instagram carousel, TikTok photo post, Facebook multi-photo post); it goes deeper than our earlier video on the same story, so the hook must work on its own and invite people to swipe and save' : 'a short vertical video' }}. Output ONLY valid JSON, no markdown.\n\n"
+    "=You write social media captions for {{ $json.kind === 'carousel' ? 'a swipeable photo carousel (Instagram carousel, Facebook multi-photo post; on TikTok the same slides play as a short slideshow video with music); it goes deeper than our earlier video on the same story, so the hook must work on its own and invite people to swipe and save' : 'a short vertical video' }}. Output ONLY valid JSON, no markdown.\n\n"
     "CHANNEL STYLE: {{ $json.style }}\n"
     "VIDEO VOICEOVER: {{ $json.voiceover }}\n"
     "{{ $json.kind === 'carousel' ? 'CAROUSEL SLIDES (this is what the post shows): ' + $json.slidesText + '\\n' : '' }}"
@@ -99,11 +101,11 @@ for (const net of p.networks) {
   if (p.kind === 'carousel') {
     if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback; post.instagramData = { type: 'POST', isAiGenerated: false }; post.firstCommentText = igComment; }
     if (net === 'facebook') { post.text = (cap.facebook && cap.facebook.text) || fallback; post.facebookData = { type: 'POST' }; post.firstCommentText = fbComment; }
-    if (net === 'tiktok') { const t = (cap.tiktok && cap.tiktok.text) || fallback;
-      // photo post: TikTok can't carry our own audio track on photos, so no music is added
-      post.text = t; post.tiktokData = { privacyOption: 'PUBLIC_TO_EVERYONE', disableComment: false, disableDuet: false, disableStitch: false,
-        commercialContentThirdParty: false, commercialContentOwnBrand: false, autoAddMusic: false, photoCoverIndex: 0,
-        title: t.split('\n')[0].replace(/#\S+/g, '').trim().slice(0, 90) }; }
+    if (net === 'tiktok') {
+      // slideshow VIDEO (the slides over our own light techno) - a TikTok photo post can't carry our track
+      post.text = (cap.tiktok && cap.tiktok.text) || fallback; post.media = [p.slideshowUrl];
+      post.tiktokData = { privacyOption: 'PUBLIC_TO_EVERYONE', disableComment: false, disableDuet: false, disableStitch: false,
+        commercialContentThirdParty: false, commercialContentOwnBrand: false, isAigc: false }; }
     if (post.text) out.push({ json: { network: net, blogId: p.blogId, body: post } });
     continue;
   }

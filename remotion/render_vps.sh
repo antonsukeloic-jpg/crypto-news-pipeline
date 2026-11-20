@@ -30,3 +30,11 @@ if [ "$CH" = "5hu" ] && [ -s "$OUT" ] && python3 -c "import json,sys;sys.exit(0 
   for f in "$CAR"/s*.tmp; do [ -e "$f" ] && mv "$f" "$CAR/slide_$(basename "$f" .tmp | tr -d s).jpg"; done
   [ "$i" -ge 3 ] || rm -rf "$CAR"
 fi
+# 5HU: TikTok slideshow = the carousel slides as a 9:16 video over the same music (TikTok photo posts can't carry our track)
+if [ "$CH" = "5hu" ] && [ -d "${OUT%.mp4}_car" ]; then
+  SS="${OUT%.mp4}_slideshow.mp4"
+  npx remotion render src/index.js FiveHuSlideshow "$SS" --props="$PROJ/props.json" --port=3999 --concurrency=4 --x264-preset=veryfast \
+    --scale=0.75 --log=error >> "$PROJ/render_error.log" 2>&1 \
+  && ffmpeg -loglevel error -y -i "$SS" -c:v copy -af "loudnorm=I=-14:TP=-1.5:LRA=11" -c:a aac -b:a 192k -movflags +faststart "${SS%.mp4}_ln.mp4" \
+  && mv -f "${SS%.mp4}_ln.mp4" "$SS" || rm -f "$SS" "${SS%.mp4}_ln.mp4"
+fi

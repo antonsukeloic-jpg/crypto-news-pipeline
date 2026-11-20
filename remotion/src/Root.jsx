@@ -5,6 +5,7 @@ import {NewsVideo} from './NewsVideo';
 import {DataScene} from './DataScene';
 import {FiveHuCover} from './FiveHuCover';
 import {FiveHuCarousel, carouselSlides} from './FiveHuCarousel';
+import {FiveHuSlideshow, slideshowFrames} from './FiveHuSlideshow';
 
 export const Root = () => {
   return (
@@ -57,6 +58,16 @@ export const Root = () => {
         height={1350}
         defaultProps={{scenes: [], carousel: {cover: '', slides: []}, creators: []}}
         calculateMetadata={({props}) => ({durationInFrames: carouselSlides(props).length})}
+      />
+      <Composition
+        id="FiveHuSlideshow"
+        component={FiveHuSlideshow}
+        durationInFrames={600}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{scenes: [], carousel: {cover: '', slides: []}, creators: []}}
+        calculateMetadata={({props}) => ({durationInFrames: slideshowFrames(props)})}
       />
       <Composition
         id="DataDemo"

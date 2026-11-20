@@ -71,6 +71,7 @@ prepare_public() {  # $1 = video path -> prints the public URL of a platform cop
   # platform copy: same look, smaller file (grain/glitch footage gets huge)
   ffmpeg -loglevel error -y -i "$1" -c:v libx264 -preset veryfast -crf 21 -maxrate 12M -bufsize 24M -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart "$f" </dev/null || cp "$1" "$f"
   [ -s "${1%.mp4}_cover.jpg" ] && cp "${1%.mp4}_cover.jpg" "$dir/"
+  [ -s "${1%.mp4}_slideshow.mp4" ] && cp "${1%.mp4}_slideshow.mp4" "$dir/"
   local sl; for sl in "${1%.mp4}"_car/slide_*.jpg; do [ -s "$sl" ] && cp "$sl" "$dir/$(basename "$1" .mp4)_car_$(basename "$sl" .jpg | sed 's/slide_//').jpg"; done
   chmod -R a+rX "$dir"
   echo "https://n8n.visualforma.cloud/m/$key/$(basename "$1")"
@@ -109,9 +110,10 @@ P
   # 5HU photo carousel: same story, deeper; Metricool holds it and posts it CAROUSEL_DELAY_MIN later
   local slides; slides=$(ls "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)"_car_*.jpg 2>/dev/null | sort | head -n 10)
   if [ -n "$slides" ] && [ "$(echo "$slides" | wc -l)" -ge 3 ]; then
-    local cp; cp=$(python3 - "$1" "$(dirname "$url")" "$slides" <<'P'
+    local ssu=""; [ -s "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)_slideshow.mp4" ] && ssu="$(dirname "$url")/$(basename "$url" .mp4)_slideshow.mp4"
+    local cp; cp=$(python3 - "$1" "$(dirname "$url")" "$slides" "$ssu" <<'P'
 import json,sys,os,re
-j=json.load(open(sys.argv[1])); base=sys.argv[2]; files=sys.argv[3].split()
+j=json.load(open(sys.argv[1])); base=sys.argv[2]; files=sys.argv[3].split(); ssu=sys.argv[4] if len(sys.argv)>4 else ""
 c=j.get("carousel") or {}
 txt="\n".join(f"{i+1}. {s.get('title','')} — {s.get('body','')}" for i,s in enumerate(c.get("slides",[])))
 credits=[]
@@ -119,7 +121,7 @@ for s in j.get("scenes",[]):
     x=str(s.get("credit") or "").strip()
     if s.get("real") and x and x not in credits: credits.append(x)
 print(json.dumps({"kind":"carousel","job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),
-  "images":[base+"/"+os.path.basename(f) for f in files],"delayMin":int(os.environ.get("CAROUSEL_DELAY_MIN","180")),
+  "images":[base+"/"+os.path.basename(f) for f in files],"slideshowUrl":ssu,"delayMin":int(os.environ.get("CAROUSEL_DELAY_MIN","180")),
   "slidesText":("COVER: "+str(c.get("cover",""))+"\n"+txt)[:2000],"creators":j.get("creators",[]),"credits":credits[:4],
   "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[])}))
 P
@@ -156,7 +158,7 @@ request_approval() {  # $1 = job json, $2 = video path, $3 = caption
   local body; body=$(python3 -c "import sys;print(sys.argv[1].encode('utf-8','surrogateescape').decode('utf-8','ignore')[:800])" "$3")
   local cap="${test}${body}"$'\n\n'"🕒 Auto-posts at $(TZ=Europe/Vilnius date -d @$due +%H:%M) if you don't choose."
   local kb='{"inline_keyboard":[[{"text":"✅ Post","callback_data":"ap:'$id':post"},{"text":"🔄 Another story","callback_data":"ap:'$id':alt"},{"text":"❌ Skip","callback_data":"ap:'$id':skip"}]]}'
-  [ -d "${2%.mp4}_car" ] && tg_album "${2%.mp4}_car" "🖼 Carousel for this story — posts ~3 h after the video (same buttons below)."
+  [ -d "${2%.mp4}_car" ] && tg_album "${2%.mp4}_car" "🖼 Carousel for this story — posts ~3 h after the video on Instagram + Facebook; TikTok gets it as a slideshow video with our music (same buttons below)."
   send_telegram "$2" "$cap" "$kb"
   printf '%s\n' "url=$url" "due=$due" "msg=$TG_LAST_MSG" "job=$APPR/${id}__$(basename "$1")" > "$APPR/$id.pending"
   log "approval $id requested (auto at $(date -d @$due +%H:%M))"
