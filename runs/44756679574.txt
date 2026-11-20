@@ -1,0 +1,14 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+flags: approve_5hu autopost_5hu 
+watcher: active  repo: 6503f42 5HU covers + carousel: crop real photos around the person / main object (YuNet faces, Haar fallback, else strongest detail)
+focus venv: 4.14.0 yunet=yes
+tOGl1tIRFxUJZJKA|Crypto Video Pipeline
+FiveHuFashion001|5HU Fashion News
+SocialPublish001|Social Publish (Metricool)
+5hu wf id: FiveHuFashion001
+active= True tz= Europe/Vilnius
+schedule: {"interval": [{"field": "cronExpression", "expression": "20 8,18 * * *"}]}
+has Carousel Copy: True  Creator Lookup: True
+tg webhook ok: True updates: ['message', 'callback_query'] pending: 0 last_error: None
+0
+disk used 5%
