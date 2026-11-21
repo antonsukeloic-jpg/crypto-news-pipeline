@@ -68,7 +68,7 @@ return [{ json: { skip: false, kind, images, slideshowUrl, ttVariant, delayMin, 
                                       for k, v in CHANNELS.items()}))
 
 CAPTION_PROMPT = (
-    "=You write social media captions for {{ $json.kind === 'carousel' ? 'a swipeable photo carousel (Instagram carousel, Facebook multi-photo post, TikTok photo carousel or a short slideshow video of the same slides); it goes deeper than our earlier video on the same story, so the hook must work on its own and invite people to swipe and save' : 'a short vertical video' }}. Output ONLY valid JSON, no markdown.\n\n"
+    "=You write social media captions for {{ $json.kind === 'carousel' ? 'a swipeable photo carousel (Instagram carousel, Facebook multi-photo post, TikTok photo carousel or a short slideshow video of the same slides); it goes deeper than our earlier video on the same story, so the hook must work on its own' : 'a short vertical video' }}. Output ONLY valid JSON, no markdown.\n\n"
     "CHANNEL STYLE: {{ $json.style }}\n"
     "VIDEO VOICEOVER: {{ $json.voiceover }}\n"
     "{{ $json.kind === 'carousel' ? 'CAROUSEL SLIDES (this is what the post shows): ' + $json.slidesText + '\\n' : '' }}"
@@ -84,6 +84,7 @@ CAPTION_PROMPT = (
     "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-5 hashtags (Instagram hard cap is 5, never more): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
     "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: keyword-rich 1-2 sentences + 3 hashtags (first 3 show above the title); youtube.tags: 5-8 plain keywords.\n"
     "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n"
+    "- Never tell people to swipe, scroll or 'see more' (no 'swipe through every slide', 'swipe for more'): end on the story itself or one real question.\n"
     "- SPELL EVERY NAME EXACTLY as in the voiceover / title (designers, labels, places) - also inside hashtags: #WillyChavarria, never a near-miss.\n"
     "- CREDIT THE CREATOR FIRST: in instagram.text tag the designer/label once with their exact @instagram handle from CREATORS; in tiktok.text use their exact @tiktok handle; "
     "in youtube.description and facebook.text you may add their website URL from CREATORS (never a social-media link). Use ONLY handles/URLs given in CREATORS - never invent or guess one; if none is given, write the plain name.\n\n"
