@@ -100,9 +100,10 @@ const when = new Date(Date.now() + (p.delayMin || 3) * 60 * 1000).toLocaleString
 const base = { publicationDate: { dateTime: when, timezone: 'Europe/Vilnius' }, autoPublish: true, draft: false, descendants: [],
   firstCommentText: '', hasNotReadNotes: false, media: p.kind === 'carousel' ? p.images : [p.videoUrl], mediaAltText: [], shortener: false, smartLinkData: { ids: [] } };
 const cr = p.creators || [];
-const credits = (p.credits || []).length ? '\n📸 ' + p.credits.join(' · ') : '';
-const igComment = cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') + credits : (credits ? credits.trim() : '');
-const fbComment = cr.some(c => c.website) ? '📍 ' + cr.filter(c => c.website).map(c => c.name + ' — ' + c.website).join(' · ') + credits : (credits ? credits.trim() : '');
+// first comment = the designer's own account / site only (no article or photo source - owner feedback 2026-11-24);
+// nothing verified -> no first comment
+const igComment = cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') : '';
+const fbComment = cr.some(c => c.website) ? '📍 ' + cr.filter(c => c.website).map(c => c.name + ' — ' + c.website).join(' · ') : '';
 // learned 2026-11-20: captions had #WillyCharvarria / #WillyCharravia. Fix near-miss hashtags against the names
 // that really appear in the voiceover / title (1-3 consecutive words joined, small edit distance, same first letters).
 const srcWords = (String(p.voiceover || '') + ' ' + String(p.title || '') + ' ' + String(p.slidesText || '')).match(/[\p{L}\p{N}]+/gu) || [];

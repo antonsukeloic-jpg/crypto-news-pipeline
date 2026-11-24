@@ -65,32 +65,42 @@ export const FiveHuCarousel = (props) => {
   const photos = (props.scenes || []).filter((x) => x.real && x.image && !seen.has(x.image) && seen.add(x.image));
   const c = props.carousel || {};
 
+  // carousel cover = "card" layout + a different photo than the Reel cover, so the Reel and the carousel never look
+  // like duplicates side by side in the Instagram / Facebook grid (owner feedback 2026-11-24)
+  const coverPhoto = photos.length > 1 ? photos[1] : photos[0];
+  const rest = photos.filter((x) => x !== coverPhoto);
   if (s.kind === 'cover') {
     const hook = c.cover || (props.scenes && props.scenes[0] && props.scenes[0].on_screen_text) || '';
     const chars = String(hook).length;
-    const p = photos[0];
+    const p = coverPhoto;
+    const BOX = {left: PAD, top: 640, w: W - 2 * PAD, h: 560};
     return (
       <AbsoluteFill style={{backgroundColor: B.black}}>
-        <Photo p={p} zoom={props.photoZoom || 1} />
-        <AbsoluteFill style={{background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.9) 88%, rgba(0,0,0,0.95) 100%)'}} />
         <div style={{position: 'absolute', top: 72, left: PAD, right: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <Mark />
-          <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 4, color: B.white}}>WHO'S NEXT</div>
+          <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 4, color: B.white}}>WHO'S NEXT · THE STORY</div>
         </div>
-        <div style={{position: 'absolute', left: PAD, right: PAD, bottom: 150}}>
-          <Hook text={hook} size={chars > 26 ? 100 : chars > 16 ? 120 : 148} />
+        <div style={{position: 'absolute', left: PAD, right: PAD, top: 180}}>
+          <Hook text={hook} size={chars > 26 ? 92 : chars > 16 ? 108 : 128} />
         </div>
-        <div style={{position: 'absolute', left: PAD, right: PAD, bottom: 72, display: 'flex', justifyContent: 'space-between', fontFamily: mono, fontSize: 22,
+        {p ? (
+          <div style={{position: 'absolute', left: BOX.left, top: BOX.top, width: BOX.w, height: BOX.h, borderRadius: 28, overflow: 'hidden', background: '#151515'}}>
+            <Photo p={p} w={BOX.w} h={BOX.h} pos="50% 30%" zoom={props.photoZoom || 1} />
+          </div>
+        ) : (
+          <div style={{position: 'absolute', left: BOX.left, top: BOX.top, width: BOX.w, height: BOX.h, borderRadius: 28, background: B.lime}} />
+        )}
+        <div style={{position: 'absolute', left: PAD, right: PAD, bottom: 64, display: 'flex', justifyContent: 'space-between', fontFamily: mono, fontSize: 22,
           letterSpacing: 3, color: B.white, textTransform: 'uppercase'}}>
           <span style={{opacity: 0.65}}>{p && p.credit ? 'photo · ' + String(p.credit).slice(0, 36) : ''}</span>
-          <span>{props.slideIndex == null ? 'swipe →' : ''}</span>
+          <Pager i={frame} n={n} />
         </div>
       </AbsoluteFill>
     );
   }
 
   if (s.kind === 'fact') {
-    const p = photos[s.n] || null;   // photo 1 is the cover; facts take the next photos, the rest go typographic
+    const p = rest[s.n - 1] || null;   // facts take the photos the cover didn't use; the rest go typographic
     const title = String(s.title || '');
     const body = String(s.body || '');
     if (p) {
