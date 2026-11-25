@@ -15,7 +15,11 @@ for d in glob.glob(A + '/*.done'):
     if act in ('skip', 'alt'):
         continue
     j = json.load(open(job))
-    rows.append({'ts': int(m.group(1)), 'title': (j.get('meta') or {}).get('title', '') or j.get('hook', ''), 'hook': j.get('hook', ''),
+    vo = j.get('voiceover', '') or ''
+    hook = re.split(r'(?<=[.!?])\s', vo.strip(), 1)[0][:160] if vo else ''
+    sc = j.get('scenes') or [{}]
+    title = ((j.get('carousel') or {}).get('cover') or sc[0].get('on_screen_text') or hook)[:80]
+    rows.append({'ts': int(m.group(1)), 'title': title, 'hook': hook,
                  'creators': j.get('creators', []), 'episode': None})
 rows.sort(key=lambda r: r['ts'])
 base = 2   # 2026-11-19 purple + 2026-11-20 09:10 Armani went out before the approval flow
