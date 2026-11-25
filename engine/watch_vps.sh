@@ -184,7 +184,8 @@ j=json.load(open(sys.argv[1]))
 vo=(j.get('voiceover','') or '').strip(); hook=re.split(r'(?<=[.!?])\\s',vo,1)[0][:160] if vo else ''
 sc=j.get('scenes') or [{}]; title=((j.get('carousel') or {}).get('cover') or sc[0].get('on_screen_text') or hook)[:80]
 print(json.dumps({'ts':int(time.time()*1000),'title':title,'hook':hook,
-  'creators':j.get('creators',[]),'episode':j.get('episode')},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
+  'creators':j.get('creators',[]),'episode':j.get('episode'),'words':len(vo.split()),'end_question':j.get('end_question',''),
+  'collab':bool([c for c in (j.get('creators') or []) if c.get('instagram')])},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
   fi
   # 5HU photo carousel: same story, deeper; Metricool holds it and posts it CAROUSEL_DELAY_MIN later
   local slides; slides=$(ls "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)"_car_*.jpg 2>/dev/null | sort | head -n 10)

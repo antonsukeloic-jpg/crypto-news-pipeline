@@ -20,7 +20,8 @@ for d in glob.glob(A + '/*.done'):
     sc = j.get('scenes') or [{}]
     title = ((j.get('carousel') or {}).get('cover') or sc[0].get('on_screen_text') or hook)[:80]
     rows.append({'ts': int(m.group(1)), 'title': title, 'hook': hook,
-                 'creators': j.get('creators', []), 'episode': None})
+                 'creators': j.get('creators', []), 'episode': None, 'words': len(vo.split()), 'end_question': j.get('end_question', ''),
+                 'collab': False})   # before 2026-11-25 no Reel carried a collab invite
 rows.sort(key=lambda r: r['ts'])
 base = 2   # 2026-11-19 purple + 2026-11-20 09:10 Armani went out before the approval flow
 for i, r in enumerate(rows):

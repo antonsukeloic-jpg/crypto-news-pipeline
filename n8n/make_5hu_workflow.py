@@ -161,8 +161,10 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "prize shortlist (LVMH Prize, ANDAM, Woolmark, NEWGEN, Fashion East), first store or big stockist, a celebrity or stylist picking them up, "
     "a breakout collab, a designer from a small label getting a bigger job.\n"
     "2. A cult / boutique brand doing something new (drop, collab, archive revival, new direction).\n"
-    "3. A new micro-trend or scene with a clear name and concrete examples.\n"
+    "3. A micro-trend or scene ONLY when the story names a small independent designer or label behind it - the video is about that designer.\n"
     "4. If nothing above exists: a smaller independent or streetwear brand story from a niche source.\n"
+    "EVERY video must feature ONE NAMED designer or small label (a real person or label we can credit and tag) - that is how 5HU reaches the fashion niche. "
+    "Never pick a story that is only about big brands or sportswear giants (Nike, Adidas, Converse, New Balance, Zara, H&M, Uniqlo, Shein...) or that names no designer.\n"
     "NEVER pick a big luxury house or conglomerate (Louis Vuitton, Chanel, Dior, Gucci, Armani, Prada, LVMH, Kering...), a mass retailer, or a celebrity story - 5HU is about the next names, not the established ones. A famous house is OK only when the story is really about a NEW young designer (e.g. a debut as creative director).\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
     "AVOID: deaths and obituaries, body or weight talk, anything about minors' bodies, crime/lawsuits with victims, shopping roundups, "
@@ -367,7 +369,9 @@ try { const buf = await this.helpers.getBinaryDataBuffer(0, 'data'); s = JSON.pa
 const t = (x, n) => String(x || '').replace(/https?:\/\/\S+/g, '').slice(0, n);
 const wmin = Math.min(30, Math.max(16, parseInt(s.words_min, 10) || D.words_min));
 const wmax = Math.min(34, Math.max(wmin + 4, parseInt(s.words_max, 10) || D.words_max));
-return [{ json: { story_focus: t(s.story_focus, 600), hook_notes: t(s.hook_notes, 600), caption_notes: t(s.caption_notes, 600),
+// playbook: short lessons the Growth Agent wrote after reviewing each of our posts (newest kept, max 8)
+const lessons = (Array.isArray(s.lessons) ? s.lessons : []).map(x => t(x, 160).trim()).filter(Boolean).slice(-8).join(' | ');
+return [{ json: { lessons, story_focus: t(s.story_focus, 600), hook_notes: t(s.hook_notes, 600), caption_notes: t(s.caption_notes, 600),
   words_min: wmin, words_max: wmax, carousel: s.carousel !== false,
   tiktok_carousel: ['ab', 'photo', 'slideshow', 'off'].includes(s.tiktok_carousel) ? s.tiktok_carousel : 'ab' } }];
 """
@@ -387,7 +391,7 @@ _LEARN = "{{ (() => { try { return $('Strategy').first().json; } catch (e) { ret
 _sel = by_name["Select Story"]["parameters"]["messages"]["values"][0]
 _sel["content"] = _sel["content"].replace("for a 20-30 second video.", "for a 12-18 second video.") + (
     "\n\nLEARNED FROM OUR OWN NUMBERS (use it to choose between good candidates; it never overrides the rules above):\n"
-    + _LEARN + ".story_focus || 'nothing yet' }}")
+    + _LEARN + ".story_focus || 'nothing yet' }}\nPLAYBOOK (lessons from reviewing our past posts): " + _LEARN + ".lessons || 'none yet' }}")
 _scr = by_name["Message a model"]["parameters"]["messages"]["values"][0]
 assert _scr["content"].count('voiceover: 22-28 words. HARD LIMIT: count the words before answering; if more than 30, rewrite shorter.') == 1
 _scr["content"] = _scr["content"].replace(
@@ -395,7 +399,7 @@ _scr["content"] = _scr["content"].replace(
     "voiceover: " + _LEARN + ".words_min || 22 }}-" + _LEARN + ".words_max || 28 }} words. HARD LIMIT: count the words before answering; if more than "
     + _LEARN + ".words_max ? $('Strategy').first().json.words_max + 2 : 30 }}, rewrite shorter.")
 _scr["content"] = _scr["content"].replace("\n\nVISUAL RULES (visual.query, English)",
-    "\n- LEARNED FROM OUR OWN NUMBERS (follow it; it never overrides the rules above): " + _LEARN + ".hook_notes || 'nothing yet' }}\n\nVISUAL RULES (visual.query, English)", 1)
+    "\n- LEARNED FROM OUR OWN NUMBERS (follow it; it never overrides the rules above): " + _LEARN + ".hook_notes || 'nothing yet' }}\n- PLAYBOOK (lessons from reviewing our past posts; follow them): " + _LEARN + ".lessons || 'none yet' }}\n\nVISUAL RULES (visual.query, English)", 1)
 assert "LEARNED FROM OUR OWN NUMBERS (follow it" in _scr["content"]
 
 # ---- photo carousel copy (posted ~3 h after the Reel): goes deeper than the video, facts only from the article

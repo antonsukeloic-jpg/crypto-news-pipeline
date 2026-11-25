@@ -68,6 +68,7 @@ return [{ json: { skip: false, kind, images, slideshowUrl, ttVariant, delayMin, 
   videoUrl: kind === 'video' ? b.videoUrl : '', voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
   hashtags: (b.hashtags || []).slice(0, 10),
   thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
+  noCollab: b.noCollab === true,
   creators: (Array.isArray(b.creators) ? b.creators : []).slice(0, 2).map(c => ({ name: String(c.name || '').slice(0, 60),
     instagram: /^[A-Za-z0-9._]{2,30}$/.test(c.instagram || '') ? c.instagram : '', tiktok: /^[A-Za-z0-9._]{2,30}$/.test(c.tiktok || '') ? c.tiktok : '',
     website: /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(c.website || '') ? c.website : '' })).filter(c => c.name),
@@ -144,11 +145,7 @@ const out = [];
 for (const net of p.networks) {
   const post = Object.assign({}, base, { providers: [{ network: net }] });
   if (p.kind === 'carousel') {
-    if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback; post.instagramData = { type: 'POST', isAiGenerated: false }; post.firstCommentText = igComment;
-      // collab invite: the carousel also appears on the designer's own profile once they accept (verified handle only;
-      // on the carousel, so an invite Instagram refuses can never cost us the Reel)
-      const collab = cr.filter(c => c.instagram).slice(0, 1).map(c => ({ username: c.instagram, deleted: false }));
-      if (collab.length) post.instagramData.collaborators = collab; }
+    if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback; post.instagramData = { type: 'POST', isAiGenerated: false }; post.firstCommentText = igComment; }
     if (net === 'facebook') { post.text = (cap.facebook && cap.facebook.text) || fallback; post.facebookData = { type: 'POST' }; post.firstCommentText = fbComment; }
     let label = net;
     if (net === 'tiktok') {
@@ -169,6 +166,11 @@ for (const net of p.networks) {
       commercialContentThirdParty: false, commercialContentOwnBrand: false, autoAddMusic: false, isAigc: true, title: '' }; }
   if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback;
     post.instagramData = { type: 'REEL', showReelOnFeed: true, isAiGenerated: true };
+    // collab invite (owner 2026-11-25: reach the designers' own followers): once the designer accepts, the Reel also shows on
+    // their profile and in their followers' feeds. Verified handle only, max 1, one invite per story (not on the carousel).
+    // If Instagram refuses it, "5HU Post Check" reposts the Reel without the invite.
+    const collab = p.noCollab ? [] : cr.filter(c => c.instagram).slice(0, 1).map(c => ({ username: c.instagram, deleted: false }));
+    if (collab.length) post.instagramData.collaborators = collab;
     if (p.thumbnailUrl) post.videoThumbnailUrl = p.thumbnailUrl;
     post.firstCommentText = igComment; }
   if (net === 'youtube') { const y = cap.youtube || {}; post.text = y.description || fallback;
