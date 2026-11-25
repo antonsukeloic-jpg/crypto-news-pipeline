@@ -1,0 +1,37 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+Wed Nov 25 07:00:44 UTC 2026
+-rw-r--r--  1 root root 6186 Nov 23 06:23 9e0198b25e92__5hu_job_1795414830451.json
+-rw-r--r--  1 root root  180 Nov 20 07:27 a6618942398c.done
+-rw-r--r--  1 root root 5080 Nov 20 07:27 a6618942398c__5hu_job_1795159439373.json
+-rw-r--r--  1 root root  337 Nov 24 06:23 a8ccd8b66cc0.cap
+-rw-r--r--  1 1000 1000    5 Nov 24 06:26 a8ccd8b66cc0.decision
+-rw-r--r--  1 root root  246 Nov 24 06:24 a8ccd8b66cc0.done
+-rw-r--r--  1 root root 6510 Nov 24 06:23 a8ccd8b66cc0__5hu_job_1795501228366.json
+-rw-r--r--  1 root root  180 Nov 20 07:52 d311f70e9d1a.done
+-rw-r--r--  1 root root 5524 Nov 20 07:52 d311f70e9d1a__5hu_job_1795160969464.json
+-rw-r--r--  1 root root  329 Nov 22 06:23 e05f4ebb80e9.cap
+-rw-r--r--  1 root root  246 Nov 22 06:23 e05f4ebb80e9.done
+-rw-r--r--  1 root root 5953 Nov 22 06:23 e05f4ebb80e9__5hu_job_1795328426089.json
+-rw-r--r--  1 root root  243 Nov 25 06:23 f026d8d19804.cap
+-rw-r--r--  1 root root  246 Nov 25 06:23 f026d8d19804.done
+-rw-r--r--  1 root root 5291 Nov 25 06:23 f026d8d19804__5hu_job_1795587626587.json
+--- pending:
+--- f026:
+f026d8d19804.cap
+f026d8d19804.done
+f026d8d19804__5hu_job_1795587626587.json
+--- render procs:
+--- watcher log tail:
+Nov 25 06:20:52 srv2107298 bash[2585722]: [06:20:52] job 5hu_job_1795587626587.json -> 5hu_video_1795587626587.mp4
+Nov 25 06:20:52 srv2107298 bash[2585722]: [06:20:52] rendering...
+Nov 25 06:20:54 srv2107298 bash[34711]: props ok channel=5hu scenes=5 btc=None change=None
+Nov 25 06:22:54 srv2107298 bash[2585722]: [06:22:54] OK 5hu_video_1795587626587.mp4
+Nov 25 06:23:04 srv2107298 bash[2585722]: [06:23:04] carousel (5 slides) sent to Telegram
+Nov 25 06:23:08 srv2107298 bash[2585722]: [06:23:08] sent to Telegram
+Nov 25 06:23:08 srv2107298 bash[2585722]: [06:23:08] approval f026d8d19804 requested (sent, auto at 06:53)
+Nov 25 06:53:11 srv2107298 bash[2585722]: [06:53:11] approval f026d8d19804 -> auto
+Nov 25 06:53:13 srv2107298 bash[2585722]: [06:53:13] publishing 5hu -> Metricool (https://n8n.visualforma.cloud/m/44b01256c0dce5b7635c04cf/5hu_video_1795587626587.mp4)
+Nov 25 06:53:21 srv2107298 bash[2585722]: [06:53:21] publish response: {"ok":true,"posts":[{"network":"tiktok","ok":true,"plannerUrl":"","id":441326440,"error":""},{"network":"instagram","ok":true,"plannerUrl":"","id":441326441,"error":""},{"network":"youtube","ok":true,"plannerUrl":"","id":441326438,"error":""},{"network":"facebook","ok":true,"plannerUrl":"","id":441326439,"error":""}]}
+Nov 25 06:53:29 srv2107298 bash[2585722]: [06:53:29] carousel publish response: {"ok":true,"posts":[{"network":"instagram","ok":true,"plannerUrl":"","id":441326524,"error":""},{"network":"tiktok (photo carousel, TikTok music)","ok":true,"plannerUrl":"","id":441326525,"error":""},{"network":"facebook","ok":true,"plannerUrl":"","id":441326526,"error":""}]}
+--- flags:
+autopost_5hu
