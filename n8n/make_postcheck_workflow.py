@@ -30,8 +30,12 @@ for (const p of list) for (const pr of (p.providers || [])) {
   const why = String(pr.detailedStatus || pr.error || pr.errorMessage || 'unknown error').replace(/\s+/g, ' ').slice(0, 200);
   const ig = p.instagramData || {};
   const hadCollab = pr.network === 'instagram' && Array.isArray(ig.collaborators) && ig.collaborators.length > 0;
+  // "published with some warnings" = it IS live (it has a public URL): never post it again
+  const live = !!(pr.publicUrl || /^https?:/.test(String(pr.id || '')));
+  const restricted = /restrict/i.test(why);
+  if (restricted) st.restrictedAt = Date.now();
   let rescue = null;
-  if (hadCollab) {
+  if (hadCollab && !live) {
     const when = new Date(Date.now() + 3 * 60 * 1000).toLocaleString('sv-SE', { timeZone: 'Europe/Vilnius' }).replace(' ', 'T').slice(0, 19);
     const igData = Object.assign({}, ig); delete igData.collaborators;
     rescue = { publicationDate: { dateTime: when, timezone: 'Europe/Vilnius' }, autoPublish: true, draft: false, descendants: [],
@@ -40,10 +44,19 @@ for (const p of list) for (const pr of (p.providers || [])) {
     if (p.videoThumbnailUrl) rescue.videoThumbnailUrl = p.videoThumbnailUrl;
   }
   const what = (ig.type === 'POST' || (p.media || []).length > 1) ? 'post' : 'Reel';
-  out.push({ json: { network: pr.network, why, rescue: rescue ? JSON.stringify(rescue) : '',
-    alert: '⚠️ 5HU: ' + pr.network + ' ' + what + ' failed to publish (' + why + ').' + (rescue ? ' Reposting it without the collab invite.' : '') } });
+  out.push({ json: { network: pr.network, why, restricted, rescue: rescue ? JSON.stringify(rescue) : '',
+    alert: '⚠️ 5HU: ' + pr.network + ' ' + what + (live ? ' is live, but ' + pr.network + ' warned: ' : ' failed to publish: ') + why.replace(/\.?$/, '.')
+      + (rescue ? ' Reposting it without the collab invite.' : '')
+      + (restricted ? ' Instagram careful mode for 14 days: no tags, collab invites, first comments or carousels there; Reels keep posting.' : '') } });
 }
 return out;
+"""
+
+HEALTH_JS = r"""
+const st = $getWorkflowStaticData('global');
+if (!$input.all().some(i => i.json.restricted)) return [];
+const body = JSON.stringify({ lastRestrictedAt: new Date(st.restrictedAt || Date.now()).toISOString(), carefulDays: 14 });
+return [{ json: {}, binary: { data: await this.helpers.prepareBinaryData(Buffer.from(body, 'utf8'), '5hu_ig_health.json', 'application/json') } }];
 """
 
 RANGE = {
@@ -80,6 +93,10 @@ nodes = [
         "authentication": "genericCredentialType", "genericAuthType": "httpHeaderAuth",
         "sendBody": True, "specifyBody": "json", "jsonBody": "={{ $json.rescue }}", "options": {"timeout": 60000}},
          [880, -120], credentials=MC_CRED, onError="continueRegularOutput", retryOnFail=True, maxTries=2, waitBetweenTries=5000),
+    node("Health File", "n8n-nodes-base.code", 2, {"jsCode": HEALTH_JS}, [660, 320]),
+    node("Write Health", "n8n-nodes-base.readWriteFile", 1,
+         {"operation": "write", "fileName": "/data/shared/5hu_ig_health.json", "dataPropertyName": "data", "options": {}}, [880, 320],
+         onError="continueRegularOutput"),
     node("Tell Owner", "n8n-nodes-base.telegram", 1.2,
          {"chatId": "694708370", "text": "={{ $json.alert }}", "additionalFields": {"appendAttribution": False}},
          [660, 120], credentials=TG_CRED, onError="continueRegularOutput", retryOnFail=True, maxTries=3, waitBetweenTries=20000),
@@ -88,7 +105,9 @@ conn = {
     "Every 30 min": {"main": [[{"node": "Our Posts", "type": "main", "index": 0}]]},
     "Run Now (CLI)": {"main": [[{"node": "Our Posts", "type": "main", "index": 0}]]},
     "Our Posts": {"main": [[{"node": "Find Problems", "type": "main", "index": 0}]]},
-    "Find Problems": {"main": [[{"node": "Rescue?", "type": "main", "index": 0}, {"node": "Tell Owner", "type": "main", "index": 0}]]},
+    "Find Problems": {"main": [[{"node": "Rescue?", "type": "main", "index": 0}, {"node": "Tell Owner", "type": "main", "index": 0},
+                                {"node": "Health File", "type": "main", "index": 0}]]},
+    "Health File": {"main": [[{"node": "Write Health", "type": "main", "index": 0}]]},
     "Rescue?": {"main": [[{"node": "Repost Without Collab", "type": "main", "index": 0}], []]},
 }
 wf = {"id": WF_ID, "name": "5HU Post Check", "nodes": nodes, "connections": conn,

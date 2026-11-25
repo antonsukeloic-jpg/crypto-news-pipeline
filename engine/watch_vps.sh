@@ -151,7 +151,12 @@ import json,sys,os,re
 def strategy():
     try: st=json.load(open("/root/shared/5hu_strategy.json"))
     except Exception: st={}
-    return {"captionNotes":str(st.get("caption_notes",""))[:600],"tiktokCarousel":st.get("tiktok_carousel","ab")}
+    try:   # Instagram careful mode: 14 days after the last "restricted activity" warning (written by 5HU Post Check)
+        import time,datetime; h=json.load(open("/root/shared/5hu_ig_health.json"))
+        t=datetime.datetime.fromisoformat(h["lastRestrictedAt"].replace("Z","+00:00")).timestamp()
+        careful=time.time()-t < int(h.get("carefulDays",14))*86400
+    except Exception: careful=False
+    return {"captionNotes":str(st.get("caption_notes",""))[:600],"tiktokCarousel":st.get("tiktok_carousel","ab"),"igCautious":careful}
 j=json.load(open(sys.argv[1]))
 credits=[]
 for s in j.get("scenes",[]):
@@ -196,7 +201,12 @@ import json,sys,os,re
 def strategy():
     try: st=json.load(open("/root/shared/5hu_strategy.json"))
     except Exception: st={}
-    return {"captionNotes":str(st.get("caption_notes",""))[:600],"tiktokCarousel":st.get("tiktok_carousel","ab")}
+    try:   # Instagram careful mode: 14 days after the last "restricted activity" warning (written by 5HU Post Check)
+        import time,datetime; h=json.load(open("/root/shared/5hu_ig_health.json"))
+        t=datetime.datetime.fromisoformat(h["lastRestrictedAt"].replace("Z","+00:00")).timestamp()
+        careful=time.time()-t < int(h.get("carefulDays",14))*86400
+    except Exception: careful=False
+    return {"captionNotes":str(st.get("caption_notes",""))[:600],"tiktokCarousel":st.get("tiktok_carousel","ab"),"igCautious":careful}
 j=json.load(open(sys.argv[1])); base=sys.argv[2]; files=sys.argv[3].split(); ssu=sys.argv[4] if len(sys.argv)>4 else ""
 c=j.get("carousel") or {}
 txt="\n".join(f"{i+1}. {s.get('title','')} — {s.get('body','')}" for i,s in enumerate(c.get("slides",[])))

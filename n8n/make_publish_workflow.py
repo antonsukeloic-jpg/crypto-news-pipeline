@@ -36,7 +36,9 @@ const only = Array.isArray(b.only) ? b.only.map(String) : null;
 const kind = b.kind === 'carousel' ? 'carousel' : 'video';
 const slideshowUrl = kind === 'carousel' && /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.mp4$/.test(String(b.slideshowUrl || '')) ? b.slideshowUrl : '';
 const pool = kind === 'carousel' ? (ch.carousel || []) : ch.networks;
-const nets = only ? pool.filter(n => only.includes(n)) : pool;
+let nets = only ? pool.filter(n => only.includes(n)) : pool;
+// Instagram careful mode (restriction warning in the last 14 days, see 5HU Post Check): fewer automated actions there
+if (b.igCautious === true && kind === 'carousel') nets = nets.filter(n => n !== 'instagram');
 if (!nets.length) return [{ json: { skip: true, reason: 'no matching networks for ' + b.channel + ' ' + kind } }];
 const key = (kind === 'carousel' ? String(b.job) + '#carousel' : String(b.job)) + (only ? '@' + nets.join(',') : '');
 const MEDIA = /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.(mp4|jpg)$/;
@@ -69,6 +71,7 @@ return [{ json: { skip: false, kind, images, slideshowUrl, ttVariant, delayMin, 
   hashtags: (b.hashtags || []).slice(0, 10),
   thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
   noCollab: b.noCollab === true,
+  igCautious: b.igCautious === true,
   creators: (Array.isArray(b.creators) ? b.creators : []).slice(0, 2).map(c => ({ name: String(c.name || '').slice(0, 60),
     instagram: /^[A-Za-z0-9._]{2,30}$/.test(c.instagram || '') ? c.instagram : '', tiktok: /^[A-Za-z0-9._]{2,30}$/.test(c.tiktok || '') ? c.tiktok : '',
     website: /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(c.website || '') ? c.website : '' })).filter(c => c.name),
@@ -100,7 +103,7 @@ CAPTION_PROMPT = (
     "- If SERIES is given, put it on its own line right after that question (like: Who's Next Nº012) on instagram, tiktok and facebook - written exactly like that, never as a hashtag.\n"
     "- Never tell people to swipe, scroll or 'see more' (no 'swipe through every slide', 'swipe for more'): end on the story itself or one real question.\n"
     "- SPELL EVERY NAME EXACTLY as in the voiceover / title (designers, labels, places) - also inside hashtags: #WillyChavarria, never a near-miss.\n"
-    "- CREDIT THE CREATOR FIRST: in instagram.text tag the designer/label once with their exact @instagram handle from CREATORS; in tiktok.text use their exact @tiktok handle; "
+    "- CREDIT THE CREATOR FIRST: {{ $json.igCautious ? 'in instagram.text write the designer/label NAME only, never an @handle; ' : 'in instagram.text tag the designer/label once with their exact @instagram handle from CREATORS; ' }}in tiktok.text use their exact @tiktok handle; "
     "in youtube.description and facebook.text you may add their website URL from CREATORS (never a social-media link). Use ONLY handles/URLs given in CREATORS - never invent or guess one; if none is given, write the plain name.\n\n"
     'SCHEMA {"tiktok":{"text":"..."},"instagram":{"text":"..."},"youtube":{"title":"...","description":"...","tags":["..."]},"facebook":{"text":"..."}}'
 )
@@ -116,7 +119,7 @@ const base = { publicationDate: { dateTime: when, timezone: 'Europe/Vilnius' }, 
 const cr = p.creators || [];
 // first comment = the designer's own account / site only (no article or photo source - owner feedback 2026-11-24);
 // nothing verified -> no first comment
-const igComment = cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') : '';
+const igComment = p.igCautious ? '' : cr.some(c => c.instagram) ? '📍 ' + cr.filter(c => c.instagram).map(c => c.name + ' @' + c.instagram).join(' · ') : '';
 const fbComment = cr.some(c => c.website) ? '📍 ' + cr.filter(c => c.website).map(c => c.name + ' — ' + c.website).join(' · ') : '';
 // learned 2026-11-20: captions had #WillyCharvarria / #WillyCharravia. Fix near-miss hashtags against the names
 // that really appear in the voiceover / title (1-3 consecutive words joined, small edit distance, same first letters).
@@ -141,6 +144,9 @@ const fixTags = (t) => String(t || '').replace(/#([\p{L}\p{N}_]{6,})/gu, (m, tag
   return '#' + (lowerStyle ? best.join('').toLowerCase() : best.map(w => w[0].toUpperCase() + w.slice(1)).join(''));
 });
 for (const k of Object.keys(cap)) { const c = cap[k]; if (c && typeof c === 'object') for (const f of ['text', 'title', 'description']) if (typeof c[f] === 'string') c[f] = fixTags(c[f]); }
+if (p.igCautious && cap.instagram && typeof cap.instagram.text === 'string') {   // careful mode: names, never @handles
+  let t = cap.instagram.text; for (const c of cr) if (c.instagram) t = t.split('@' + c.instagram).join(c.name);
+  cap.instagram.text = t.replace(/(^|\s)@([A-Za-z0-9._]{2,30})/g, '$1$2'); }
 const out = [];
 for (const net of p.networks) {
   const post = Object.assign({}, base, { providers: [{ network: net }] });
@@ -169,7 +175,7 @@ for (const net of p.networks) {
     // collab invite (owner 2026-11-25: reach the designers' own followers): once the designer accepts, the Reel also shows on
     // their profile and in their followers' feeds. Verified handle only, max 1, one invite per story (not on the carousel).
     // If Instagram refuses it, "5HU Post Check" reposts the Reel without the invite.
-    const collab = p.noCollab ? [] : cr.filter(c => c.instagram).slice(0, 1).map(c => ({ username: c.instagram, deleted: false }));
+    const collab = (p.noCollab || p.igCautious) ? [] : cr.filter(c => c.instagram).slice(0, 1).map(c => ({ username: c.instagram, deleted: false }));
     if (collab.length) post.instagramData.collaborators = collab;
     if (p.thumbnailUrl) post.videoThumbnailUrl = p.thumbnailUrl;
     post.firstCommentText = igComment; }
