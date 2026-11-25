@@ -551,6 +551,66 @@ for _n in w["nodes"]:
     if _n["name"] in ("Select Story", "Message a model", "Perplexity Photos", "Image - Request", "Image - Get", "Music - Generate"):
         _n.update({"retryOnFail": True, "maxTries": 3, "waitBetweenTries": 3000})
 
+# ---- length guard (2026-11-25 test: the model ignored the word limit -> 36 words = a 23 s video).
+# Per-sentence caps in the prompt, then code counts the voiceover words; over the hard limit -> one
+# "Shorten Script" pass (same JSON, tighter sentences). If that pass fails, the original script is used.
+assert _scr["content"].count("5 short sentences, one per scene (") == 1
+_scr["content"] = _scr["content"].replace("5 short sentences, one per scene (",
+    "5 short sentences, one per scene - sentence 1 max 7 words, sentences 2-4 max 6 words each, the closing question max 5 words (", 1)
+_LEN_JS = r"""const it = $input.first().json;
+const raw = ((it.content || [])[0] || {}).text || '';
+let st = {}; try { st = $('Strategy').first().json; } catch (e) {}
+const max = (parseInt(st.words_max, 10) || 28) + 2;
+const m = raw.match(/"voiceover"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+const words = (m ? m[1] : '').split(/\s+/).filter(Boolean).length;
+return [{ json: Object.assign({}, it, { _words: words, _maxWords: max, _tooLong: (words > max ? 'yes' : 'no') }) }];"""
+_PICK_JS = r"""const orig = $('Length Check').first().json;
+const it = $input.first().json || {};
+const raw = ((it.content || [])[0] || {}).text || '';
+const m = raw.match(/"voiceover"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+const n = (m ? m[1] : '').split(/\s+/).filter(Boolean).length;
+const scenes = (raw.match(/"vo_segment"\s*:/g) || []).length;
+const scenes0 = ((((orig.content || [])[0] || {}).text || '').match(/"vo_segment"\s*:/g) || []).length;
+if (n >= 12 && n < orig._words && scenes === scenes0) return [{ json: Object.assign({}, it, { _words: n, _shortened: orig._words + '->' + n }) }];
+return [{ json: Object.assign({}, orig, { _shortened: 'kept ' + orig._words + ' (shorten pass gave ' + n + ')' }) }];"""
+_SHORT_PROMPT = ("=You tighten scripts for 5HU, a fast fashion video channel. The script JSON below has a voiceover of {{ $json._words }} words. "
+    "It MUST be at most {{ $json._maxWords - 2 }} words.\n\n"
+    "Rewrite ONLY \"voiceover\" and each scene's \"vo_segment\":\n"
+    "- keep the same number of scenes, one short sentence each;\n"
+    "- sentence 1 (the hook) max 7 words; every middle sentence max 6 words; the last sentence is the two-option question and stays unchanged (it equals end_question);\n"
+    "- keep names spelled exactly, use only facts already in the script, keep the voice cool and punchy, at most one \"...\" pause;\n"
+    "- the vo_segment values joined with spaces must equal the voiceover;\n"
+    "- keep every other field exactly as it is (hook may change to match the new sentence 1).\n"
+    "Count the words before answering. Output ONLY the full JSON - no markdown, no text before or after. Inside JSON strings use typographic quotes “ ”, never the ASCII double quote.\n\n"
+    "SCRIPT JSON\n{{ $json.content[0].text }}")
+_mx, _my = by_name["Message a model"]["position"]
+w["nodes"] += [
+    {"parameters": {"jsCode": _LEN_JS}, "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [_mx + 110, _my + 260],
+     "id": str(uuid.uuid4()), "name": "Length Check"},
+    {"parameters": {"conditions": {"options": {"caseSensitive": True, "leftValue": "", "typeValidation": "loose", "version": 2},
+        "conditions": [{"id": str(uuid.uuid4()), "leftValue": "={{ $json._tooLong }}", "rightValue": "yes",
+                        "operator": {"type": "string", "operation": "equals"}}], "combinator": "and"}, "options": {}},
+     "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [_mx + 330, _my + 260], "id": str(uuid.uuid4()), "name": "Too Long?"},
+    {"parameters": {"modelId": {"__rl": True, "value": "claude-sonnet-4-6", "mode": "list", "cachedResultName": "claude-sonnet-4-6"},
+                    "messages": {"values": [{"content": _SHORT_PROMPT}]}, "simplify": False, "options": {"maxTokens": 4000}},
+     "type": "@n8n/n8n-nodes-langchain.anthropic", "typeVersion": 1, "position": [_mx + 550, _my + 160], "id": str(uuid.uuid4()),
+     "name": "Shorten Script", "onError": "continueRegularOutput", "alwaysOutputData": True, "retryOnFail": True, "maxTries": 2, "waitBetweenTries": 3000,
+     "credentials": {"anthropicApi": {"id": "3pYNdkLM3jdNYjyM", "name": "Anthropic account"}}},
+    {"parameters": {"jsCode": _PICK_JS}, "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [_mx + 770, _my + 160],
+     "id": str(uuid.uuid4()), "name": "Pick Script"},
+]
+assert w["connections"]["Message a model"] == {"main": [[{"node": "Code in JavaScript", "type": "main", "index": 0}]]}, w["connections"]["Message a model"]
+w["connections"]["Message a model"] = {"main": [[{"node": "Length Check", "type": "main", "index": 0}]]}
+w["connections"]["Length Check"] = {"main": [[{"node": "Too Long?", "type": "main", "index": 0}]]}
+w["connections"]["Too Long?"] = {"main": [[{"node": "Shorten Script", "type": "main", "index": 0}],
+                                          [{"node": "Code in JavaScript", "type": "main", "index": 0}]]}
+w["connections"]["Shorten Script"] = {"main": [[{"node": "Pick Script", "type": "main", "index": 0}]]}
+w["connections"]["Pick Script"] = {"main": [[{"node": "Code in JavaScript", "type": "main", "index": 0}]]}
+_mj = by_name["Make Job File"]["parameters"]
+_old = "const raw = $('Message a model').first().json.content[0].text; const m = raw.match("
+assert _mj["jsCode"].count(_old) == 1
+_mj["jsCode"] = _mj["jsCode"].replace(_old, "const raw = (() => { try { return $('Pick Script').first().json.content[0].text; } catch (e) { return $('Message a model').first().json.content[0].text; } })(); const m = raw.match(", 1)
+
 # ---- schedule (owner 2026-11-20): automatic 5HU video twice a day, 09:00 and 19:00 Vilnius time.
 # The watcher then auto-posts it via Social Publish (kill switch: rm /root/stack/autopost_5hu).
 _sch = by_name["Every Hour"]
