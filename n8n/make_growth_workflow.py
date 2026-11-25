@@ -136,6 +136,7 @@ for (const ch of (Array.isArray(out.changes) ? out.changes : []).slice(0, limit)
   next[k] = v;
 }
 if (next.words_max < next.words_min + 4) next.words_max = Math.min(34, next.words_min + 4);
+for (const a of applied) a.to = next[a.knob];   // log what was really applied (after the min/max clamp)
 next.updated = new Date().toISOString();
 const entry = { at: next.updated, judged: c.judged, data: c.apiOk, observations: (out.observations || []).slice(0, 6).map(o => clean(o, 300)),
   changes: applied, watching: clean(out.watching, 300) };
