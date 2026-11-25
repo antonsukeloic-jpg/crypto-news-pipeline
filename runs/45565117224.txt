@@ -1,0 +1,20 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+HEAD ac72e49 Featured log: take title/hook from the real job fiel
+WATCHER active
+featured rows: 10 | with accounts: 3 | episode counter: 12
+{"ts": 1795537228181, "title": "The Rose Behind The Craft", "hook": "Copenhagen grew something rare.", "creators": [], "episode": 11}
+{"ts": 1795587626587, "title": "Meet The Designer Behind CRITTERS", "hook": "Designer Mirta D'Aloisio built a world where human ends and animal begins.", "creators": [], "episode": 12}
+n8n stopped
+BACKUP 25141248 bytes
+deleted workflows: 4
+shared_workflow left: 0
+workflow_history left: 0
+execution_entity left: 0
+workflow_dependency left: 0
+workflow_statistics left: 0
+integrity: ok | fk violations: 0
+tOGl1tIRFxUJZJKA|Crypto Video Pipeline
+LtNewsPipeLine01|LT News Pipeline
+VikopsAdPipeln01|Vikops Ad Pipeline
+FiveHuFashion001|5HU Fashion News
+SocialPublish001|Social Publish (Metricool)
