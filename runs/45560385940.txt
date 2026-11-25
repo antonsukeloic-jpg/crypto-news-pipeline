@@ -1,9 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-06:24
-approve_5hu
-autopost_5hu
-flags now: autopost_5hu 
-1
-]: [06:23:04] carousel (5 slides) sent to Telegram
-]: [06:23:08] sent to Telegram
-]: [06:23:08] approval f026d8d19804 requested (sent, auto at 06:53)
