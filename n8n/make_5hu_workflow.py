@@ -163,7 +163,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "2. A cult / boutique brand doing something new (drop, collab, archive revival, new direction).\n"
     "3. A micro-trend or scene ONLY when the story names a small independent designer or label behind it - the video is about that designer.\n"
     "4. If nothing above exists: a smaller independent or streetwear brand story from a niche source.\n"
-    "EVERY video must feature ONE NAMED designer or small label (a real person or label we can credit and tag) - that is how 5HU reaches the fashion niche. "
+    "EVERY video must feature ONE NAMED designer or small label (a real person or label we credit by name) - that is how 5HU becomes the place the fashion niche finds new names. "
     "Never pick a story that is only about big brands or sportswear giants (Nike, Adidas, Converse, New Balance, Zara, H&M, Uniqlo, Shein...) or that names no designer.\n"
     "NEVER pick a big luxury house or conglomerate (Louis Vuitton, Chanel, Dior, Gucci, Armani, Prada, LVMH, Kering...), a mass retailer, or a celebrity story - 5HU is about the next names, not the established ones. A famous house is OK only when the story is really about a NEW young designer (e.g. a debut as creative director).\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
