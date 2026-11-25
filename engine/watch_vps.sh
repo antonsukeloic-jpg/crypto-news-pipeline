@@ -172,6 +172,12 @@ except Exception: ok=False
 e=json.load(open(sys.argv[2])).get('episode') if ok else None
 print(e or '')" "$resp" "$1" 2>/dev/null)
     [ -n "$epv" ] && echo "$epv" > "$ROOT/5hu_episode" && log "5HU episode Nº$epv published"
+    # log for the engagement assistant (who we featured, with the accounts we verified)
+    [ -n "$epv" ] && python3 -c "
+import json,sys,time
+j=json.load(open(sys.argv[1]))
+print(json.dumps({'ts':int(time.time()*1000),'title':(j.get('meta') or {}).get('title','') or j.get('hook',''),'hook':j.get('hook',''),
+  'creators':j.get('creators',[]),'episode':j.get('episode')},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
   fi
   # 5HU photo carousel: same story, deeper; Metricool holds it and posts it CAROUSEL_DELAY_MIN later
   local slides; slides=$(ls "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)"_car_*.jpg 2>/dev/null | sort | head -n 10)
