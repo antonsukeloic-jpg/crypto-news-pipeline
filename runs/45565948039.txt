@@ -1,0 +1,62 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+now 07:09:40
+0
+          "pairedItem": {
+                      "item": 0
+                    },
+                    "binary": {
+                      "data": {
+                        "mimeType": "application/json",
+                        "fileType": "json",
+                        "fileExtension": "json",
+                        "data": "filesystem-v2",
+                        "fileName": "5hu_job_1795590430288.json",
+                        "id": "filesystem-v2:workflows/FiveHuFashion001/executions/160/binary_data/77e9c2ff-20f1-45e1-9c1c-09477d5110a0",
+                        "fileSize": "5.21 kB",
+                        "bytes": 5206
+                      }
+                    }
+                  }
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      "lastNodeExecuted": "Save Job"
+    },
+    "executionData": {
+      "contextData": {},
+      "nodeExecutionStack": [],
+      "metadata": {},
+      "waitingExecution": {},
+      "waitingExecutionSource": {},
+      "runtimeData": {
+        "version": 1,
+        "establishedAt": 1795590404836,
+        "source": "cli",
+        "triggerNode": {
+          "name": "Run Now (CLI)",
+          "type": "n8n-nodes-base.executeWorkflowTrigger"
+        }
+      }
+    },
+    "resumeToken": "94d2bc0efb894fa7401099081bdc673d9d7cec51fce62d434919de7948320fa4"
+  },
+  "mode": "cli",
+  "startedAt": "2026-11-25T07:06:44.831Z",
+  "stoppedAt": "2026-11-25T07:07:35.265Z",
+  "storedAt": "db",
+  "status": "success",
+  "finished": true
+}
+
+--- watcher:
+Nov 25 07:05:56 srv2107298 systemd[1]: Started cnf-watcher.service - CryptoNewsFactory render watcher.
+Nov 25 07:05:56 srv2107298 bash[51410]: [07:05:56] watcher started, watching /root/shared/jobs
+Nov 25 07:07:37 srv2107298 bash[51410]: [07:07:37] job 5hu_job_1795590430288.json -> 5hu_video_1795590430288.mp4
+Nov 25 07:07:37 srv2107298 bash[51410]: [07:07:37] rendering...
+Nov 25 07:07:37 srv2107298 bash[51410]: [07:07:37] 5HU episode Nº13
+Nov 25 07:07:38 srv2107298 bash[52088]: props ok channel=5hu scenes=5 btc=None change=None
+Nov 25 07:09:08 srv2107298 bash[51410]: [07:09:08] OK 5hu_video_1795590430288.mp4
+Nov 25 07:09:08 srv2107298 bash[51410]: [07:09:08] HELD (hold_5hu): 5hu_video_1795590430288.mp4 rendered, not posted
