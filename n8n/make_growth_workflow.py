@@ -172,5 +172,8 @@ names = [n["name"] for n in nodes]
 wf = {"id": WF_ID, "name": "5HU Growth Agent", "nodes": nodes,
       "connections": {a: {"main": [[{"node": b, "type": "main", "index": 0}]]} for a, b in zip(names, names[1:])},
       "settings": {"executionOrder": "v1", "timezone": "Europe/Vilnius"}, "active": False, "pinData": {}}
+# manual run from the VPS: n8n execute --id=FiveHuGrowth0001 (needs an Execute Workflow Trigger; same chain as the schedule)
+wf["nodes"].append(node("Run Now (CLI)", "n8n-nodes-base.executeWorkflowTrigger", 1.1, {"inputSource": "passthrough"}, [0, 220]))
+wf["connections"]["Run Now (CLI)"] = {"main": [[{"node": names[1], "type": "main", "index": 0}]]}
 json.dump(wf, open(OUT, "w"), ensure_ascii=False, indent=1)
 print("OK ->", OUT)
