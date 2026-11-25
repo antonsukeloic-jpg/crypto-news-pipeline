@@ -8,7 +8,7 @@ import {focusPos} from './focusCrop';
 // Instagram's profile grid shows only the middle 1080x1440 (y 240-1680), so everything important sits inside that band.
 const B = {lime: '#C8FF2E', black: '#0A0A0A', white: '#F5F5F2'};
 
-export const FiveHuCover = ({scenes = [], coverHook}) => {
+export const FiveHuCover = ({scenes = [], coverHook, episode}) => {
   const pick = scenes.find((s) => s.real && s.image) || scenes.find((s) => s.image) || {};
   const hook = String(coverHook || (scenes[0] && scenes[0].on_screen_text) || '').trim();
   const words = hook.split(/\s+/).filter(Boolean).slice(0, 6);
@@ -27,7 +27,7 @@ export const FiveHuCover = ({scenes = [], coverHook}) => {
           textShadow: '0 4px 24px rgba(0,0,0,0.6)'}}>
           5HU<span style={{display: 'inline-block', width: 16, height: 16, borderRadius: 8, background: B.lime, marginLeft: 5}} />
         </div>
-        <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 4, color: B.white, opacity: 0.92, textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>WHO'S NEXT</div>
+        <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 4, color: B.white, opacity: 0.92, textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>WHO'S NEXT{episode ? ' Nº' + String(episode).padStart(3, '0') : ''}</div>
       </div>
       {words.length ? (
         <div style={{position: 'absolute', left: 80, right: 80, bottom: 330, fontFamily: inter, fontWeight: 900, fontSize: size, lineHeight: 0.96,

@@ -176,7 +176,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
 msg = by_name["Message a model"]["parameters"]["messages"]["values"][0]
 article_expr = msg["content"].split("ARTICLE\n", 1)[1]
 msg["content"] = (
-    "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 20-30 second vertical video plan.\n\n"
+    "=You are the scriptwriter for 5HU - the channel that spots fashion's next big names first (TikTok/Reels/Shorts). Turn ONE fashion news article into a 12-18 second vertical video plan.\n\n"
     "Output ONLY valid JSON matching the SCHEMA below. No markdown, no code fences, no text before or after the JSON. "
     "Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n\n"
     "VOICE\n"
@@ -185,15 +185,19 @@ msg["content"] = (
     "- Say names exactly as they are spelled in the article.\n"
     "- SIGNATURE FLAVOUR (owner loves it): English with a little French chic. Keep fashion words, events and names in their original language with their accents so the voice says them natively - Première Vision, haute couture, prêt-à-porter, savoir-faire, atelier, aubergine, maison, défilé, je ne sais quoi, Japanese/Italian/Scandinavian names as written. One or two such words per video, woven naturally into the English, never forced or translated.\n\n"
     "RULES\n"
-    "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 20-30 s around it. Never stack names, dates and numbers one after another.\n"
-    "- voiceover: 32-40 words. HARD LIMIT: count the words before answering; if more than 42, rewrite shorter. 5 short sentences, one per scene, so the voice can breathe between them (the 5HU voice is slow, smoky and dramatic - fewer words, more weight; use \"...\" for suspense pauses). Sentence 1 is the hook and must be FRESH every time: NEVER open with “Remember this name”. Rotate opening styles - a bold claim, a question, a contrast (“Not Paris. Not Milan...”), a scene you can see, a striking number, a direct dare to the viewer. Do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\nSay WHERE the label is from when the article says it. End with a punchy closing line (the channel sign-off is added after it automatically).\n"
+    "- ONE idea, told deeper - not a list of facts. Pick the single most interesting angle of the story (who they are, what is new, why it matters NOW) and build the 12-18 s around it. Never stack names, dates and numbers one after another.\n"
+    "- voiceover: 22-28 words. HARD LIMIT: count the words before answering; if more than 30, rewrite shorter. 5 short sentences, one per scene (at most ONE \"...\" pause in the whole voiceover - viewers leave in the first 2 seconds, so no slow build-up).\n"
+    "- THE FIRST 2 SECONDS DECIDE EVERYTHING. Sentence 1 is the HOOK: max 7 words, and it IS the single most surprising, concrete, visual fact of the story, said straight away - the thing that makes a scroller stop (like “She made a dress out of seatbelts.” or “A ¥1,000,000 dress. Instant noodles for dinner.”). "
+    "NEVER open with scene-setting (a city, a season, “X grew something rare”), a vague “What if…” question, a brand intro, or “Remember this name”. Must be FRESH every time - do not reuse any of these recent openings or their pattern:\n{{ $('Combine Feeds').first().json.recentHooks }}\n"
+    "Say WHERE the label is from when the article says it (not in sentence 1). "
+    "The LAST sentence is a short two-option question to the viewer about the piece, like “Wear it... or pass?” or “Genius or too much?” - the same question goes in end_question (max 5 words, two options joined by “or”). The channel sign-off is added after it automatically.\n"
     "- NEVER say the channel name 5HU anywhere in the voiceover or vo_segment - the sign-off \"Follow 5HU. We find them first.\" is added automatically at the very end.\n"
     "- “One to watch” is the channel's opinion: never present future success as fact, and never invent sales, followers, stockists, celebrities or prizes.\n"
     "- ACCURACY: use ONLY facts in the article. Never invent prices, dates, names, quotes, sales figures or who wore what. If it isn't in the article, don't say it.\n"
     "- No body or weight comments about anyone. Describe clothes, not bodies.\n"
-    "- scenes: exactly 5. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to 25 (the video follows the voice, 20-30 s).\n"
+    "- scenes: exactly 5. Each = 1 VO sentence + one short on_screen_text + one visual + duration_sec. Durations sum to 14 (the video follows the voice, 12-18 s); scene 1 is about 2 s.\n"
     "- The scenes' vo_segment values, joined in order with spaces, MUST equal the voiceover.\n"
-    "- on_screen_text: max ~5 words.\n"
+    "- on_screen_text: max ~5 words. Scene 1 on_screen_text = the hook idea in max 5 words - never a place/season label like “Copenhagen. Pre-Spring 2027.”\n"
     "- center: per scene, what shows in the MIDDLE of the frame. "
     "{\"type\":\"stat\",\"value\":\"2\",\"prefix\":\"$\",\"suffix\":\"B\",\"color\":\"green\",\"label\":\"max 5 words\"} for ONE striking number from the article "
     "(at most 1-2 scenes; value digits only; prefix/suffix short units like $, €, %, B, M, K; color red for a fall/loss, green for a rise, otherwise omit). "
@@ -202,7 +206,7 @@ msg["content"] = (
     "{\"type\":\"entity\",\"kind\":\"company\",\"name\":\"Brand\",\"wiki\":\"Exact English Wikipedia page title\"} when a fashion house, brand or retailer is the subject "
     "(we fetch its photo/logo from Wikipedia). Whenever a scene is centered on a named brand or public person you MUST use \"entity\". "
     "{\"type\":\"none\"} otherwise. NEVER invent a number.\n"
-    "- hook: max 7 words. hashtags: 4-6, e.g. #5HU #emergingdesigners #fashion plus the label/designer and city.\n\n"
+    "- hook: max 7 words (= sentence 1). end_question: the closing two-option question (max 5 words). hashtags: 4-6, e.g. #newdesigners #fashion plus the label/designer and city.\n\n"
     "VISUAL RULES (visual.query, English)\n"
     "- Show what the sentence is about: the garments, fabrics, accessories, shoes, a runway, a backstage rail, a boutique window, a sneaker on a pedestal, "
     "a street-style moment. Fashion-editorial, specific and literal to the sentence.\n"
@@ -211,7 +215,7 @@ msg["content"] = (
     "- No readable text, numbers or watermarks. No phone/computer screens with UI.\n"
     "- Each scene a clearly different shot and setting. Vertical 9:16, subject lower-middle, calmer space in the top third.\n\n"
     "SCHEMA\n"
-    "{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\","
+    "{\"meta\":{\"title\":\"...\"},\"hook\":\"...\",\"end_question\":\"Wear it or pass?\",\"hashtags\":[\"#...\"],\"voiceover\":\"...\","
     "\"scenes\":[{\"id\":1,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":8},"
     "{\"id\":2,\"vo_segment\":\"...\",\"on_screen_text\":\"...\",\"visual\":{\"query\":\"...\"},\"center\":{\"type\":\"none\"},\"duration_sec\":7}]}\n\n"
     "ARTICLE\n" + article_expr)
@@ -284,7 +288,7 @@ tts = by_name["Convert text to speech"]["parameters"]
 tts["voice"] = {"__rl": True, "mode": "id", "value": VOICE_ID}
 tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
-    {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True}, indent=2)
+    {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True, "speed": 1.1}, indent=2)
 
 # ---- fresh techno for every video (never the same track): ElevenLabs Sound Effects, random style + BPM
 MUSIC_JS = r"""
@@ -384,6 +388,8 @@ by_name["Make Job File"]["parameters"]["jsCode"] = (
     "  const t = (x, n) => String(x || '').replace(/\\s+/g, ' ').trim().slice(0, n);\n"
     "  const slides = (Array.isArray(c.slides) ? c.slides : []).map(s => ({ title: t(s.title, 60), body: t(s.body, 240) })).filter(s => s.title && s.body).slice(0, 4);\n"
     "  if (slides.length >= 3) { const j = JSON.parse(txt); j.carousel = { cover: t(c.cover, 50), slides }; txt = JSON.stringify(j); } } catch (e) {}\n"
+    "try { const raw = $('Message a model').first().json.content[0].text; const m = raw.match(/\"end_question\"\\s*:\\s*\"([^\"]{3,60})\"/);\n"
+    "  if (m) { const j = JSON.parse(txt); j.end_question = m[1].trim(); txt = JSON.stringify(j); } } catch (e) {}\n"
     "const name = $('Code in JavaScript').first().json.jobFile;\n"
     "const bin = await this.helpers.prepareBinaryData(Buffer.from(txt, 'utf8'), name, 'application/json');\n"
     "return [{ json: { jobFile: name }, binary: { data: bin } }];")
@@ -442,7 +448,9 @@ for _m in _msgs:
     c = c.replace('"visual":{"query":"..."}', '"photo":1,"visual":{"query":"..."}')
     if '- “One to watch” is the channel' in c:
         c = c.replace('"- “One to watch” is the channel'.lstrip('"'),
-            "- THE DESIGNER: one of the first two scenes MUST show the designer as a person - give it the real photo whose caption names or shows them "
+            "- SCENE 1 = THE PIECE: scene 1 MUST use the most striking real photo of the actual garment / bag / shoe / look on a body - never a headshot, a building, a store, a logo or a city view. "
+            "If no photo shows a piece, use the most dramatic, sharpest photo.\n"
+            "- THE DESIGNER: scene 2 or 3 MUST show the designer as a person - give it the real photo whose caption names or shows them "
             "(portrait, studio or backstage shot). If no real photo shows them, give that scene center {\"type\":\"entity\",\"kind\":\"person\",\"name\":\"<designer>\",\"wiki\":\"<designer>\"}.\n"
             "- LOGO: at least one scene MUST have center {\"type\":\"entity\",\"kind\":\"company\",\"name\":\"<label name exactly as written>\",\"wiki\":\"<Wikipedia title, or the label name>\"} for the label the story is about.\n"
             "- REAL PHOTOS: this is news about REAL designers and REAL collections - show the real person and the real pieces, never an invented collection. "

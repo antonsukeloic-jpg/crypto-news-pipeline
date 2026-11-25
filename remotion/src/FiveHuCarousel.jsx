@@ -78,7 +78,7 @@ export const FiveHuCarousel = (props) => {
       <AbsoluteFill style={{backgroundColor: B.black}}>
         <div style={{position: 'absolute', top: 72, left: PAD, right: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
           <Mark />
-          <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 4, color: B.white}}>WHO'S NEXT · THE STORY</div>
+          <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 4, color: B.white}}>WHO'S NEXT{props.episode ? ' Nº' + String(props.episode).padStart(3, '0') : ' · THE STORY'}</div>
         </div>
         <div style={{position: 'absolute', left: PAD, right: PAD, top: 180}}>
           <Hook text={hook} size={chars > 26 ? 92 : chars > 16 ? 108 : 128} />

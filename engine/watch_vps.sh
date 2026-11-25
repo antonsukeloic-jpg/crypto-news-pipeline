@@ -155,13 +155,24 @@ for s in j.get("scenes",[]):
     if s.get("real") and c and c not in credits: credits.append(c)
 print(json.dumps({"job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
   "thumbnailUrl":sys.argv[3],"creators":j.get("creators",[]),"credits":credits[:4],
-  "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[])}))
+  "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[]),
+  "episode":j.get("episode"),"endQuestion":j.get("end_question","")}))
 P
 )
   log "publishing $ch -> Metricool ($url)"
   local resp; resp=$(curl -sS -m 180 -H 'Content-Type: application/json' -d "$payload" https://n8n.visualforma.cloud/webhook/social-publish 2>&1)
   log "publish response: ${resp:0:400}"
   tg_text "$ch: $(publish_report "$resp" "live in ~3 min")"
+  # the series number counts only once the Reel is really out
+  if [ "$ch" = 5hu ]; then
+    local epv; epv=$(python3 -c "
+import json,sys
+try: r=json.loads(sys.argv[1]); ok=any(p.get('ok') for p in r.get('posts',[]))
+except Exception: ok=False
+e=json.load(open(sys.argv[2])).get('episode') if ok else None
+print(e or '')" "$resp" "$1" 2>/dev/null)
+    [ -n "$epv" ] && echo "$epv" > "$ROOT/5hu_episode" && log "5HU episode Nº$epv published"
+  fi
   # 5HU photo carousel: same story, deeper; Metricool holds it and posts it CAROUSEL_DELAY_MIN later
   local slides; slides=$(ls "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)"_car_*.jpg 2>/dev/null | sort | head -n 10)
   if [ -n "$slides" ] && [ "$(echo "$slides" | wc -l)" -ge 3 ]; then
@@ -178,7 +189,8 @@ for s in j.get("scenes",[]):
 print(json.dumps({"kind":"carousel","job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),
   "images":[base+"/"+os.path.basename(f) for f in files],"slideshowUrl":ssu,"delayMin":int(os.environ.get("CAROUSEL_DELAY_MIN","180")),
   "slidesText":("COVER: "+str(c.get("cover",""))+"\n"+txt)[:2000],"creators":j.get("creators",[]),"credits":credits[:4],
-  "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[])}))
+  "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[]),
+  "episode":j.get("episode"),"endQuestion":j.get("end_question","")}))
 P
 )
     resp=$(curl -sS -m 180 -H 'Content-Type: application/json' -d "$cp" https://n8n.visualforma.cloud/webhook/social-publish 2>&1)
@@ -291,6 +303,11 @@ while true; do
     done
     rm -f "$ROOT/$outp"
     log "rendering..."
+    if [ "$(job_channel "$dest")" = 5hu ]; then
+      ep=$(( $(cat "$ROOT/5hu_episode" 2>/dev/null || echo 0) + 1 ))
+      python3 -c "import json,sys;p=sys.argv[1];j=json.load(open(p));j['episode']=int(sys.argv[2]);json.dump(j,open(p,'w'),ensure_ascii=False)" "$dest" "$ep" \
+        && log "5HU episode Nº$ep"
+    fi
     bash "$RENDER" "$dest" "$ROOT" "$ROOT/$outp"
     if [ -f "$ROOT/$outp" ]; then
       touch "$ARCH/.done_$outbase"; log "OK $outbase"

@@ -57,6 +57,8 @@ if (kind === 'carousel' && nets.includes('tiktok')) {
 }
 return [{ json: { skip: false, kind, images, slideshowUrl, ttVariant, delayMin, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
   slidesText: kind === 'carousel' ? String(b.slidesText || '').slice(0, 2000) : '',
+  episode: Number.isInteger(Number(b.episode)) && Number(b.episode) > 0 && Number(b.episode) < 10000 ? Number(b.episode) : 0,
+  endQuestion: String(b.endQuestion || '').replace(/[\r\n"]+/g, ' ').trim().slice(0, 60),
   videoUrl: kind === 'video' ? b.videoUrl : '', voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
   hashtags: (b.hashtags || []).slice(0, 10),
   thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
@@ -74,7 +76,9 @@ CAPTION_PROMPT = (
     "{{ $json.kind === 'carousel' ? 'CAROUSEL SLIDES (this is what the post shows): ' + $json.slidesText + '\\n' : '' }}"
     "STORY TITLE: {{ $json.title }}\n"
     "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n"
-    "CREATORS (verified accounts; empty = none found): {{ JSON.stringify($json.creators || []) }}\n\n"
+    "CREATORS (verified accounts; empty = none found): {{ JSON.stringify($json.creators || []) }}\n"
+    "END QUESTION: {{ $json.endQuestion || '' }}\n"
+    "SERIES: {{ $json.episode ? 'Who' + String.fromCharCode(39) + 's Next Nº' + String($json.episode).padStart(3, '0') : '' }}\n\n"
     "RULES\n- Same language as the voiceover. Native to each platform, never copy-paste the same text.\n"
     "- Hook in the first line (it is all people see). No clickbait the video does not deliver. Facts only from the voiceover/title.\n"
     "- SEARCH FIRST (2026 best practice: platforms are search engines, hashtags only categorize): put the main searchable keyword (designer / label / trend / coin name) in the first ~80 characters of every text.\n"
@@ -84,6 +88,8 @@ CAPTION_PROMPT = (
     "- instagram.text: hook line, 1-2 sentences of context, a question to drive comments, then 4-5 hashtags (Instagram hard cap is 5, never more): 1 broad + 2 niche + 2 specific (designer/label/event/city).\n"
     "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: keyword-rich 1-2 sentences + 3 hashtags (first 3 show above the title); youtube.tags: 5-8 plain keywords.\n"
     "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n"
+    "- If END QUESTION is given, the last line before the hashtags is exactly that two-option question (on instagram, tiktok, facebook and in the youtube description) - no other question in the caption.\n"
+    "- If SERIES is given, put it on its own line right after that question (like: Who's Next Nº012) on instagram, tiktok and facebook - written exactly like that, never as a hashtag.\n"
     "- Never tell people to swipe, scroll or 'see more' (no 'swipe through every slide', 'swipe for more'): end on the story itself or one real question.\n"
     "- SPELL EVERY NAME EXACTLY as in the voiceover / title (designers, labels, places) - also inside hashtags: #WillyChavarria, never a near-miss.\n"
     "- CREDIT THE CREATOR FIRST: in instagram.text tag the designer/label once with their exact @instagram handle from CREATORS; in tiktok.text use their exact @tiktok handle; "
@@ -131,7 +137,11 @@ const out = [];
 for (const net of p.networks) {
   const post = Object.assign({}, base, { providers: [{ network: net }] });
   if (p.kind === 'carousel') {
-    if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback; post.instagramData = { type: 'POST', isAiGenerated: false }; post.firstCommentText = igComment; }
+    if (net === 'instagram') { post.text = (cap.instagram && cap.instagram.text) || fallback; post.instagramData = { type: 'POST', isAiGenerated: false }; post.firstCommentText = igComment;
+      // collab invite: the carousel also appears on the designer's own profile once they accept (verified handle only;
+      // on the carousel, so an invite Instagram refuses can never cost us the Reel)
+      const collab = cr.filter(c => c.instagram).slice(0, 1).map(c => ({ username: c.instagram, deleted: false }));
+      if (collab.length) post.instagramData.collaborators = collab; }
     if (net === 'facebook') { post.text = (cap.facebook && cap.facebook.text) || fallback; post.facebookData = { type: 'POST' }; post.firstCommentText = fbComment; }
     let label = net;
     if (net === 'tiktok') {

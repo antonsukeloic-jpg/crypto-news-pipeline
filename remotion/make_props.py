@@ -84,6 +84,8 @@ channel = job.get('channel') or 'crypto'
 # 5HU photo carousel copy + designer accounts (FiveHuCarousel)
 if job.get('carousel'): out_obj['carousel'] = job['carousel']
 if job.get('creators'): out_obj['creators'] = job['creators']
+if job.get('episode'): out_obj['episode'] = int(job['episode'])          # 5HU series number (Who's Next Nº…)
+if job.get('end_question'): out_obj['end_question'] = str(job['end_question'])[:60]   # two-option question in the outro
 out_obj['channel'] = channel
 # 5HU: fixed brand sign-off ("Follow Šū, we find them first.") played after the voice; render_vps.sh copies music/*.mp3 into public/music
 so = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'music', '5hu_signoff.mp3')

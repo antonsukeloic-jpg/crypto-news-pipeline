@@ -40,15 +40,19 @@ const Media = ({scene, dur, i, from}) => {
   const bar = Math.floor(frame / (beat * 4));
   const f0 = FRAMINGS[(bar + i) % FRAMINGS.length];
   // real photos: keep the designer / the pieces in frame (softer zoom); wide shots sit on a blurred copy instead of being cropped
-  const fr = scene.real ? {z: 1 + (f0.z - 1) * 0.45, x: f0.x * 0.4, y: f0.y * 0.4} : f0;
+  // real photos: hard re-frame every bar toward the subject (face / piece from focus.py) - a visible new picture every ~1.8 s
+  const fz = [1.0, 1.28, 1.12, 1.4][(bar + i) % 4];
+  const fr = scene.real ? {z: fz, x: 0, y: 0} : f0;
+  const origin = scene.real && scene.focus ? (scene.focus.x * 100).toFixed(1) + '% ' + (scene.focus.y * 100).toFixed(1) + '%' : '50% 40%';
   const wide = scene.real && Number(scene.aspect) > 0.68;
-  const punch = interpolate(frame, [0, 7], [1.12, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+  // the very first frames of the video must be sharp and readable (owner data: 60-100% left within 3 s) - no punch, no glitch
+  const punch = i === 0 ? 1 : interpolate(frame, [0, 7], [1.12, 1.0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
   const drift = interpolate(frame, [0, dur], [1, 1.05]);
   // glitch on the cut: jitter + RGB-ish ghost for 6 frames
-  const glitch = frame < 6;
+  const glitch = i > 0 && frame < 6;
   const jx = glitch ? ((frame * 37) % 7 - 3) * 14 : 0;
   const base = {position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
-    scale: String(fr.z * punch * drift * kick), translate: (fr.x + jx) + 'px ' + fr.y + 'px',
+    scale: String(fr.z * punch * drift * kick), translate: (fr.x + jx) + 'px ' + fr.y + 'px', transformOrigin: origin,
     filter: 'contrast(1.14) saturate(0.88) brightness(0.95)'};
   if (wide) {
     // landscape photo: fill the frame and pan across it (Ken Burns), direction alternates per scene
@@ -132,7 +136,7 @@ const Grade = () => (
 );
 
 // ---- kinetic typography: words slam in (scale + blur), the key word gets a lime block, everything pumps on the kick
-const Headline = ({text, layout, accent, from}) => {
+const Headline = ({text, layout, accent, from, instant}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   if (!text) return null;
@@ -150,9 +154,9 @@ const Headline = ({text, layout, accent, from}) => {
       fontWeight: L.weight, fontSize: L.size, lineHeight: 0.95, letterSpacing: L.upper ? -4 : -2, color: BRAND.white,
       textTransform: L.upper ? 'uppercase' : 'none', textShadow: '0 2px 2px rgba(0,0,0,0.55), 0 6px 26px rgba(0,0,0,0.75), 0 0 60px rgba(0,0,0,0.5)', scale: String(pump)}}>
       {words.map((w, k) => {
-        const p = spring({frame: frame - 3 - k * 3, fps, config: {damping: 13, mass: 0.6, stiffness: 180}});
+        const p = instant ? 1 : spring({frame: frame - 3 - k * 3, fps, config: {damping: 13, mass: 0.6, stiffness: 180}});
         const isKey = k === key;
-        const fill = interpolate(frame - 6 - k * 3, [0, 6], [0, 100], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+        const fill = instant ? 100 : interpolate(frame - 6 - k * 3, [0, 6], [0, 100], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
         return (
           <span key={k} style={{display: 'inline-block', marginRight: '0.22em', position: 'relative',
             scale: String(interpolate(p, [0, 1], [2.1, 1])), opacity: Math.min(1, p * 1.4),
@@ -167,11 +171,11 @@ const Headline = ({text, layout, accent, from}) => {
   );
 };
 
-const Header = ({stamp, accent}) => {
+const Header = ({stamp, accent, episode}) => {
   const frame = useCurrentFrame();
   const {durationInFrames, fps} = useVideoConfig();
   const prog = frame / Math.max(1, durationInFrames - 1);
-  const intro = spring({frame, fps, config: {damping: 16}});
+  const intro = 1;   // header is there from the first frame
   return (
     <>
       <div style={{position: 'absolute', top: 150, left: 72, right: 72, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -180,7 +184,7 @@ const Header = ({stamp, accent}) => {
           5HU<span style={{display: 'inline-block', width: 16, height: 16, borderRadius: 8, background: BRAND.lime, marginLeft: 5}} />
         </div>
         <div style={{fontFamily: mono, fontSize: 24, letterSpacing: 3, color: BRAND.white, opacity: 0.9}}>
-          WHO'S NEXT <span style={{color: accent}}>●</span> {stamp}
+          WHO'S NEXT <span style={{color: accent}}>●</span> {episode ? 'Nº' + String(episode).padStart(3, '0') : stamp}
         </div>
       </div>
       <div style={{position: 'absolute', top: 236, left: 72, right: 72, height: 4, background: 'rgba(255,255,255,0.22)'}}>
@@ -272,13 +276,35 @@ const Subs = ({caps}) => {
   );
 };
 
-const Outro = () => {
+const Outro = ({question, episode}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const bg = interpolate(frame, [0, 5], [0, 1], {extrapolateRight: 'clamp'});
   const p = spring({frame: frame - 2, fps, config: {damping: 14}});
   const q = spring({frame: frame - 10, fps, config: {damping: 18}});
   const split = interpolate(frame, [0, 14], [26, 0], {extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+  // two-option question ("Wear it or pass?") -> two big lines, the first on a lime block; no question -> the 5HU logo outro
+  const qs = String(question || '').replace(/[?.!…]+$/, '').trim();
+  const parts = qs ? qs.split(/\s+or\s+/i) : [];
+  const series = 'WHO\'S NEXT' + (episode ? ' Nº' + String(episode).padStart(3, '0') : '') + ' · FOLLOW 5HU';
+  if (parts.length === 2) {
+    const big = (t, k) => {
+      const pk = spring({frame: frame - 2 - k * 6, fps, config: {damping: 12, mass: 0.7}});
+      return (
+        <div style={{fontFamily: inter, fontWeight: 900, fontSize: t.length > 12 ? 108 : 140, lineHeight: 0.95, letterSpacing: -5, textTransform: 'uppercase',
+          color: k === 0 ? BRAND.black : BRAND.white, background: k === 0 ? BRAND.lime : 'transparent', padding: k === 0 ? '4px 22px 10px' : '8px 0 0',
+          display: 'inline-block', scale: String(interpolate(pk, [0, 1], [1.5, 1])), opacity: pk}}>{k === 0 ? t : 'or ' + t + '?'}</div>
+      );
+    };
+    return (
+      <AbsoluteFill style={{background: 'rgba(10,10,10,' + bg + ')', justifyContent: 'center', alignItems: 'flex-start', paddingLeft: 90, paddingRight: 200}}>
+        {big(parts[0], 0)}
+        {big(parts[1], 1)}
+        <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 5, color: BRAND.white, marginTop: 60, opacity: q}}>{series}</div>
+        <div style={{fontFamily: serif, fontStyle: 'italic', fontSize: 64, color: BRAND.lime, marginTop: 14, opacity: q}}>we find them first.</div>
+      </AbsoluteFill>
+    );
+  }
   const logo = (color, dx, extra) => (
     <div style={{position: 'absolute', fontFamily: inter, fontWeight: 900, fontSize: 300, letterSpacing: -16, color, lineHeight: 0.9,
       translate: dx + 'px 0px', ...extra}}>5HU</div>
@@ -293,7 +319,7 @@ const Outro = () => {
           scale: String(spring({frame: frame - 8, fps, config: {damping: 9}}))}} />
       </div>
       <div style={{fontFamily: serif, fontStyle: 'italic', fontSize: 84, color: BRAND.lime, marginTop: 16, opacity: q, translate: '0px ' + interpolate(q, [0, 1], [30, 0]) + 'px'}}>we find them first.</div>
-      <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 5, color: BRAND.white, marginTop: 40, opacity: q}}>FOLLOW FOR THE NEXT BIG NAME</div>
+      <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 5, color: BRAND.white, marginTop: 40, opacity: q}}>{series}</div>
     </AbsoluteFill>
   );
 };
@@ -315,13 +341,13 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
       <BarFlash from={from} />
       <Grade />
       <Center center={s.center} accent={accent} compact={!!s.real} />
-      <Headline text={s.on_screen_text} layout={layout} accent={accent} from={from} />
+      <Headline text={s.on_screen_text} layout={layout} accent={accent} from={from} instant={i === 0} />
       {i > 0 && <Sequence durationInFrames={14}><Impact kind={kind} accent={accent} /></Sequence>}
     </AbsoluteFill>
   );
 };
 
-export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec}) => {
+export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec, episode, end_question}) => {
   BPM = Number(bpm) || 132;
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
@@ -345,9 +371,9 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
         </Sequence>
       ))}
       <Grain />
-      <Header stamp={stampFrom(voice)} accent={accent} />
+      <Header stamp={stampFrom(voice)} accent={accent} episode={episode} />
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
-      <Sequence from={outroFrom}><Outro /></Sequence>
+      <Sequence from={outroFrom}><Outro question={end_question} episode={episode} /></Sequence>
       <Audio src={staticFile(voice)} />
       {signoff && <Sequence from={outroFrom + 5}><Audio src={staticFile(signoff)} volume={1.15} /></Sequence>}
       <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {
