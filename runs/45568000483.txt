@@ -1,0 +1,16 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+HEAD 13f6646 Growth Agent log: record the val
+log fixed: words_max 28 -> 26
+TG up
+GROWTH_WF_IMPORTED
+GROWTH_WF_LIVE (n8n restarted)
+FLAGS: autopost_5hu quiet_5hu 
+tOGl1tIRFxUJZJKA|Crypto Video Pipeline
+LtNewsPipeLine01|LT News Pipeline
+VikopsAdPipeln01|Vikops Ad Pipeline
+FiveHuFashion001|5HU Fashion News
+SocialPublish001|Social Publish (Metricool)
+FiveHuGrowth0001|5HU Growth Agent
+[('5HU Fashion News', 1), ('5HU Growth Agent', 1), ('Crypto Video Pipeline', 1), ('LT News Pipeline', 1), ('Social Publish (Metricool)', 1), ('Vikops Ad Pipeline', 1)]
+active
+webhook set: True ['message', 'callback_query'] last_error: None
