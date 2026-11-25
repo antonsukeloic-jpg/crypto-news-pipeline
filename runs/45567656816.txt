@@ -1,0 +1,34 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+1146 /root/shared/test_growth_exec.log
+n8n Task Broker ready on 127.0.0.1, port 5684
+Failed to start Python task runner in internal mode. because Python 3 is missing from this system. Launching a Python runner in internal mode is intended only for debugging and is not recommended for production. Users are encouraged to deploy in external mode. See: https://docs.n8n.io/hosting/config
+[license SDK] Skipping renewal on init: renewOnInit is disabled in config
+[license SDK] Skipping renewal on init: license cert is not initialized
+Error executing workflow. See log messages for details.
+Execution error:
+====================================
+Missing node to start execution
+Please make sure the workflow you're calling contains an Execute Workflow Trigger node
+CliWorkflowOperationError: Missing node to start execution
+    at /usr/local/lib/node_modules/n8n/src/utils.ts:54:9
+    at Execute.run (/usr/local/lib/node_modules/n8n/src/commands/execute.ts:84:44)
+    at CommandRegistry.execute (/usr/local/lib/node_modules/n8n/src/command-registry.ts:99:4)
+    at /usr/local/lib/node_modules/n8n/bin/n8n:67:2
+Missing node to start execution
+...
+n8n Task Broker ready on 127.0.0.1, port 5684
+Failed to start Python task runner in internal mode. because Python 3 is missing from this system. Launching a Python runner in internal mode is intended only for debugging and is not recommended for production. Users are encouraged to deploy in external mode. See: https://docs.n8n.io/hosting/configuration/task-runners/#setting-up-external-mode
+[license SDK] Skipping renewal on init: renewOnInit is disabled in config
+[license SDK] Skipping renewal on init: license cert is not initialized
+Error executing workflow. See log messages for details.
+
+Execution error:
+====================================
+Missing node to start execution
+Please make sure the workflow you're calling contains an Execute Workflow Trigger node
+CliWorkflowOperationError: Missing node to start execution
+    at /usr/local/lib/node_modules/n8n/src/utils.ts:54:9
+    at Execute.run (/usr/local/lib/node_modules/n8n/src/commands/execute.ts:84:44)
+    at CommandRegistry.execute (/usr/local/lib/node_modules/n8n/src/command-registry.ts:99:4)
+    at /usr/local/lib/node_modules/n8n/bin/n8n:67:2
+Missing node to start execution
