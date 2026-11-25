@@ -1,0 +1,47 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+HEAD c533739 Growth Agent: add a Run Now (CLI
+TG up
+GROWTH_WF_IMPORTED
+GROWTH_WF_LIVE (n8n restarted)
+exit 0
+"status": "success"
+"lastNodeExecuted": "Write Files"
+--- strategy:
+{
+ "story_focus": "",
+ "hook_notes": "",
+ "caption_notes": "",
+ "words_min": 22,
+ "words_max": 26,
+ "carousel": true,
+ "tiktok_carousel": "ab",
+ "updated": "2026-11-25T07:24:47.770Z"
+}
+--- log:
+{
+ "at": "2026-11-25T07:24:47.770Z",
+ "judged": 8,
+ "data": {
+  "instagram": 11,
+  "tiktok": 19,
+  "youtube": 7,
+  "facebook": 11
+ },
+ "observations": [
+  "Instagram skipRate is high across all posts (60–85%); ep5 had the lowest skipRate (60.7%) and also the shortest video (19s), suggesting shorter length helps retention.",
+  "Instagram avgWatchSec vs length: ep3 watched 4.5s of 21s (21%), ep8 watched 4.4s of 25s (18%) — both among the better performers; ep4 watched 2.2s of 27s (8%), worst ratio.",
+  "TikTok views are the clearest distribution signal: ep6–10 all hit 240–273 views vs ep3–5 at 73–89, suggesting the account is gaining momentum or algo favour on TikTok.",
+  "No saves or shares recorded on any post across any platform — engagement beyond comments is zero; comments are almost always exactly 1, likely auto or bot.",
+  "Facebook avgWatchSec is notably higher on ep8 (5.0s/25s = 20%) and ep9 (4.4s/30s = 15%), both with strong hooks referencing specific well-known brands/places.",
+  "TikTok carousel data: photo variant posts (ep7 261, ep8 246, ep11 164) vs slideshow (ep6 252, ep9 234, ep10 242) — too close to call with only 4 of each; keeping ab test."
+ ],
+ "changes": [
+  {
+   "knob": "words_max",
+   "from": 28,
+   "to": 22,
+   "why": "Shorter videos correlate with better Instagram skip/watch ratios: ep5 at 19s had the lowest skipRate (60.7%) while ep4 at 27s and ep7 at 32s had the worst (83–85%). Capping at 22 words targets ~16s video, reducing drop-off risk. words_min stays 16 to keep flexibility."
+  }
+ ],
+ "watching": "Whether reducing max length to 22 words lowers Instagram skipRate below 70% and raises avgWatchSec/lenSec ratio above 20% in the next 3–4 judged posts. Also watching TikTok carousel photo vs slideshow — need 4 judged posts of each before deciding."
+}
