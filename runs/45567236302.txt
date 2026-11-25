@@ -1,0 +1,16 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+now 07:19:38
+0
+"status": "success"
+"_tooLong": "no"
+"_words": 27
+ [07:16:40] rendering...
+ [07:16:40] 5HU episode Nº13
+ props ok channel=5hu scenes=5 btc=None change=None
+ [07:17:58] OK 5hu_video_1795590972500.mp4
+ [07:17:58] HELD (hold_5hu): 5hu_video_1795590972500.mp4 rendered, not posted
+job /root/shared/outputs/5hu_video_1795590972500.job.json
+VO words: 27 | Nike just put a heel on the Jordan 1. Converse did it too. Even Onitsuka Tiger is coming. The sneaker-heel… it’s everywhere now. Wear it or pass?
+episode 13 | q: Wear it or pass?
+[(2, 'Jordan 1. With a heel.'), (3, 'Converse x Vaquera VX-1'), (3, 'Knee-high sneaker-boots. 2027.'), (3, 'From Y2K to right now'), (14, 'Wear it or pass?')]
+/root/shared/outputs/5hu_video_1795590972500.mp4 16.400000
