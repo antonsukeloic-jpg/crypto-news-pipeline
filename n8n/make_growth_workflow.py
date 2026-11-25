@@ -131,7 +131,7 @@ PROMPT = (
     "keep what works, undo what made things worse.\n\n"
     "WHAT DRIVES GROWTH (in this order): 1) people not swiping away in the first 2-3 s (Instagram skipRate lower = better, igWatchPct = "
     "avg watch time as % of length, YouTube avgViewSec, TikTok views as a proxy for distribution), 2) shares and saves per view, "
-    "3) comments (our videos end with a two-option question), 4) follows/likes. collabInvite = the Reel invited the featured designer as an "
+    "3) comments (our videos end with a two-option question; Instagram/Facebook counts include our own first comment when we posted one), 4) follows/likes. collabInvite = the Reel invited the featured designer as an "
     "Instagram collaborator (if they accept, it reaches their followers).\n\n"
     "TASK 1 - REVIEW each post in TO_REVIEW (it has 2+ days of numbers) against OUR BASELINE (median of our own judged posts): "
     "verdict better | average | worse, why (one sentence with the numbers that decide it), and lesson (one short, general, reusable rule "
@@ -139,7 +139,7 @@ PROMPT = (
     "Compare with similar past posts in RECENT REVIEWS; don't invent causes the data can't support.\n"
     "TO_REVIEW:\n{{ JSON.stringify($json.toReview) }}\nOUR BASELINE:\n{{ JSON.stringify($json.baseline) }}\n"
     "RECENT REVIEWS (oldest first):\n{{ JSON.stringify($json.recentReviews) }}\n\n"
-    "TASK 2 - PLAYBOOK: return the full updated list of at most 8 lessons (each max 140 characters) that the story picker and scriptwriter "
+    "TASK 2 - PLAYBOOK: return the full updated list of at most 8 lessons (each max 140 characters, no episode numbers, written as an instruction 'do X' / 'avoid Y') that the story picker and scriptwriter "
     "follow. Keep lessons that keep holding, merge duplicates, drop or rewrite any that newer posts contradicted. A lesson needs support from "
     "at least 2 posts, or 1 post that was far from the baseline. Current playbook: {{ JSON.stringify($json.strategy.lessons || []) }}\n\n"
     "TASK 3 - AT MOST ONE CHANGE to the strategy, only if the evidence supports it. "
@@ -184,7 +184,11 @@ for (const r of (Array.isArray(out.reviews) ? out.reviews : [])) {
     why: clean(r.why, 300), lesson: clean(r.lesson, 160), score: p.score });
 }
 // 2) playbook
-if (ok && Array.isArray(out.lessons)) next.lessons = out.lessons.map(x => clean(x, 160)).filter(Boolean).slice(0, 8);
+// lessons go into the prompts: no episode refs, whole clauses only (never cut mid-word)
+const lessonClean = (x) => { let s = clean(x, 600).replace(/\s*\([^)]*\b(?:ep|episode|N\u00ba)\s?\d[^)]*\)/gi, '').replace(/\s*\([^)]*$/, '').trim();
+  if (s.length > 170) { const cut = s.slice(0, 170); const i = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('; '), cut.lastIndexOf(', ')); s = i > 60 ? cut.slice(0, i) + '.' : cut.slice(0, cut.lastIndexOf(' ')) + '…'; }
+  return s; };
+if (ok && Array.isArray(out.lessons)) next.lessons = out.lessons.map(lessonClean).filter(Boolean).slice(0, 8);
 // 3) at most one change; a knob changes again only after 4 judged posts, except an explicit revert to an earlier value
 const isRevert = (k, v) => (c.experiments || []).some(e => e.knob === k && JSON.stringify(e.from) === JSON.stringify(v));
 for (const ch of (Array.isArray(out.changes) ? out.changes : []).slice(0, 1)) {
