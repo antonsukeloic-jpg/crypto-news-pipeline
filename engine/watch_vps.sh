@@ -148,6 +148,10 @@ do_publish() {  # $1 = job json, $2 = public video URL
   [ -s "$tf" ] && thumb="$(dirname "$url")/$(basename "$url" .mp4)_cover.jpg"
   local payload; payload=$(python3 - "$1" "$url" "$thumb" <<'P'
 import json,sys,os,re
+def strategy():
+    try: st=json.load(open("/root/shared/5hu_strategy.json"))
+    except Exception: st={}
+    return {"captionNotes":str(st.get("caption_notes",""))[:600],"tiktokCarousel":st.get("tiktok_carousel","ab")}
 j=json.load(open(sys.argv[1]))
 credits=[]
 for s in j.get("scenes",[]):
@@ -156,13 +160,14 @@ for s in j.get("scenes",[]):
 print(json.dumps({"job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
   "thumbnailUrl":sys.argv[3],"creators":j.get("creators",[]),"credits":credits[:4],
   "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[]),
-  "episode":j.get("episode"),"endQuestion":j.get("end_question","")}))
+  "episode":j.get("episode"),"endQuestion":j.get("end_question",""),**strategy()}))
 P
 )
   log "publishing $ch -> Metricool ($url)"
   local resp; resp=$(curl -sS -m 180 -H 'Content-Type: application/json' -d "$payload" https://n8n.visualforma.cloud/webhook/social-publish 2>&1)
   log "publish response: ${resp:0:400}"
-  tg_text "$ch: $(publish_report "$resp" "live in ~3 min")"
+  local rep; rep=$(publish_report "$resp" "live in ~3 min")
+  if [ "${QUIET:-0}" != 1 ] || echo "$rep" | grep -qE "❌|⚠️|⏭"; then tg_text "$ch: $rep"; else log "published (quiet): ${rep//$'\n'/ | }"; fi
   # the series number counts only once the Reel is really out
   if [ "$ch" = 5hu ]; then
     local epv; epv=$(python3 -c "
@@ -185,6 +190,10 @@ print(json.dumps({'ts':int(time.time()*1000),'title':(j.get('meta') or {}).get('
     local ssu=""; [ -s "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)_slideshow.mp4" ] && ssu="$(dirname "$url")/$(basename "$url" .mp4)_slideshow.mp4"
     local cp; cp=$(python3 - "$1" "$(dirname "$url")" "$slides" "$ssu" <<'P'
 import json,sys,os,re
+def strategy():
+    try: st=json.load(open("/root/shared/5hu_strategy.json"))
+    except Exception: st={}
+    return {"captionNotes":str(st.get("caption_notes",""))[:600],"tiktokCarousel":st.get("tiktok_carousel","ab")}
 j=json.load(open(sys.argv[1])); base=sys.argv[2]; files=sys.argv[3].split(); ssu=sys.argv[4] if len(sys.argv)>4 else ""
 c=j.get("carousel") or {}
 txt="\n".join(f"{i+1}. {s.get('title','')} — {s.get('body','')}" for i,s in enumerate(c.get("slides",[])))
@@ -196,12 +205,13 @@ print(json.dumps({"kind":"carousel","job":re.sub(r'^[a-f0-9]+__','',os.path.base
   "images":[base+"/"+os.path.basename(f) for f in files],"slideshowUrl":ssu,"delayMin":int(os.environ.get("CAROUSEL_DELAY_MIN","180")),
   "slidesText":("COVER: "+str(c.get("cover",""))+"\n"+txt)[:2000],"creators":j.get("creators",[]),"credits":credits[:4],
   "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[]),
-  "episode":j.get("episode"),"endQuestion":j.get("end_question","")}))
+  "episode":j.get("episode"),"endQuestion":j.get("end_question",""),**strategy()}))
 P
 )
     resp=$(curl -sS -m 180 -H 'Content-Type: application/json' -d "$cp" https://n8n.visualforma.cloud/webhook/social-publish 2>&1)
     log "carousel publish response: ${resp:0:400}"
-    tg_text "$ch carousel: $(publish_report "$resp" "goes live $(TZ=Europe/Vilnius date -d "+${CAROUSEL_DELAY_MIN:-180} min" +%H:%M)")"
+    rep=$(publish_report "$resp" "goes live $(TZ=Europe/Vilnius date -d "+${CAROUSEL_DELAY_MIN:-180} min" +%H:%M)")
+    if [ "${QUIET:-0}" != 1 ] || echo "$rep" | grep -qE "❌|⚠️|⏭"; then tg_text "$ch carousel: $rep"; else log "carousel scheduled (quiet): ${rep//$'\n'/ | }"; fi
   fi
   find "$ROOT/public" -mindepth 1 -maxdepth 1 -type d -mtime +5 -exec rm -rf {} + 2>/dev/null
 }
@@ -319,8 +329,15 @@ while true; do
       touch "$ARCH/.done_$outbase"; log "OK $outbase"
       cap=$(python3 -c "import json;j=json.load(open('$dest'));print({'lt':'🇱🇹 ','vikops':'🪨 VIKOPS · ','5hu':'👗 5HU · '}.get(j.get('channel'),'')+j.get('voiceover','')[:900])" 2>/dev/null)
       ch=$(job_channel "$dest")
-      if [ -n "$ch" ] && [ -f "/root/stack/autopost_$ch" ] && [ -f "/root/stack/approve_$ch" ]; then
+      if [ -n "$ch" ] && [ -f "/root/stack/hold_$ch" ]; then
+        # render-only test: keep the video, post nothing, message nobody
+        log "HELD (hold_$ch): $outbase rendered, not posted"
+        cp "$dest" "$ROOT/outputs/$(basename "$outp" .mp4).job.json" 2>/dev/null
+      elif [ -n "$ch" ] && [ -f "/root/stack/autopost_$ch" ] && [ -f "/root/stack/approve_$ch" ]; then
         request_approval "$dest" "$ROOT/$outp" "$cap"
+      elif [ -n "$ch" ] && [ -f "/root/stack/quiet_$ch" ]; then
+        # fully automatic: no video / reports in Telegram, only errors (owner 2026-11-25)
+        QUIET=1 publish "$dest" "$ROOT/$outp"
       else
         send_telegram "$ROOT/$outp" "$cap"
         [ -n "$TG_LAST_MSG" ] || tg_queue_video "$ROOT/$outp" "$cap"
@@ -328,6 +345,7 @@ while true; do
       fi
     else
       log "RENDER FAILED $outbase (see remotion/render_error.log)"
+      tg_text "⚠️ $(job_channel "$dest"): a video failed to render ($outbase). Nothing was posted for this slot."
     fi
     mv "$dest" "$ARCH/$name" 2>/dev/null
   fi

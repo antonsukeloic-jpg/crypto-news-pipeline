@@ -54,11 +54,17 @@ let ttVariant = '';
 if (kind === 'carousel' && nets.includes('tiktok')) {
   const n = sd.ttCarouselN || 0; sd.ttCarouselN = n + 1;
   ttVariant = slideshowUrl && (n % 4 === 1 || n % 4 === 2) ? 'slideshow' : 'photo';
+  // the Growth Agent can settle the A/B: photo | slideshow | off ('ab' = keep alternating)
+  const pick = String(b.tiktokCarousel || 'ab');
+  if (pick === 'photo') ttVariant = 'photo';
+  if (pick === 'slideshow' && slideshowUrl) ttVariant = 'slideshow';
 }
+if (kind === 'carousel' && String(b.tiktokCarousel || '') === 'off') { const k = nets.indexOf('tiktok'); if (k >= 0) nets.splice(k, 1); ttVariant = ''; }
 return [{ json: { skip: false, kind, images, slideshowUrl, ttVariant, delayMin, job: b.job, channel: b.channel, blogId: ch.blogId, networks: nets, style: ch.style,
   slidesText: kind === 'carousel' ? String(b.slidesText || '').slice(0, 2000) : '',
   episode: Number.isInteger(Number(b.episode)) && Number(b.episode) > 0 && Number(b.episode) < 10000 ? Number(b.episode) : 0,
   endQuestion: String(b.endQuestion || '').replace(/[\r\n"]+/g, ' ').trim().slice(0, 60),
+  captionNotes: String(b.captionNotes || '').replace(/https?:\/\/\S+/g, '').replace(/[\r\n]+/g, ' ').slice(0, 600),
   videoUrl: kind === 'video' ? b.videoUrl : '', voiceover: String(b.voiceover || '').slice(0, 1500), title: String(b.title || '').slice(0, 200),
   hashtags: (b.hashtags || []).slice(0, 10),
   thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
@@ -78,7 +84,8 @@ CAPTION_PROMPT = (
     "SUGGESTED HASHTAGS: {{ ($json.hashtags || []).join(' ') }}\n"
     "CREATORS (verified accounts; empty = none found): {{ JSON.stringify($json.creators || []) }}\n"
     "END QUESTION: {{ $json.endQuestion || '' }}\n"
-    "SERIES: {{ $json.episode ? 'Who' + String.fromCharCode(39) + 's Next Nº' + String($json.episode).padStart(3, '0') : '' }}\n\n"
+    "SERIES: {{ $json.episode ? 'Who' + String.fromCharCode(39) + 's Next Nº' + String($json.episode).padStart(3, '0') : '' }}\n"
+    "LEARNED FROM OUR OWN NUMBERS (follow it; it never overrides the rules): {{ $json.captionNotes || 'nothing yet' }}\n\n"
     "RULES\n- Same language as the voiceover. Native to each platform, never copy-paste the same text.\n"
     "- Hook in the first line (it is all people see). No clickbait the video does not deliver. Facts only from the voiceover/title.\n"
     "- SEARCH FIRST (2026 best practice: platforms are search engines, hashtags only categorize): put the main searchable keyword (designer / label / trend / coin name) in the first ~80 characters of every text.\n"

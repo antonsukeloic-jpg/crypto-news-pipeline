@@ -358,6 +358,46 @@ w["nodes"] += [
 ]
 w["connections"]["Save Music"] = {"main": [[{"node": "Creator Lookup", "type": "main", "index": 0}]]}
 w["connections"]["Creator Lookup"] = {"main": [[{"node": "Creators", "type": "main", "index": 0}]]}
+# ---- learned strategy (written by the 5HU Growth Agent from our own metrics; /data/shared/5hu_strategy.json).
+# Read right after the triggers; every prompt below can use $('Strategy').first().json. Missing/broken file -> safe defaults.
+_STRAT_JS = r"""
+const D = { story_focus: '', hook_notes: '', caption_notes: '', words_min: 22, words_max: 28, carousel: true, tiktok_carousel: 'ab' };
+let s = {};
+try { const buf = await this.helpers.getBinaryDataBuffer(0, 'data'); s = JSON.parse(buf.toString('utf8')) || {}; } catch (e) { s = {}; }
+const t = (x, n) => String(x || '').replace(/https?:\/\/\S+/g, '').slice(0, n);
+const wmin = Math.min(30, Math.max(16, parseInt(s.words_min, 10) || D.words_min));
+const wmax = Math.min(34, Math.max(wmin + 4, parseInt(s.words_max, 10) || D.words_max));
+return [{ json: { story_focus: t(s.story_focus, 600), hook_notes: t(s.hook_notes, 600), caption_notes: t(s.caption_notes, 600),
+  words_min: wmin, words_max: wmax, carousel: s.carousel !== false,
+  tiktok_carousel: ['ab', 'photo', 'slideshow', 'off'].includes(s.tiktok_carousel) ? s.tiktok_carousel : 'ab' } }];
+"""
+_cf = by_name["Combine Feeds"]["position"]
+w["nodes"] += [
+    {"parameters": {"operation": "read", "fileSelector": "/data/shared/5hu_strategy.json", "options": {}},
+     "type": "n8n-nodes-base.readWriteFile", "typeVersion": 1, "position": [_cf[0] - 440, _cf[1] - 200], "id": str(uuid.uuid4()),
+     "name": "Read Strategy", "onError": "continueRegularOutput", "alwaysOutputData": True, "executeOnce": True},
+    {"parameters": {"jsCode": _STRAT_JS}, "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [_cf[0] - 220, _cf[1] - 200],
+     "id": str(uuid.uuid4()), "name": "Strategy", "alwaysOutputData": True},
+]
+for _t in ("Every Hour", "Run Now (CLI)"):
+    w["connections"][_t] = {"main": [[{"node": "Read Strategy", "type": "main", "index": 0}]]}
+w["connections"]["Read Strategy"] = {"main": [[{"node": "Strategy", "type": "main", "index": 0}]]}
+w["connections"]["Strategy"] = {"main": [[{"node": "Combine Feeds", "type": "main", "index": 0}]]}
+_LEARN = "{{ (() => { try { return $('Strategy').first().json; } catch (e) { return {}; } })()"
+_sel = by_name["Select Story"]["parameters"]["messages"]["values"][0]
+_sel["content"] = _sel["content"].replace("for a 20-30 second video.", "for a 12-18 second video.") + (
+    "\n\nLEARNED FROM OUR OWN NUMBERS (use it to choose between good candidates; it never overrides the rules above):\n"
+    + _LEARN + ".story_focus || 'nothing yet' }}")
+_scr = by_name["Message a model"]["parameters"]["messages"]["values"][0]
+assert _scr["content"].count('voiceover: 22-28 words. HARD LIMIT: count the words before answering; if more than 30, rewrite shorter.') == 1
+_scr["content"] = _scr["content"].replace(
+    'voiceover: 22-28 words. HARD LIMIT: count the words before answering; if more than 30, rewrite shorter.',
+    "voiceover: " + _LEARN + ".words_min || 22 }}-" + _LEARN + ".words_max || 28 }} words. HARD LIMIT: count the words before answering; if more than "
+    + _LEARN + ".words_max ? $('Strategy').first().json.words_max + 2 : 30 }}, rewrite shorter.")
+_scr["content"] = _scr["content"].replace("\n\nVISUAL RULES (visual.query, English)",
+    "\n- LEARNED FROM OUR OWN NUMBERS (follow it; it never overrides the rules above): " + _LEARN + ".hook_notes || 'nothing yet' }}\n\nVISUAL RULES (visual.query, English)", 1)
+assert "LEARNED FROM OUR OWN NUMBERS (follow it" in _scr["content"]
+
 # ---- photo carousel copy (posted ~3 h after the Reel): goes deeper than the video, facts only from the article
 _CAR_PROMPT = (
     "=You write the slides of a 5HU photo carousel (Instagram / TikTok / Facebook) that goes DEEPER than our short video about the same story. "
@@ -387,7 +427,8 @@ by_name["Make Job File"]["parameters"]["jsCode"] = (
     "try { const raw = $('Carousel Copy').first().json.content[0].text; const c = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));\n"
     "  const t = (x, n) => String(x || '').replace(/\\s+/g, ' ').trim().slice(0, n);\n"
     "  const slides = (Array.isArray(c.slides) ? c.slides : []).map(s => ({ title: t(s.title, 60), body: t(s.body, 240) })).filter(s => s.title && s.body).slice(0, 4);\n"
-    "  if (slides.length >= 3) { const j = JSON.parse(txt); j.carousel = { cover: t(c.cover, 50), slides }; txt = JSON.stringify(j); } } catch (e) {}\n"
+    "  const on = (() => { try { return $('Strategy').first().json.carousel !== false; } catch (e) { return true; } })();\n"
+    "  if (on && slides.length >= 3) { const j = JSON.parse(txt); j.carousel = { cover: t(c.cover, 50), slides }; txt = JSON.stringify(j); } } catch (e) {}\n"
     "try { const raw = $('Message a model').first().json.content[0].text; const m = raw.match(/\"end_question\"\\s*:\\s*\"([^\"]{3,60})\"/);\n"
     "  if (m) { const j = JSON.parse(txt); j.end_question = m[1].trim(); txt = JSON.stringify(j); } } catch (e) {}\n"
     "const name = $('Code in JavaScript').first().json.jobFile;\n"
