@@ -1,0 +1,48 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+FLAGS: autopost_5hu hold_5hu quiet_5hu 
+HEAD 6d0a53f Fully automatic 5HU: quiet mode (Telegram only on errors), render-only hold mode, learned strategy file read by the 5HU + publish workflows, 5HU Growth Agent (twice a week, own metrics -> bounded strategy changes, logged)
+WATCHER active
+featured rows: 10 | with accounts: 3 | episode counter: 12
+--- featured:
+{"ts": 1795191634488, "title": "", "hook": "", "creators": [], "episode": 3}
+{"ts": 1795242033422, "title": "", "hook": "", "creators": [{"name": "RARE Collective", "role": "label", "instagram": "rare_berlin", "tiktok": "", "website": ""
+{"ts": 1795278024102, "title": "", "hook": "", "creators": [{"name": "AKILA", "role": "label", "instagram": "akila.la", "tiktok": "", "website": ""}], "episode"
+{"ts": 1795328426089, "title": "", "hook": "", "creators": [], "episode": 6}
+{"ts": 1795364430590, "title": "", "hook": "", "creators": [], "episode": 7}
+{"ts": 1795414830451, "title": "", "hook": "", "creators": [{"name": "A BATHING APE® (BAPE)", "role": "label", "instagram": "bape_japan", "tiktok": "", "websit
+{"ts": 1795450831629, "title": "", "hook": "", "creators": [], "episode": 9}
+{"ts": 1795501228366, "title": "", "hook": "", "creators": [], "episode": 10}
+{"ts": 1795537228181, "title": "", "hook": "", "creators": [], "episode": 11}
+{"ts": 1795587626587, "title": "", "hook": "", "creators": [], "episode": 12}
+episode=12
+TG getMe ok = True
+wf rows: [('PplxSmokeTest001', 'Perplexity smoke test', 0), ('PplxSmokeTest002', 'Perplexity smoke test', 0), ('PplxSmokeTest003', 'Perplexity smoke test 3', 0), ('PplxSmokeTest004', 'Perplexity smoke test 4', 0)]
+workflows_tags.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+webhook_entity.workflowId rows=0 fks=[]
+shared_workflow.workflowId rows=4 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+processed_data.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+insights_metadata.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'SET NULL')]
+chat_hub_messages.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'SET NULL')]
+workflow_statistics.workflowId rows=6 fks=[]
+workflow_dependency.workflowId rows=16 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_published_version.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'RESTRICT'), ('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+chat_hub_sessions.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'SET NULL')]
+workflow_builder_session.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_publish_history.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+ai_builder_temporary_workflow.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+evaluation_config.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+evaluation_collection.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+test_run.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_history.workflowId rows=4 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+execution_entity.workflowId rows=5 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_publication_trigger_status.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_review_request_workflow.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+poller_state.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_publication_outbox.workflowId rows=0 fks=[]
+agent_workflow_dependency.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_publication_retry_state.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+migration_finding.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+agent_background_job.workflowId rows=0 fks=[]
+migration_workflow_owner.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+workflow_suggestion.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
+self_healing_result.workflowId rows=0 fks=[('workflow_entity', 'workflowId', 'id', 'CASCADE')]
