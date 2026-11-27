@@ -1,0 +1,8 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+: [08:43:05] OK 5hu_video_1795768886431.mp4
+: [08:43:05] HELD (hold_5hu): 5hu_video_1795768886431.mp4 rendered, not posted
+/root/shared/outputs/5hu_video_1795768886431.job.json
+VO 24 w | She wore backless to show one necklace. Athena Calderone, New York. Chanel atelier jewels, guided by intention. Every piece earned. Timeless or too quiet?
+q: Timeless or too quiet? | scene1: One dress. One necklace.
+voice dur 13.557551
+video dur 16.900000
