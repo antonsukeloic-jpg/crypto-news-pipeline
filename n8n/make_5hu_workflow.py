@@ -428,7 +428,14 @@ w["connections"]["Carousel Copy"] = {"main": [[{"node": "Split Scenes", "type": 
 by_name["Make Job File"]["parameters"]["jsCode"] = (
     "let txt = $('Add Captions').first().json.job_json;\n"
     "try { const j = JSON.parse(txt); const cr = ($('Creators').first().json.creators) || []; if (cr.length) { j.creators = cr; txt = JSON.stringify(j); } } catch (e) {}\n"
-    "try { const raw = $('Carousel Copy').first().json.content[0].text; const c = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));\n"
+    "// model JSON sometimes has bare ASCII quotes inside a value (colorway \"moss\" killed Nº016's carousel): turn them into typographic quotes\n"
+    "const repair = (s) => { let o = '', inS = false; for (let i = 0; i < s.length; i++) { const ch = s[i];\n"
+    "  if (ch === '\\\\' && inS) { o += ch + (s[i + 1] || ''); i++; continue; }\n"
+    "  if (ch === '\"') { if (!inS) { inS = true; o += ch; continue; } const nx = (s.slice(i + 1).match(/^\\s*(.)/) || [])[1];\n"
+    "    if (nx === undefined || ',:}]'.includes(nx)) { inS = false; o += ch; } else o += '\u201d'; continue; }\n"
+    "  o += ch; } return o; };\n"
+    "const pj = (raw) => { const s = raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1); try { return JSON.parse(s); } catch (e) { return JSON.parse(repair(s)); } };\n"
+    "try { const raw = $('Carousel Copy').first().json.content[0].text; const c = pj(raw);\n"
     "  const t = (x, n) => String(x || '').replace(/\\s+/g, ' ').trim().slice(0, n);\n"
     "  const slides = (Array.isArray(c.slides) ? c.slides : []).map(s => ({ title: t(s.title, 60), body: t(s.body, 240) })).filter(s => s.title && s.body).slice(0, 4);\n"
     "  const on = (() => { try { return $('Strategy').first().json.carousel !== false; } catch (e) { return true; } })();\n"
@@ -620,7 +627,7 @@ _mj["jsCode"] = _mj["jsCode"].replace(_old, "const raw = (() => { try { return $
 _sch = by_name["Every Hour"]
 _sch.pop("disabled", None)
 _sch["name"] = "Every Hour"  # keep the name: connections reference it
-_sch["parameters"] = {"rule": {"interval": [{"field": "cronExpression", "expression": "20 8,18 * * *"}]}}
+_sch["parameters"] = {"rule": {"interval": [{"field": "cronExpression", "expression": "20 8,12,18,23 * * *"}]}}
 w.setdefault("settings", {})["timezone"] = "Europe/Vilnius"
 
 # ---- sanity

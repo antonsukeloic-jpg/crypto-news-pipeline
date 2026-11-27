@@ -165,7 +165,8 @@ for s in j.get("scenes",[]):
 print(json.dumps({"job":re.sub(r'^[a-f0-9]+__','',os.path.basename(sys.argv[1])),"channel":j.get("channel",""),"videoUrl":sys.argv[2],
   "thumbnailUrl":sys.argv[3],"creators":j.get("creators",[]),"credits":credits[:4],
   "voiceover":j.get("voiceover",""),"title":(j.get("meta") or {}).get("title","") or j.get("hook",""),"hashtags":j.get("hashtags",[]),
-  "episode":j.get("episode"),"endQuestion":j.get("end_question",""),**strategy()}))
+  "episode":j.get("episode"),"endQuestion":j.get("end_question",""),"sendCta":bool(j.get("send_cta")),
+  **({"only":["tiktok","youtube","facebook"]} if j.get("slot")=="extra" else {}),**strategy()}))
 P
 )
   log "publishing $ch -> Metricool ($url)"
@@ -190,11 +191,12 @@ vo=(j.get('voiceover','') or '').strip(); hook=re.split(r'(?<=[.!?])\\s',vo,1)[0
 sc=j.get('scenes') or [{}]; title=((j.get('carousel') or {}).get('cover') or sc[0].get('on_screen_text') or hook)[:80]
 print(json.dumps({'ts':int(time.time()*1000),'title':title,'hook':hook,
   'creators':j.get('creators',[]),'episode':j.get('episode'),'words':len(vo.split()),'end_question':j.get('end_question',''),
-  'collab':bool([c for c in (j.get('creators') or []) if c.get('instagram')])},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
+  'collab':bool([c for c in (j.get('creators') or []) if c.get('instagram')]),'slot':j.get('slot','main'),'send_cta':bool(j.get('send_cta'))},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
   fi
   # 5HU photo carousel: same story, deeper; Metricool holds it and posts it CAROUSEL_DELAY_MIN later
   local slides; slides=$(ls "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)"_car_*.jpg 2>/dev/null | sort | head -n 10)
-  if [ -n "$slides" ] && [ "$(echo "$slides" | wc -l)" -ge 3 ]; then
+  local slot; slot=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('slot','main'))" "$1" 2>/dev/null)
+  if [ "$slot" != extra ] && [ -n "$slides" ] && [ "$(echo "$slides" | wc -l)" -ge 3 ]; then
     local ssu=""; [ -s "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)_slideshow.mp4" ] && ssu="$(dirname "$url")/$(basename "$url" .mp4)_slideshow.mp4"
     local cp; cp=$(python3 - "$1" "$(dirname "$url")" "$slides" "$ssu" <<'P'
 import json,sys,os,re
@@ -334,8 +336,11 @@ while true; do
     log "rendering..."
     if [ "$(job_channel "$dest")" = 5hu ]; then
       ep=$(( $(cat "$ROOT/5hu_episode" 2>/dev/null || echo 0) + 1 ))
-      python3 -c "import json,sys;p=sys.argv[1];j=json.load(open(p));j['episode']=int(sys.argv[2]);json.dump(j,open(p,'w'),ensure_ascii=False)" "$dest" "$ep" \
-        && log "5HU episode Nº$ep"
+      # slot (owner 2026-11-27, turbo growth): 08:20 + 18:20 runs = main (all networks + carousel); other runs = extra
+      # (TikTok / YouTube / Facebook only). send_cta A/B: every 2nd episode the outro asks to send it to a friend.
+      slot=extra; case "$(TZ=Europe/Vilnius date +%H)" in 08|09|18|19) slot=main ;; esac
+      python3 -c "import json,sys;p=sys.argv[1];j=json.load(open(p));j['episode']=int(sys.argv[2]);j['slot']=sys.argv[3];j['send_cta']=int(sys.argv[2])%2==1;json.dump(j,open(p,'w'),ensure_ascii=False)" "$dest" "$ep" "$slot" \
+        && log "5HU episode Nº$ep ($slot slot)"
     fi
     bash "$RENDER" "$dest" "$ROOT" "$ROOT/$outp"
     if [ -f "$ROOT/$outp" ]; then

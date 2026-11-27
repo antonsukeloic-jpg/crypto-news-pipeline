@@ -41,7 +41,9 @@ const Media = ({scene, dur, i, from}) => {
   const f0 = FRAMINGS[(bar + i) % FRAMINGS.length];
   // real photos: keep the designer / the pieces in frame (softer zoom); wide shots sit on a blurred copy instead of being cropped
   // real photos: hard re-frame every bar toward the subject (face / piece from focus.py) - a visible new picture every ~1.8 s
-  const fz = [1.0, 1.28, 1.12, 1.4][(bar + i) % 4];
+  // 2026-11-27: every HALF bar (~0.9 s at 132 bpm) - fashion-edit rhythm, more visual change per second for retention
+  const half = Math.floor(frame / (beat * 2));
+  const fz = [1.0, 1.28, 1.12, 1.4][(half + i) % 4];
   const fr = scene.real ? {z: fz, x: 0, y: 0} : f0;
   const origin = scene.real && scene.focus ? (scene.focus.x * 100).toFixed(1) + '% ' + (scene.focus.y * 100).toFixed(1) + '%' : '50% 40%';
   const wide = scene.real && Number(scene.aspect) > 0.68;
@@ -276,7 +278,7 @@ const Subs = ({caps}) => {
   );
 };
 
-const Outro = ({question, episode}) => {
+const Outro = ({question, episode, sendCta}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const bg = interpolate(frame, [0, 5], [0, 1], {extrapolateRight: 'clamp'});
@@ -301,7 +303,7 @@ const Outro = ({question, episode}) => {
         {big(parts[0], 0)}
         {big(parts[1], 1)}
         <div style={{fontFamily: mono, fontSize: 26, letterSpacing: 5, color: BRAND.white, marginTop: 60, opacity: q}}>{series}</div>
-        <div style={{fontFamily: serif, fontStyle: 'italic', fontSize: 64, color: BRAND.lime, marginTop: 14, opacity: q}}>we find them first.</div>
+        <div style={{fontFamily: serif, fontStyle: 'italic', fontSize: 64, color: BRAND.lime, marginTop: 14, opacity: q}}>{sendCta ? 'send it to someone who\'d wear it.' : 'we find them first.'}</div>
       </AbsoluteFill>
     );
   }
@@ -347,7 +349,7 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
   );
 };
 
-export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec, episode, end_question}) => {
+export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec, episode, end_question, send_cta}) => {
   BPM = Number(bpm) || 132;
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
@@ -373,7 +375,7 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       <Grain />
       <Header stamp={stampFrom(voice)} accent={accent} episode={episode} />
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
-      <Sequence from={outroFrom}><Outro question={end_question} episode={episode} /></Sequence>
+      <Sequence from={outroFrom}><Outro question={end_question} episode={episode} sendCta={send_cta} /></Sequence>
       <Audio src={staticFile(voice)} />
       {signoff && <Sequence from={outroFrom + 5}><Audio src={staticFile(signoff)} volume={1.15} /></Sequence>}
       <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {

@@ -72,6 +72,7 @@ return [{ json: { skip: false, kind, images, slideshowUrl, ttVariant, delayMin, 
   thumbnailUrl: /^https:\/\/n8n\.visualforma\.cloud\/m\/[A-Za-z0-9_-]+\/[A-Za-z0-9_.-]+\.jpg$/.test(String(b.thumbnailUrl || '')) ? b.thumbnailUrl : '',
   noCollab: b.noCollab === true,
   igCautious: b.igCautious === true,
+  sendCta: b.sendCta === true,
   creators: (Array.isArray(b.creators) ? b.creators : []).slice(0, 2).map(c => ({ name: String(c.name || '').slice(0, 60),
     instagram: /^[A-Za-z0-9._]{2,30}$/.test(c.instagram || '') ? c.instagram : '', tiktok: /^[A-Za-z0-9._]{2,30}$/.test(c.tiktok || '') ? c.tiktok : '',
     website: /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}$/i.test(c.website || '') ? c.website : '' })).filter(c => c.name),
@@ -100,6 +101,7 @@ CAPTION_PROMPT = (
     "- youtube.title: max 90 characters, include #Shorts at the end; youtube.description: keyword-rich 1-2 sentences + 3 hashtags (first 3 show above the title); youtube.tags: 5-8 plain keywords.\n"
     "- facebook.text: 1-3 sentences, conversational, 1-2 hashtags.\n"
     "- If END QUESTION is given, the last line before the hashtags is exactly that two-option question (on instagram, tiktok, facebook and in the youtube description) - no other question in the caption.\n"
+    "{{ $json.sendCta ? '- SEND LINE: right after the question add one short natural line inviting people to send this to the friend who would wear it (e.g. Send this to your most daring friend.) - never ask to tag anyone.\\n' : '' }}"
     "- If SERIES is given, put it on its own line right after that question (like: Who's Next Nº012) on instagram, tiktok and facebook - written exactly like that, never as a hashtag.\n"
     "- Never tell people to swipe, scroll or 'see more' (no 'swipe through every slide', 'swipe for more'): end on the story itself or one real question.\n"
     "- SPELL EVERY NAME EXACTLY as in the voiceover / title (designers, labels, places) - also inside hashtags: #WillyChavarria, never a near-miss.\n"
