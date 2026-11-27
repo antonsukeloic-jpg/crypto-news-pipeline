@@ -1,7 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-LengthCheck: words 37 max 28 weak True route yes
-Shorten VO: 32 Trotter's trench coat sold for £20,000 instantly. Milan atelier opened to top clients only. Intrecciato leather sells six figures a session. The VIC is the new front row. Covet it or crazy?
-Pick: kept 37 (shorten pass gave 32)
-Story: ven the rules strictly applied, Candidate 6 is the least-bad option as it at least names a designer in a fashion context, even if imperfect. No other candidate names any fashion designer or label at all.
-
-{"link":"https://10magazine.com/inside-the-world-of-the-vic-tw77/","title":"Inside The Alluring World Of The VIC","reason":"Only candidate naming a fashion designer; Bottega/Trotter craft focus"}
