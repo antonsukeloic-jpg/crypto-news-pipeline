@@ -163,7 +163,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "2. A cult / boutique brand doing something new (drop, collab, archive revival, new direction).\n"
     "3. A micro-trend or scene ONLY when the story names a small independent designer or label behind it - the video is about that designer.\n"
     "4. If nothing above exists: a smaller independent or streetwear brand story from a niche source.\n"
-    "EVERY video must feature ONE NAMED designer or small label (a real person or label we credit by name) - that is how 5HU becomes the place the fashion niche finds new names. "
+    "EVERY video must feature ONE NAMED designer or small label that MAKES clothes, shoes, bags or jewellery (not a photographer, stylist, editorial shoot, magazine or store) (a real person or label we credit by name) - that is how 5HU becomes the place the fashion niche finds new names. "
     "Never pick a story that is only about big brands or sportswear giants (Nike, Adidas, Converse, New Balance, Zara, H&M, Uniqlo, Shein...) or that names no designer.\n"
     "NEVER pick a big luxury house or conglomerate (Louis Vuitton, Chanel, Dior, Gucci, Armani, Prada, LVMH, Kering...), a mass retailer, or a celebrity story - 5HU is about the next names, not the established ones. A famous house is OK only when the story is really about a NEW young designer (e.g. a debut as creative director).\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
@@ -290,7 +290,7 @@ tts = by_name["Convert text to speech"]["parameters"]
 tts["voice"] = {"__rl": True, "mode": "id", "value": VOICE_ID}
 tts["additionalOptions"]["model"] = {"__rl": True, "value": MODEL, "mode": "list", "cachedResultName": "Eleven v4"}
 tts["additionalOptions"]["voiceSettings"] = json.dumps(
-    {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True, "speed": 1.1}, indent=2)
+    {"stability": 0.4, "similarity_boost": 0.85, "style": 0.45, "use_speaker_boost": True, "speed": 1.2}, indent=2)
 
 # ---- fresh techno for every video (never the same track): ElevenLabs Sound Effects, random style + BPM
 MUSIC_JS = r"""
@@ -576,8 +576,14 @@ const raw = ((it.content || [])[0] || {}).text || '';
 let st = {}; try { st = $('Strategy').first().json; } catch (e) {}
 const max = (parseInt(st.words_max, 10) || 28) + 2;
 const m = raw.match(/"voiceover"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-const words = (m ? m[1] : '').split(/\s+/).filter(Boolean).length;
-return [{ json: Object.assign({}, it, { _words: words, _maxWords: max, _tooLong: (words > max ? 'yes' : 'no') }) }];"""
+const vo = (m ? m[1] : '');
+const words = vo.split(/\s+/).filter(Boolean).length;
+// weak hook (producer rule 2026-11-27): <=3 words, a comma list ("Light, shadow, Los Angeles."), or a banned opener
+const hook = (vo.split(/(?<=[.!?\u2026])\s/)[0] || '').trim();
+const hw = hook.split(/\s+/).filter(Boolean).length;
+const weakHook = hw <= 3 || (hook.match(/,/g) || []).length >= 2 || /^(in|meet|what if|remember|this is|introducing)\b/i.test(hook);
+return [{ json: Object.assign({}, it, { _words: words, _maxWords: max, _hook: hook, _weakHook: weakHook,
+  _tooLong: ((words > max || weakHook) ? 'yes' : 'no') }) }];"""
 _PICK_JS = r"""const orig = $('Length Check').first().json;
 const it = $input.first().json || {};
 const raw = ((it.content || [])[0] || {}).text || '';
@@ -585,11 +591,12 @@ const m = raw.match(/"voiceover"\s*:\s*"((?:[^"\\]|\\.)*)"/);
 const n = (m ? m[1] : '').split(/\s+/).filter(Boolean).length;
 const scenes = (raw.match(/"vo_segment"\s*:/g) || []).length;
 const scenes0 = ((((orig.content || [])[0] || {}).text || '').match(/"vo_segment"\s*:/g) || []).length;
-if (n >= 12 && n < orig._words && scenes === scenes0) return [{ json: Object.assign({}, it, { _words: n, _shortened: orig._words + '->' + n }) }];
+if (n >= 12 && n <= orig._maxWords && (n < orig._words || orig._weakHook) && scenes === scenes0) return [{ json: Object.assign({}, it, { _words: n, _shortened: orig._words + '->' + n }) }];
 return [{ json: Object.assign({}, orig, { _shortened: 'kept ' + orig._words + ' (shorten pass gave ' + n + ')' }) }];"""
-_SHORT_PROMPT = ("=You tighten scripts for 5HU, a fast fashion video channel. The script JSON below has a voiceover of {{ $json._words }} words. "
-    "It MUST be at most {{ $json._maxWords - 2 }} words.\n\n"
-    "Rewrite ONLY \"voiceover\" and each scene's \"vo_segment\":\n"
+_SHORT_PROMPT = ("=You are the editor of 5HU, a fast fashion video channel. The script JSON below has a voiceover of {{ $json._words }} words. "
+    "It MUST be at most {{ $json._maxWords - 2 }} words.\n"
+    "{{ $json._weakHook ? 'Its opening line (the hook) is weak: \"' + $json._hook + '\". Rewrite sentence 1 into the single most surprising, concrete fact of the story with a named subject (the designer, label or piece) and a verb, max 7 words, e.g. She made a dress out of seatbelts. Never a list of nouns, a place, a mood or an intro. Update hook and scene 1 on_screen_text to match.' : '' }}\n\n"
+    "Rewrite ONLY \"voiceover\" and each scene's \"vo_segment\" (and, if sentence 1 changes, \"hook\" and scene 1 \"on_screen_text\"):\n"
     "- keep the same number of scenes, one short sentence each;\n"
     "- sentence 1 (the hook) max 7 words; every middle sentence max 6 words; the last sentence is the two-option question and stays unchanged (it equals end_question);\n"
     "- keep names spelled exactly, use only facts already in the script, keep the voice cool and punchy, at most one \"...\" pause;\n"
