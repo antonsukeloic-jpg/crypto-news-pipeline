@@ -94,7 +94,7 @@ const posts = featured.map(f => {
     fbWatchSec: b ? num(b.avgWatchSec) : null };
   return { ts: f.ts, episode: f.episode, hoursOld: Math.round((Date.now() - f.ts) / H), title: f.title, hook: f.hook,
     words: f.words, endQuestion: f.end_question, collabInvite: !!f.collab, designerAccounts: (f.creators || []).length,
-    slot: f.slot || 'main', sendCta: !!f.send_cta,
+    slot: f.slot || 'main', sendCta: !!f.send_cta, storyType: f.story_type || '',
     instagram: strip(i), tiktok: strip(tr), youtube: strip(y), facebook: strip(b), score,
     tiktokCarousel: tc ? { variant: tc.type === 'PHOTO' ? 'photo' : 'slideshow', views: tc.views, likes: tc.likes, shares: tc.shares } : null,
     reviewed: reviewed.has(String(f.ts)) };
@@ -135,7 +135,7 @@ PROMPT = (
     "3) comments (our videos end with a two-option question; Instagram/Facebook counts include our own first comment when we posted one), 4) follows/likes. collabInvite = the Reel invited the featured designer as an "
     "Instagram collaborator (only Nº012-13; tags are now off for good). Since 2026-11-27 there are 4 videos a day: slot main (08:20, 18:20) "
     "goes to all networks, slot extra (12:20, 23:20) only to TikTok, YouTube and Facebook (so no Instagram numbers). sendCta = A/B test on "
-    "alternate episodes: the outro and caption ask viewers to send the video to a friend (aims at DM sends) - compare sendCta true vs false.\n\n"
+    "alternate episodes: the outro and caption ask viewers to send the video to a friend (aims at DM sends) - compare sendCta true vs false. storyType (since 2026-11-27): designer = a new name, piece = one new designer piece - compare them too; story_focus can steer the mix.\n\n"
     "TASK 1 - REVIEW each post in TO_REVIEW (it has 2+ days of numbers) against OUR BASELINE (median of our own judged posts): "
     "verdict better | average | worse, why (one sentence with the numbers that decide it), and lesson (one short, general, reusable rule "
     "that explains the result - about the story, hook, first image, length, question or designer - or empty if nothing can be learned). "
