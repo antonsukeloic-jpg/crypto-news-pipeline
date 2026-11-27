@@ -256,7 +256,8 @@ rep("return [{ json: data }];", "const _no5 = t => (String(t || '').match(/[^.!?
     "(data.scenes || []).forEach(sc => { sc.vo_segment = _no5(sc.vo_segment); });\n"
     "const _sh = $getWorkflowStaticData('global'); _sh.hooks5hu = [String(data.voiceover || '').split(/[.!?…]/)[0].trim()].concat(_sh.hooks5hu || []).slice(0, 12);\n"
     "data.voiceover_align = String(data.voiceover || '').replace(/5\\s*HU/gi, 'Shoo');\n"
-    "data.voiceover_tts = (_body.match(/[^.!?…]+[.!?…]*/g) || [_body]).map(x => x.trim()).filter(Boolean).join(' [pause] ');\n"
+    "// 2026-11-27: no [pause] tags between sentences any more - they added ~1.1 s of dead air per sentence (~5 s per video)\n"
+    "data.voiceover_tts = (_body.match(/[^.!?…]+[.!?…]*/g) || [_body]).map(x => x.trim()).filter(Boolean).join(' ');\n"
     "try { const _j = JSON.parse(data.job_json); _j.signoff = true; _j.voiceover = data.voiceover; data.job_json = JSON.stringify(_j); } catch (e) {}\n"
     "return [{ json: data }];")
 # 20-30 s videos: up to 6 scenes, 25 s script total (the render follows the voice length)
