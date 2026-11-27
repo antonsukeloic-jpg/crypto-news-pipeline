@@ -1,0 +1,16 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+5hu_video_1795760430613 dur=18.600000
+5hu_video_1795710038741 dur=19.000000
+malloc(): corrupted top size
+bash: line 7: 800981 Aborted                 ffmpeg -v error -i $T/5hu_video_1795760430613_sheet.jpg -i $T/5hu_video_1795710038741_sheet.jpg -filter_complex vstack=inputs=2 -frames:v 1 -q:v 11 $T/both.jpg < /dev/null
+ls: cannot access '/tmp/fr/both.jpg': No such file or directory
+5hu_video_1795710038741.mp4
+5hu_video_1795710038741_car
+5hu_video_1795710038741_cover.jpg
+5hu_video_1795710038741_slideshow.mp4
+5hu_video_1795760430613.mp4
+5hu_video_1795760430613_cover.jpg
+B64START
+base64: /tmp/fr/both.jpg: No such file or directory
+
+B64END
