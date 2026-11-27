@@ -1,0 +1,17 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+: props ok channel=5hu scenes=5 btc=None change=None
+: [08:30:24] OK 5hu_video_1795768114141.mp4
+: [08:30:24] HELD (hold_5hu): 5hu_video_1795768114141.mp4 rendered, not posted
+/root/shared/outputs/5hu_video_1795768114141.job.json
+VO 25 w | Heidi Klein built hardware into bikinis. The London label chased Morocco's light. Seven destinations, one collection. Talitha Getty energy, all resortwear. Pack it or pass?
+ep 17 slot extra cta True | q: Pack it or pass? | scene1: Hardware built into bikinis.
+dur 20.100000
+LengthCheck: words 25 hook 'Marrakech orange.' weak True route yes
+Pick: 25->25
+Story: Looking at the candidates:
+
+1. Adidas sneakers — big brand shopping roundup, ruled out.
+2. Bottega Veneta/Louise Trotter — major luxury house, not a rising name story.
+3. High society orgies — not fashion, ruled out.
+4. Harrison First — musician/DJ, not a designer/label making clothes.
+5. Heidi Klei
