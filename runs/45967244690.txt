@@ -1,8 +1,0 @@
-Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
-: [08:37:26] OK 5hu_video_1795768535060.mp4
-: [08:37:26] HELD (hold_5hu): 5hu_video_1795768535060.mp4 rendered, not posted
-/root/shared/outputs/5hu_video_1795768535060.job.json
-VO 37 w | A trench coat. £20,000. Gone instantly. Bottega Veneta's Milan atelier drew its top clients first. Louise Trotter's intrecciato leather — selling at six figures a session. The VIC is the new front row. Covet it or crazy?
-q: Covet it or crazy? | scene1: £20,000 trench. Gone.
-voice dur 19.147755
-video dur 22.400000
