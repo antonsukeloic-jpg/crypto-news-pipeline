@@ -592,8 +592,21 @@ const m = raw.match(/"voiceover"\s*:\s*"((?:[^"\\]|\\.)*)"/);
 const n = (m ? m[1] : '').split(/\s+/).filter(Boolean).length;
 const scenes = (raw.match(/"vo_segment"\s*:/g) || []).length;
 const scenes0 = ((((orig.content || [])[0] || {}).text || '').match(/"vo_segment"\s*:/g) || []).length;
-if (n >= 12 && n <= orig._maxWords && (n < orig._words || orig._weakHook) && scenes === scenes0) return [{ json: Object.assign({}, it, { _words: n, _shortened: orig._words + '->' + n }) }];
-return [{ json: Object.assign({}, orig, { _shortened: 'kept ' + orig._words + ' (shorten pass gave ' + n + ')' }) }];"""
+// take the editor's version when it is valid and shorter (or fixed a weak hook) - even if still over the limit
+let pick = (n >= 12 && scenes === scenes0 && (n < orig._words || (orig._weakHook && n <= orig._words)))
+  ? { j: Object.assign({}, it), note: orig._words + '->' + n } : { j: Object.assign({}, orig), note: 'kept ' + orig._words + ' (editor gave ' + n + ')' };
+// still too long -> drop the longest middle scene (never the hook, never the question) until it fits; min 4 scenes
+try {
+  const t0 = pick.j.content[0].text; const s0 = t0.slice(t0.indexOf('{'), t0.lastIndexOf('}') + 1); const d = JSON.parse(s0);
+  const wc = (x) => String(x || '').split(/\s+/).filter(Boolean).length;
+  let w = wc(d.voiceover), cut = 0;
+  while (w > orig._maxWords && Array.isArray(d.scenes) && d.scenes.length > 4) {
+    let k = 1; for (let i = 1; i < d.scenes.length - 1; i++) if (wc(d.scenes[i].vo_segment) > wc(d.scenes[k].vo_segment)) k = i;
+    d.scenes.splice(k, 1); d.voiceover = d.scenes.map(x => String(x.vo_segment || '').trim()).join(' '); w = wc(d.voiceover); cut++;
+  }
+  if (cut) { pick.j = Object.assign({}, pick.j, { content: [Object.assign({}, pick.j.content[0], { text: JSON.stringify(d) })] }); pick.note += ' -> cut ' + cut + ' scene(s) -> ' + w; }
+} catch (e) { pick.note += ' (no cut: ' + String(e.message || e).slice(0, 60) + ')'; }
+return [{ json: Object.assign({}, pick.j, { _shortened: pick.note }) }];"""
 _SHORT_PROMPT = ("=You are the editor of 5HU, a fast fashion video channel. The script JSON below has a voiceover of {{ $json._words }} words. "
     "It MUST be at most {{ $json._maxWords - 2 }} words.\n"
     "{{ $json._weakHook ? 'Its opening line (the hook) is weak: \"' + $json._hook + '\". Rewrite sentence 1 into the single most surprising, concrete fact of the story with a named subject (the designer, label or piece) and a verb, max 7 words, e.g. She made a dress out of seatbelts. Never a list of nouns, a place, a mood or an intro. Update hook and scene 1 on_screen_text to match.' : '' }}\n\n"
