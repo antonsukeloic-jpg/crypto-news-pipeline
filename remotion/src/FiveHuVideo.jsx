@@ -60,7 +60,8 @@ const Media = ({scene, dur, i, from}) => {
     // landscape photo: fill the frame and pan across it (Ken Burns), direction alternates per scene
     const pan = interpolate(frame, [0, dur], i % 2 ? [82, 18] : [18, 82], {extrapolateRight: 'clamp', easing: Easing.inOut(Easing.sin)});
     base.objectPosition = pan + '% 50%';
-    base.scale = String(punch * kick * interpolate(frame, [0, dur], [1.04, 1.12]));
+    // 2026-11-27: wide photos also step in on every half bar (they used to only drift, so most article photos barely moved)
+    base.scale = String(punch * kick * [1.04, 1.2, 1.1, 1.3][(half + i) % 4] * interpolate(frame, [0, dur], [1, 1.06]));
     base.translate = jx + 'px 0px';
   }
   const src = scene.video ? null : staticFile(scene.image);

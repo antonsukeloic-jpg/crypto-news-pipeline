@@ -442,6 +442,9 @@ by_name["Make Job File"]["parameters"]["jsCode"] = (
     "  if (on && slides.length >= 3) { const j = JSON.parse(txt); j.carousel = { cover: t(c.cover, 50), slides }; txt = JSON.stringify(j); } } catch (e) {}\n"
     "try { const raw = $('Message a model').first().json.content[0].text; const m = raw.match(/\"end_question\"\\s*:\\s*\"([^\"]{3,60})\"/);\n"
     "  if (m) { const j = JSON.parse(txt); j.end_question = m[1].trim(); txt = JSON.stringify(j); } } catch (e) {}\n"
+    "// the spoken last line wins: the outro must show the question the voice just asked (Nº017 test: VO 'Genius or too much?' vs field 'Rent it or buy it?')\n"
+    "try { const j = JSON.parse(txt); const last = ((String(j.voiceover || '').trim().match(/[^.!?\u2026]+\\?\\s*$/) || [''])[0]).trim();\n"
+    "  if (/\\bor\\b/i.test(last) && last.split(/\\s+/).length <= 7) { j.end_question = last; txt = JSON.stringify(j); } } catch (e) {}\n"
     "const name = $('Code in JavaScript').first().json.jobFile;\n"
     "const bin = await this.helpers.prepareBinaryData(Buffer.from(txt, 'utf8'), name, 'application/json');\n"
     "return [{ json: { jobFile: name }, binary: { data: bin } }];")
