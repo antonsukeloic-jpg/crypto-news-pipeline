@@ -1,0 +1,15 @@
+Warning: Permanently added '76.13.251.134' (ED25519) to the list of known hosts.
+]: [08:49:47] 5HU episode Nº21 (extra slot, silent=0)
+]: [08:51:09] HELD (hold_5hu): 5hu_video_1795855761242.mp4 rendered, not posted
+exec 340 success
+feedsRead 34 | candidates 7 | scout 4
+   * web: ELLE | The Launch: November’s Must-Know Fashion News
+     Hypebeast | Jun Takahashi’s UNDERCOVER and Nike Return With a Minimalist GYAKUSOU Capsule
+   * web: Dazed | What we learned from the winner of the H&M Design Award 2026, Macy Grimshaw
+     NYLON | Cindy Kimberly On Her Near-Death Experience, Hannah Montana, and Making Pop Musi
+   * web: Luxuri | Designer Fashion Explores Accessible Retail Collaborations
+     Dazed | Calling all Sofia Coppola stans! You can now buy the director’s hoodie
+   * web: Time Out Tokyo | Tokyo’s fashion underground is making frog bags
+Parsed: {"storyType": "designer", "storyKnown": false, "link": "https://www.dazeddigital.com/fashion/article/71407/1/what-we-learned-from-the-winner-of-the-hm-design-award-2026-macy-grimshaw", "title": "What we learned from the winner of the H&M Design Award 2026, Macy Grimshaw", "source_url": "https://www.
+job u_video_1795855761242.job.json | silent False | type designer | known False | 22 w | Harry Styles knows her. H&M just crowned her. French-British, trained in London. A corset built like roller shutters. Genius or too much?
+hold removed: 0 left
