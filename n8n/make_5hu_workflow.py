@@ -169,11 +169,15 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "Never pick a story that is only about big brands or sportswear giants (Nike, Adidas, Converse, New Balance, Zara, H&M, Uniqlo, Shein...) or that names no designer.\n"
     "NEVER pick a big luxury house or conglomerate (Louis Vuitton, Chanel, Dior, Gucci, Armani, Prada, LVMH, Kering...), a mass retailer, or a celebrity story - 5HU is about the next names, not the established ones. A famous house is OK only when the story is really about a NEW young designer (e.g. a debut as creative director), or about ONE specific new piece (never a show review, campaign, business or celebrity news). Sportswear giants only as a designer's collab piece, with the designer named.\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
+    "MIX (owner 2026-11-27: niche fashion that's interesting but less mainstream; a better-known label only now and then): at most 1 video in 4 "
+    "may be about a famous or established label. OUR LAST POSTS (newest last):\n{{ $('Strategy').first().json.recentText }}\n"
+    "{{ $('Strategy').first().json.famousLately ? 'One of the last 3 was a famous label, so THIS story MUST be a niche / new / independent name or piece. Never repeat a label or designer from the last posts.\\n' : 'Never repeat a label or designer from the last posts.\\n' }}"
     "AVOID: deaths and obituaries, body or weight talk, anything about minors' bodies, crime/lawsuits with victims, shopping roundups, "
     "sales/affiliate lists, horoscopes, sponsored posts, celebrity relationship gossip, essays without news, "
     "and anything that can't be told accurately in 15 seconds.\n\n"
     "Output ONLY valid JSON, no markdown, no code fences. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n"
-    "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"type\":\"designer|piece\",\"reason\":\"<max 12 words>\"}\n\n"
+    "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"type\":\"designer|piece\",\"known\":true|false,\"reason\":\"<max 12 words>\"}\n"
+    "known = true when the label or person is famous or established (a big house, a well-known designer brand, a celebrity); false for niche / new / independent names.\n\n"
     "CANDIDATES\n{{ $json.candidatesText }}")
 
 # ---- script writer (same schema; English; entities from en.wikipedia)
@@ -374,7 +378,11 @@ const wmin = Math.min(30, Math.max(16, parseInt(s.words_min, 10) || D.words_min)
 const wmax = Math.min(34, Math.max(wmin + 4, parseInt(s.words_max, 10) || D.words_max));
 // playbook: short lessons the Growth Agent wrote after reviewing each of our posts (newest kept, max 8)
 const lessons = (Array.isArray(s.lessons) ? s.lessons : []).map(x => t(x, 160).trim()).filter(Boolean).slice(-8).join(' | ');
-return [{ json: { lessons, story_focus: t(s.story_focus, 600), hook_notes: t(s.hook_notes, 600), caption_notes: t(s.caption_notes, 600),
+// last posts (the render watcher keeps `recent` up to date): the story picker keeps the niche / famous mix (owner 2026-11-27)
+const recent = (Array.isArray(s.recent) ? s.recent : []).slice(-4);
+const recentText = recent.map(r => '- ' + t(r.title, 80) + ' (' + (r.known ? 'FAMOUS label' : 'niche') + ')').join('\n') || '- none yet';
+const famousLately = recent.slice(-3).some(r => r.known);
+return [{ json: { lessons, recentText, famousLately, story_focus: t(s.story_focus, 600), hook_notes: t(s.hook_notes, 600), caption_notes: t(s.caption_notes, 600),
   words_min: wmin, words_max: wmax, carousel: s.carousel !== false,
   tiktok_carousel: ['ab', 'photo', 'slideshow', 'off'].includes(s.tiktok_carousel) ? s.tiktok_carousel : 'ab' } }];
 """
@@ -446,7 +454,8 @@ by_name["Make Job File"]["parameters"]["jsCode"] = (
     "try { const raw = $('Message a model').first().json.content[0].text; const m = raw.match(/\"end_question\"\\s*:\\s*\"([^\"]{3,60})\"/);\n"
     "  if (m) { const j = JSON.parse(txt); j.end_question = m[1].trim(); txt = JSON.stringify(j); } } catch (e) {}\n"
     "try { const r = $('Select Story').first().json.content[0].text; const t = (r.match(/\"type\"\\s*:\\s*\"(designer|piece)\"/) || [])[1];\n"
-    "  if (t) { const j = JSON.parse(txt); j.story_type = t; txt = JSON.stringify(j); } } catch (e) {}\n"
+    "  const k = (r.match(/\"known\"\\s*:\\s*(true|false)/) || [])[1];\n"
+    "  const j = JSON.parse(txt); if (t) j.story_type = t; if (k) j.story_known = (k === 'true'); txt = JSON.stringify(j); } catch (e) {}\n"
     "// the spoken last line wins: the outro must show the question the voice just asked (Nº017 test: VO 'Genius or too much?' vs field 'Rent it or buy it?')\n"
     "try { const j = JSON.parse(txt); const last = ((String(j.voiceover || '').trim().match(/[^.!?\u2026]+\\?\\s*$/) || [''])[0]).trim();\n"
     "  if (/\\bor\\b/i.test(last) && last.split(/\\s+/).length <= 7) { j.end_question = last; txt = JSON.stringify(j); } } catch (e) {}\n"

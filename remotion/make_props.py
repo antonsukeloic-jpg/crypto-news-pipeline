@@ -86,6 +86,7 @@ if job.get('carousel'): out_obj['carousel'] = job['carousel']
 if job.get('creators'): out_obj['creators'] = job['creators']
 if job.get('episode'): out_obj['episode'] = int(job['episode'])          # 5HU series number (Who's Next Nº…)
 if job.get('end_question'): out_obj['end_question'] = str(job['end_question'])[:60]   # two-option question in the outro
+if job.get('silent'): out_obj['silent'] = True   # A/B (2026-11-28): no AI voice - words on screen + music only
 if job.get('send_cta'): out_obj['send_cta'] = True   # A/B (2026-11-27): outro asks people to send it to a friend (DM sends = top IG reach signal)
 out_obj['channel'] = channel
 # 5HU: fixed brand sign-off ("Follow Šū, we find them first.") played after the voice; render_vps.sh copies music/*.mp3 into public/music

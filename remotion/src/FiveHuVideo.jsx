@@ -350,7 +350,7 @@ const Scene = ({s, i, from, dur, layout, kind, accent}) => {
   );
 };
 
-export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec, episode, end_question, send_cta}) => {
+export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music, bpm, signoff, signoffSec, episode, end_question, send_cta, silent}) => {
   BPM = Number(bpm) || 132;
   const {durationInFrames} = useVideoConfig();
   const f = fps || 30;
@@ -377,13 +377,15 @@ export const FiveHuVideo = ({scenes = [], voice, captions, voiceover, fps, music
       <Header stamp={stampFrom(voice)} accent={accent} episode={episode} />
       <Sequence durationInFrames={outroFrom}><Subs caps={subsCaps} /></Sequence>
       <Sequence from={outroFrom}><Outro question={end_question} episode={episode} sendCta={send_cta} /></Sequence>
-      <Audio src={staticFile(voice)} />
-      {signoff && <Sequence from={outroFrom + 5}><Audio src={staticFile(signoff)} volume={1.15} /></Sequence>}
+      {/* silent edit (A/B 2026-11-28): the voice still sets the timing, but only the words on screen tell the story */}
+      {!silent && <Audio src={staticFile(voice)} />}
+      {signoff && !silent && <Sequence from={outroFrom + 5}><Audio src={staticFile(signoff)} volume={1.15} /></Sequence>}
       <Audio src={staticFile(music || 'music/5hu_techno.mp3')} loop volume={(fr) => {
         const ms = (fr / f) * 1000;
         const speaking = caps.some((c) => ms >= c.startMs - 80 && ms <= c.endMs + 120);
         const bed = speaking ? 0.36 : MUSIC_VOL;
         const env = interpolate(fr, [0, 12, durationInFrames - 20, durationInFrames - 1], [0, 1, 1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+        if (silent) return 0.9 * env;
         return (fr >= outroFrom ? (signoff ? 0.42 : 0.55) : bed) * env;
       }} />
     </AbsoluteFill>

@@ -191,7 +191,17 @@ vo=(j.get('voiceover','') or '').strip(); hook=re.split(r'(?<=[.!?])\\s',vo,1)[0
 sc=j.get('scenes') or [{}]; title=((j.get('carousel') or {}).get('cover') or sc[0].get('on_screen_text') or hook)[:80]
 print(json.dumps({'ts':int(time.time()*1000),'title':title,'hook':hook,
   'creators':j.get('creators',[]),'episode':j.get('episode'),'words':len(vo.split()),'end_question':j.get('end_question',''),
-  'collab':bool([c for c in (j.get('creators') or []) if c.get('instagram')]),'slot':j.get('slot','main'),'send_cta':bool(j.get('send_cta')),'story_type':j.get('story_type','')},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
+  'collab':bool([c for c in (j.get('creators') or []) if c.get('instagram')]),'slot':j.get('slot','main'),'send_cta':bool(j.get('send_cta')),'story_type':j.get('story_type',''),'known':bool(j.get('story_known')),'silent':bool(j.get('silent'))},ensure_ascii=False))" "$1" >> "$ROOT/5hu_featured.jsonl" 2>/dev/null
+    # the story picker sees the last posts (title + famous/niche) through the strategy file -> keeps the niche mix
+    python3 - "$ROOT" <<'P' 2>/dev/null
+import json,os,sys
+root=sys.argv[1]; sp=os.path.join(root,'5hu_strategy.json')
+rows=[json.loads(l) for l in open(os.path.join(root,'5hu_featured.jsonl')) if l.strip()][-6:]
+try: s=json.load(open(sp))
+except Exception: s={}
+s['recent']=[{'title':r.get('title',''),'known':bool(r.get('known')),'type':r.get('story_type','')} for r in rows]
+tmp=sp+'.tmp'; json.dump(s,open(tmp,'w'),ensure_ascii=False,indent=1); os.chown(tmp,1000,1000); os.replace(tmp,sp)
+P
   fi
   # 5HU photo carousel: same story, deeper; Metricool holds it and posts it CAROUSEL_DELAY_MIN later
   local slides; slides=$(ls "$ROOT/public/$(basename "$(dirname "$url")")/$(basename "$url" .mp4)"_car_*.jpg 2>/dev/null | sort | head -n 10)
@@ -339,8 +349,10 @@ while true; do
       # slot (owner 2026-11-27, turbo growth): 08:20 + 18:20 runs = main (all networks + carousel); other runs = extra
       # (TikTok / YouTube / Facebook only). send_cta A/B: every 2nd episode the outro asks to send it to a friend.
       slot=extra; case "$(TZ=Europe/Vilnius date +%H)" in 08|09|18|19) slot=main ;; esac
-      python3 -c "import json,sys;p=sys.argv[1];j=json.load(open(p));j['episode']=int(sys.argv[2]);j['slot']=sys.argv[3];j['send_cta']=int(sys.argv[2])%2==1;json.dump(j,open(p,'w'),ensure_ascii=False)" "$dest" "$ep" "$slot" \
-        && log "5HU episode Nº$ep ($slot slot)"
+      # silent-edit A/B (2026-11-28): every 2nd extra-slot video has no AI voice (words on screen + music)
+      silent=0; if [ "$slot" = extra ]; then sn=$(cat "$ROOT/5hu_silent_n" 2>/dev/null || echo 0); [ $((sn % 2)) -eq 0 ] && silent=1; echo $((sn + 1)) > "$ROOT/5hu_silent_n"; fi
+      python3 -c "import json,sys;p=sys.argv[1];j=json.load(open(p));j['episode']=int(sys.argv[2]);j['slot']=sys.argv[3];j['send_cta']=int(sys.argv[2])%2==1;j['silent']=sys.argv[4]=='1';json.dump(j,open(p,'w'),ensure_ascii=False)" "$dest" "$ep" "$slot" "$silent" \
+        && log "5HU episode Nº$ep ($slot slot, silent=$silent)"
     fi
     bash "$RENDER" "$dest" "$ROOT" "$ROOT/$outp"
     if [ -f "$ROOT/$outp" ]; then
