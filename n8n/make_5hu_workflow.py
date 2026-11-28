@@ -26,6 +26,14 @@ FEEDS = [
     ("Office Magazine (NY)", "https://www.officemagazine.net/rss.xml", "emerging"),
     ("Kaltblut (Berlin)", "https://www.kaltblut-magazine.com/feed/", "emerging"),
     ("Highxtar", "https://highxtar.com/feed/", "emerging"),
+    # 2026-11-28: story supply ran dry (4 videos a day) - more emerging-designer sources
+    ("1 Granary", "https://1granary.com/feed/", "emerging"),
+    ("Sleek (Berlin)", "https://www.sleek-mag.com/feed/", "emerging"),
+    ("Glamcult (Amsterdam)", "https://www.glamcult.com/feed/", "emerging"),
+    ("Document Journal", "https://www.documentjournal.com/feed/", "niche"),
+    ("HERO", "https://hero-magazine.com/feed/", "niche"),
+    ("Wonderland", "https://www.wonderlandmagazine.com/feed/", "niche"),
+    ("Schon!", "https://schonmagazine.com/feed/", "niche"),
     ("Numero", "https://www.numero.com/en/rss", "niche"),
     ("Interview", "https://www.interviewmagazine.com/feed", "niche"),
     ("NYLON", "https://www.nylon.com/feeds/feed.rss", "niche"),
@@ -119,6 +127,19 @@ const res = await Promise.allSettled(FEEDS.map(([name, url, tier]) =>
     .then(body => parse(typeof body === 'string' ? body : String(body), name, tier))));
 let all = [], ok = 0;
 res.forEach(r => { if (r.status === 'fulfilled' && r.value.length) { ok++; all = all.concat(r.value); } });
+// web scout (Perplexity, 2026-11-28): fresh niche designer stories found by search; only URLs it actually retrieved
+const scout = [];
+try { const b = $('Scout').first().json || {}; let reply = '', seen = '';
+  for (const o of (b.output || [])) { if (!o) continue;
+    if (o.type === 'message') { for (const c of (o.content || [])) { if (c.type === 'output_text') reply += c.text || ''; seen += ' ' + JSON.stringify(c.annotations || []); } }
+    else seen += ' ' + JSON.stringify(o); }
+  const j = JSON.parse(reply.slice(reply.indexOf('{'), reply.lastIndexOf('}') + 1));
+  for (const s of (j.stories || []).slice(0, 8)) { const u = String(s.url || '').trim();
+    if (!/^https?:\/\//.test(u) || !seen.includes(u.replace(/[?#].*$/, '').slice(0, 60))) continue;
+    scout.push({ source: 'web: ' + String(s.source || 'search').slice(0, 30), tier: 'emerging', title: String(s.title || '').slice(0, 160), link: u,
+      snippet: String(s.summary || '').slice(0, 240), date: s.date || new Date().toISOString(), images: [], body: '', scout: true }); }
+} catch (e) {}
+if (scout.length) { ok++; all = all.concat(scout); }
 // only new stories: skip links already used (kept in workflow static data) and older than 72 h
 const _st = $getWorkflowStaticData('global'); const _seen = new Set(_st.seen5hu || []);
 const age = (x) => Date.now() - (new Date(x.date).getTime() || 0);
@@ -133,9 +154,15 @@ const rising = (x) => RISING.test(x.title + ' ' + x.snippet);
 // 5HU = the NEXT names: drop big houses, mass retail and celebrity headlines unless the item is about a new name / prize / debut
 const BIG = /\b(armani|chanel|dior|louis vuitton|vuitton|gucci|prada|herm[eè]s|saint laurent|ysl|balenciaga|valentino|versace|fendi|burberry|givenchy|bottega veneta|loewe|c[eé]line|miu miu|dolce ?(&|and) ?gabbana|moncler|kering|lvmh|richemont|tiffany|cartier|rolex|ralph lauren|calvin klein|tommy hilfiger|michael kors|alexander mcqueen|zara|h&m|uniqlo|shein|kardashian|skims|beyonc[eé]|rihanna|taylor swift|hailey bieber|kylie jenner|zendaya|met gala|vogue world)\b/i;
 all = all.filter(x => !BIG.test(x.title) || rising(x));
+// fashion only: clothes, shoes, bags, jewellery (11-28: the pool was all music, film and hospitality and the picker found nothing)
+const FASHION = /\b(collection|designer|label|runway|ss2\d|aw2\d|fw2\d|capsule|drop|collab\w*|bags?|handbag|shoes?|sneakers?|boots?|heels?|dress(es)?|jackets?|coats?|knit\w*|denim|tailoring|suits?|jewel\w*|rings?|necklace|atelier|couture|menswear|womenswear|accessor\w*|leather|lookbook|garments?|clothing|fashion|debut|graduate)\b/i;
+const NONFASHION = /\b(fragrance|perfume|scent|skincare|make-?up|beauty|album|single|tour|film|movie|trailer|series|episode|recipe|restaurant|hotel|cocktail|interior|furniture|horoscope)\b/i;
+const fashionish = (x) => FASHION.test(x.title + ' ' + x.snippet) && !NONFASHION.test(x.title);
+if (all.filter(fashionish).length >= 4) all = all.filter(fashionish);
 if (!all.length) throw new Error('5HU: no fresh niche stories this slot (big names filtered out)');
 const used = new Set(); const take = (arr, n) => arr.filter(x => !used.has(x.link)).slice(0, n).map(x => (used.add(x.link), x));
 const pool = [].concat(
+  take(shuffle(all.filter(x => x.scout)), 4),
   take(shuffle(all.filter(rising)), 6),
   take(shuffle(all.filter(x => x.tier === 'emerging')), 4),
   take(shuffle(all.filter(x => x.tier === 'niche')), 3),
@@ -155,6 +182,18 @@ ps["jsCode"] = ps["jsCode"].replace(old,
     "  const _h = cands.find(c => c.link === sel.alt.link); sel = Object.assign({}, sel.alt, { title: sel.alt.title || (_h ? _h.title : ''), reason: 'niche swap (mix rule)', alt: null }); }\n"
     "const _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\n" + old)
 ps["jsCode"] = ps["jsCode"].replace("return [{ json: { link: sel.link,", "return [{ json: { storyType: sel.type || '', storyKnown: sel.known === true, link: sel.link,", 1)
+# 11-28: the picker returned an empty link (no fashion candidate) and the whole run died; now fall back to a scout story
+_thr = "  if (!m) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));"
+assert ps["jsCode"].count(_thr) == 1, "parse-selection throw line changed"
+ps["jsCode"] = ps["jsCode"].replace(_thr, "  const _fb = !m ? (cands.find(c => c.scout) || null) : null;\n"
+    "  if (!m && !_fb) throw new Error('Parse Selection: no link in: ' + raw.slice(0, 300));\n"
+    "  if (!m) { sel = { link: _fb.link, title: _fb.title, reason: 'fallback: scout story' }; }")
+_old_link = "  const link = m[1] || m[0];"
+assert ps["jsCode"].count(_old_link) == 1
+ps["jsCode"] = ps["jsCode"].replace(_old_link, "  const link = m ? (m[1] || m[0]) : sel.link;")
+_old_sel = "  sel = { link, title: '', reason: rm ? rm[1] : '' };"
+assert ps["jsCode"].count(_old_sel) == 1
+ps["jsCode"] = ps["jsCode"].replace(_old_sel, "  if (m) sel = { link, title: '', reason: rm ? rm[1] : '' };")
 assert ps["jsCode"].count("source: hit ? hit.source : ''") == 1
 ps["jsCode"] = ps["jsCode"].replace("source: hit ? hit.source : ''", "source: (cands.find(c => c.link === sel.link) || hit || {}).source || ''")
 
@@ -406,7 +445,21 @@ w["nodes"] += [
 for _t in ("Every Hour", "Run Now (CLI)"):
     w["connections"][_t] = {"main": [[{"node": "Read Strategy", "type": "main", "index": 0}]]}
 w["connections"]["Read Strategy"] = {"main": [[{"node": "Strategy", "type": "main", "index": 0}]]}
-w["connections"]["Strategy"] = {"main": [[{"node": "Combine Feeds", "type": "main", "index": 0}]]}
+# Scout (2026-11-28): Perplexity web search for fresh niche designer stories -> extra candidates for Combine Feeds
+_sq = ("={{ JSON.stringify({ preset: 'fast', input: 'Use web search now. Find 6 fashion news stories published in the last 7 days about independent, emerging or niche '"
+       " + 'designers or labels that make clothes, shoes, bags or jewellery: a new collection, a debut, one new piece or drop, a collab, a prize, a first store. '"
+       " + 'Not big luxury houses, not celebrities, not fragrance or beauty. Prefer different countries and different labels. '"
+       " + 'For each give the exact URL of the news or magazine article you actually saw (not a shop page), its title, a one-sentence summary naming the designer or label, '"
+       " + 'the publication date and the publication name. Reply ONLY with JSON: {\\\"stories\\\":[{\\\"title\\\":\\\"\\\",\\\"url\\\":\\\"\\\",\\\"summary\\\":\\\"\\\",\\\"date\\\":\\\"YYYY-MM-DD\\\",\\\"source\\\":\\\"\\\"}]}' }) }}")
+_stp = next(n for n in w["nodes"] if n["name"] == "Strategy")["position"]
+w["nodes"].append({"parameters": {"method": "POST", "url": "https://api.perplexity.ai/v1/agent", "authentication": "predefinedCredentialType",
+                    "nodeCredentialType": "perplexityApi", "sendBody": True, "specifyBody": "json", "jsonBody": _sq,
+                    "options": {"timeout": 90000, "response": {"response": {"neverError": True}}}},
+     "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [_stp[0] + 110, _stp[1] + 200], "id": str(uuid.uuid4()),
+     "name": "Scout", "onError": "continueRegularOutput", "alwaysOutputData": True, "executeOnce": True,
+     "credentials": {"perplexityApi": {"id": "0F59WAwddf4rDMK4", "name": "Perplexity account"}}})
+w["connections"]["Strategy"] = {"main": [[{"node": "Scout", "type": "main", "index": 0}]]}
+w["connections"]["Scout"] = {"main": [[{"node": "Combine Feeds", "type": "main", "index": 0}]]}
 _LEARN = "{{ (() => { try { return $('Strategy').first().json; } catch (e) { return {}; } })()"
 _sel = by_name["Select Story"]["parameters"]["messages"]["values"][0]
 _sel["content"] = _sel["content"].replace("for a 20-30 second video.", "for a 12-18 second video.") + (
