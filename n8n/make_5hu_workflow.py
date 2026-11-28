@@ -149,7 +149,14 @@ ps = by_name["Parse Selection"]["parameters"]
 old = "return [{ json: { link: sel.link,"
 assert ps["jsCode"].count(old) == 1
 ps["jsCode"] = ps["jsCode"].replace(old,
+    "// niche mix, enforced in code: after a famous-label story in the last 3 posts, a famous pick is swapped for the niche backup\n"
+    "let _famousLately = false; try { _famousLately = !!$('Strategy').first().json.famousLately; } catch (e) {}\n"
+    "if (_famousLately && sel.known === true && sel.alt && sel.alt.link && sel.alt.known === false && cands.some(c => c.link === sel.alt.link)) {\n"
+    "  const _h = cands.find(c => c.link === sel.alt.link); sel = Object.assign({}, sel.alt, { title: sel.alt.title || (_h ? _h.title : ''), reason: 'niche swap (mix rule)', alt: null }); }\n"
     "const _st = $getWorkflowStaticData('global'); _st.seen5hu = [sel.link].concat(_st.seen5hu || []).slice(0, 500);\n" + old)
+ps["jsCode"] = ps["jsCode"].replace("return [{ json: { link: sel.link,", "return [{ json: { storyType: sel.type || '', storyKnown: sel.known === true, link: sel.link,", 1)
+assert ps["jsCode"].count("source: hit ? hit.source : ''") == 1
+ps["jsCode"] = ps["jsCode"].replace("source: hit ? hit.source : ''", "source: (cands.find(c => c.link === sel.link) || hit || {}).source || ''")
 
 # ---- editor: "who's next" fashion
 by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
@@ -166,6 +173,7 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "4. A micro-trend or scene ONLY when the story names a small independent designer or label behind it - the video is about that designer.\n"
     "5. If nothing above exists: a smaller independent or streetwear brand story from a niche source.\n"
     "EVERY video must feature ONE NAMED designer or label that MAKES clothes, shoes, bags or jewellery - a new name, or a new piece of theirs (not a photographer, stylist, editorial shoot, magazine or store) (a real person or label we credit by name) - that is how 5HU becomes the place the fashion niche finds new names. "
+    "Never fragrance, beauty, make-up or skincare stories - only clothes, shoes, bags and jewellery. "
     "Never pick a story that is only about big brands or sportswear giants (Nike, Adidas, Converse, New Balance, Zara, H&M, Uniqlo, Shein...) or that names no designer.\n"
     "NEVER pick a big luxury house or conglomerate (Louis Vuitton, Chanel, Dior, Gucci, Armani, Prada, LVMH, Kering...), a mass retailer, or a celebrity story - 5HU is about the next names, not the established ones. A famous house is OK only when the story is really about a NEW young designer (e.g. a debut as creative director), or about ONE specific new piece (never a show review, campaign, business or celebrity news). Sportswear giants only as a designer's collab piece, with the designer named.\n"
     "Candidates tagged RISING or emerging are usually best. Freshness matters: newer beats older.\n"
@@ -176,7 +184,8 @@ by_name["Select Story"]["parameters"]["messages"]["values"][0]["content"] = (
     "sales/affiliate lists, horoscopes, sponsored posts, celebrity relationship gossip, essays without news, "
     "and anything that can't be told accurately in 15 seconds.\n\n"
     "Output ONLY valid JSON, no markdown, no code fences. Inside JSON strings use typographic quotes “ ” instead of the ASCII double quote.\n"
-    "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"type\":\"designer|piece\",\"known\":true|false,\"reason\":\"<max 12 words>\"}\n"
+    "{\"link\":\"<exact LINK of the chosen story>\",\"title\":\"<its title>\",\"type\":\"designer|piece\",\"known\":true|false,\"reason\":\"<max 12 words>\","
+    "\"alt\":{\"link\":\"<LINK of the best NICHE story (known=false) among the other candidates, if any>\",\"title\":\"...\",\"type\":\"designer|piece\",\"known\":false}}\n"
     "known = true when the label or person is famous or established (a big house, a well-known designer brand, a celebrity); false for niche / new / independent names.\n\n"
     "CANDIDATES\n{{ $json.candidatesText }}")
 
@@ -453,9 +462,8 @@ by_name["Make Job File"]["parameters"]["jsCode"] = (
     "  if (on && slides.length >= 3) { const j = JSON.parse(txt); j.carousel = { cover: t(c.cover, 50), slides }; txt = JSON.stringify(j); } } catch (e) {}\n"
     "try { const raw = $('Message a model').first().json.content[0].text; const m = raw.match(/\"end_question\"\\s*:\\s*\"([^\"]{3,60})\"/);\n"
     "  if (m) { const j = JSON.parse(txt); j.end_question = m[1].trim(); txt = JSON.stringify(j); } } catch (e) {}\n"
-    "try { const r = $('Select Story').first().json.content[0].text; const t = (r.match(/\"type\"\\s*:\\s*\"(designer|piece)\"/) || [])[1];\n"
-    "  const k = (r.match(/\"known\"\\s*:\\s*(true|false)/) || [])[1];\n"
-    "  const j = JSON.parse(txt); if (t) j.story_type = t; if (k) j.story_known = (k === 'true'); txt = JSON.stringify(j); } catch (e) {}\n"
+    "try { const ps = $('Parse Selection').first().json; const j = JSON.parse(txt);\n"
+    "  if (ps.storyType) j.story_type = ps.storyType; j.story_known = ps.storyKnown === true; txt = JSON.stringify(j); } catch (e) {}\n"
     "// the spoken last line wins: the outro must show the question the voice just asked (Nº017 test: VO 'Genius or too much?' vs field 'Rent it or buy it?')\n"
     "try { const j = JSON.parse(txt); const last = ((String(j.voiceover || '').trim().match(/[^.!?\u2026]+\\?\\s*$/) || [''])[0]).trim();\n"
     "  if (/\\bor\\b/i.test(last) && last.split(/\\s+/).length <= 7) { j.end_question = last; txt = JSON.stringify(j); } } catch (e) {}\n"
